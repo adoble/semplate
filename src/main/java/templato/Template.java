@@ -3,8 +3,10 @@
  */
 package templato;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,13 +47,10 @@ public class Template  {
 			if (!templateComment.isEmpty()) {
 				commentStartDelimiter = templateComment.substring(0,templateComment.indexOf(templateCommentField));
 				commentEndDelimiter = templateComment.substring(commentStartDelimiter.length() + templateCommentField.length(), templateComment.length());
-				
-			}
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-			 
 
+			}
+		}
+	
 	}
 	
 	
@@ -59,23 +58,21 @@ public class Template  {
 	 * TODO
 	 * @param templateStream
 	 */
-	public void config(InputStream templateStream) { 
+	public void config(InputStream templateStream) throws IOException { 
 		//TODO
-		
-		/*
-		 try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-			
-			//Get Stream with lines from BufferedReader
-			reader.lines()
-			//Gives each line as string to the changeTrumpToDrumpf method of this.
-			.map(this::changeTrumptoDrumpf)
-			//Calls for each line the print method of this.
-			.forEach(this::print);
-			
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
+
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(templateStream));
+		try (Stream<String> stream = reader.lines()) {
+
+			String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
+			if (!templateComment.isEmpty()) {
+				commentStartDelimiter = templateComment.substring(0,templateComment.indexOf(templateCommentField));
+				commentEndDelimiter = templateComment.substring(commentStartDelimiter.length() + templateCommentField.length(), templateComment.length());
+
+			}
 		}
-		 */
+
 	}
 	
 	/**

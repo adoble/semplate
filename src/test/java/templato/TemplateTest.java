@@ -77,7 +77,11 @@ class TemplateTest {
 		
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream in = classLoader.getResourceAsStream(templateFileName);
-		t.config(in);
+		try {
+			t.config(in);
+		} catch (IOException e) {
+			fail("Unxpected exception: " + e.getMessage());
+		}
 
 		assertTrue(t.getCommentStartDelimiter().equals("<!--"));
 		assertTrue(t.getCommentEndDelimiter().equals("-->"));
