@@ -64,7 +64,7 @@ class TemplateTest {
 		assertTrue(t.getTemplatePath().toString().equals("/templates/" + templateFileName));
 		
 		assertTrue(t.getCommentStartDelimiter().equals("<!--"));
-		assertTrue(t.getCommentEndDelimiter().equals("-->"));
+		assertTrue(t.getCommentEndDelimiter().equals("-->")); 
 		
 	
 	}
