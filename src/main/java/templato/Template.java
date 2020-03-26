@@ -40,17 +40,11 @@ public class Template  {
 	 */
 	public void config(Path templatePath) throws IOException {
 		this.templatePath = templatePath;
-	
+
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
-
-			String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
-			if (!templateComment.isEmpty()) {
-				commentStartDelimiter = templateComment.substring(0,templateComment.indexOf(templateCommentField));
-				commentEndDelimiter = templateComment.substring(commentStartDelimiter.length() + templateCommentField.length(), templateComment.length());
-
-			}
+			parseTemplateStream(stream);
 		}
-	
+
 	}
 	
 	
@@ -64,13 +58,7 @@ public class Template  {
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(templateStream));
 		try (Stream<String> stream = reader.lines()) {
-
-			String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
-			if (!templateComment.isEmpty()) {
-				commentStartDelimiter = templateComment.substring(0,templateComment.indexOf(templateCommentField));
-				commentEndDelimiter = templateComment.substring(commentStartDelimiter.length() + templateCommentField.length(), templateComment.length());
-
-			}
+			parseTemplateStream(stream);
 		}
 
 	}
@@ -120,6 +108,19 @@ public class Template  {
 	public String getCommentEndDelimiter() {
 		return commentEndDelimiter;
 	}
+	
+    /**
+     * Parser the stream of template lines and extracts the start end end delimiters of comments,
+     * @param stream Stream of template lines.
+     */
+	private void parseTemplateStream(Stream<String> stream) {
+    	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
+		if (!templateComment.isEmpty()) {
+			commentStartDelimiter = templateComment.substring(0,templateComment.indexOf(templateCommentField));
+			commentEndDelimiter = templateComment.substring(commentStartDelimiter.length() + templateCommentField.length(), templateComment.length());
+
+		}
+    }
 	
 	
 	
