@@ -1,12 +1,16 @@
 package templato;
 
+import static org.junit.Assume.assumeNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 
@@ -41,19 +45,18 @@ class TemplateTest {
 		Files.copy(in, templateFile);
 		assertTrue(Files.exists(templateFile));
 		
-		
-
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
+	  fileSystem.close();
 	}
 
 
 	@Test
 	void testConfigWithPath() {
 		Template t = new Template();
-		assertNotNull(t);
+		assumeNotNull(t);
 		
 		try {
 			t.config(templateFile);
@@ -73,7 +76,7 @@ class TemplateTest {
 	@Test
 	void testConfigWithStream() {
 		Template t = new Template();
-		assertNotNull(t);
+		assumeNotNull(t);
 		
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream in = classLoader.getResourceAsStream(templateFileName);
@@ -85,6 +88,47 @@ class TemplateTest {
 
 		assertTrue(t.getCommentStartDelimiter().equals("<!--"));
 		assertTrue(t.getCommentEndDelimiter().equals("-->"));
+
+	}
+	
+	@Test 
+	void testGenerateSimple() {
+		
+		fail("Test not implmented");
+		Template template = new Template();
+		assumeNotNull(template);
+		
+		try {
+			template.config(templateFile);
+		} catch (IOException e) {
+			fail("Unxpected exception: " + e.getMessage());
+		}
+		
+		Work work = new Work();
+		work.setAuthor("Plato");
+		work.setTitle("The Republic");
+		work.setTranslator("Benjamin Jowett");
+		work.setSource("Wikisource");
+		
+				
+		try {
+			work.setSourceLink(new URL(" https://en.wikisource.org/wiki/The_Republic"));
+		} catch (MalformedURLException e) {
+			fail(e.getMessage());
+		}
+		
+		Path outputPath = templatesPath.resolve("the_republic.md");
+		template.generate(work, outputPath);
+
+		assertTrue(Files.exists(outputPath));
+
+		try (Stream<String> stream = Files.lines(outputPath)) {
+            //TODO stream.
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		//count = Files.lines(file).filter(s -> s.contains(lookFor)).count();
 
 	}
 

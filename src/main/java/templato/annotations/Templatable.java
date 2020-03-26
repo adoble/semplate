@@ -17,6 +17,6 @@ import java.lang.annotation.Target;
  * @author Andrew
  *
  */
-public @interface Template {
+public @interface Templatable {
 
 }
