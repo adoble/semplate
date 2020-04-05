@@ -10,12 +10,16 @@ public class Work {
 	@TemplateField
 	private String title;
 	
+	@TemplateField
 	private String author;
 	
+	@TemplateField
 	private String translator;
 	
+	@TemplateField
 	private String source;
 	
+	@TemplateField
 	private URL sourceLink;
 
 	public String getTitle() {

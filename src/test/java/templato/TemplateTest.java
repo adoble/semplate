@@ -1,7 +1,9 @@
 package templato;
 
-import static org.junit.Assume.assumeNotNull;
+import static org.junit.Assume.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +12,7 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
@@ -66,8 +69,8 @@ class TemplateTest {
 		
 		assertTrue(t.getTemplatePath().toString().equals("/templates/" + templateFileName));
 		
-		assertTrue(t.getCommentStartDelimiter().equals("<!--"));
-		assertTrue(t.getCommentEndDelimiter().equals("-->")); 
+		assertTrue(t.getCommentStartDelimiter().get().equals("<!--"));
+		assertTrue(t.getCommentEndDelimiter().get().equals("-->")); 
 		
 	
 	}
@@ -86,15 +89,16 @@ class TemplateTest {
 			fail("Unxpected exception: " + e.getMessage());
 		}
 
-		assertTrue(t.getCommentStartDelimiter().equals("<!--"));
-		assertTrue(t.getCommentEndDelimiter().equals("-->"));
+		assertTrue(t.getCommentStartDelimiter().get().equals("<!--"));
+		assertTrue(t.getCommentEndDelimiter().get().equals("-->"));
 
 	}
 	
 	@Test 
 	void testGenerateSimple() {
 		
-		fail("Test not implmented");
+		//fail("Test not implmented");
+		
 		Template template = new Template();
 		assumeNotNull(template);
 		
@@ -118,17 +122,33 @@ class TemplateTest {
 		}
 		
 		Path outputPath = templatesPath.resolve("the_republic.md");
-		template.generate(work, outputPath);
+		
+		try {
+			template.generate(work, outputPath);
+		}
+		catch (IOException e) {
+			fail(e.getMessage());
+		}
 
 		assertTrue(Files.exists(outputPath));
 
+		String actualContents = "";
 		try (Stream<String> stream = Files.lines(outputPath)) {
-            //TODO stream.
+            actualContents = stream.collect(Collectors.joining());
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
 		
-		//count = Files.lines(file).filter(s -> s.contains(lookFor)).count();
+		String expectedContents = "";
+		try (Stream<String> stream = Files.lines(outputPath)) {
+			expectedContents = stream.collect(Collectors.joining());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}		
+		
+		assertThat(actualContents, is(expectedContents));
+		
+		
 
 	}
 
