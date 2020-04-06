@@ -97,7 +97,7 @@ class TemplateTest {
 	@Test 
 	void testGenerateSimple() {
 		
-		//fail("Test not implmented");
+		//fail("Test not implemented");
 		
 		Template template = new Template();
 		assumeNotNull(template);
@@ -131,7 +131,8 @@ class TemplateTest {
 		}
 
 		assertTrue(Files.exists(outputPath));
-
+		
+		
 		String actualContents = "";
 		try (Stream<String> stream = Files.lines(outputPath)) {
             actualContents = stream.collect(Collectors.joining());
@@ -139,17 +140,39 @@ class TemplateTest {
 			fail(e.getMessage());
 		}
 		
+			
 		String expectedContents = "";
-		try (Stream<String> stream = Files.lines(outputPath)) {
+		String resourceFileName = "simple_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		
+		
+		copyFromResource(resourceFileName, expectedFile);
+		
+		
+		try (Stream<String> stream = Files.lines(expectedFile)) {
+			
 			expectedContents = stream.collect(Collectors.joining());
 		} catch (IOException e) {
 			fail(e.getMessage());
-		}		
-		
-		assertThat(actualContents, is(expectedContents));
-		
+		}	
+	
+				
+		//assertThat(actualContents, is(expectedContents));
+		assertEquals(expectedContents, actualContents);
 		
 
+	}
+	
+	private void copyFromResource(String resourceFileName, Path outputFile)  {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		
+		try (InputStream in  = classLoader.getResourceAsStream(resourceFileName)) {
+			Files.copy(in, outputFile);
+		} catch (IOException e) {
+			fail(e.getMessage());
+			
+		}
+		assertTrue(Files.exists(outputFile));
 	}
 
 }

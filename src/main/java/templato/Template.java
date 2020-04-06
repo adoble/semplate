@@ -35,7 +35,7 @@ public class Template  {
 	Optional<String> commentStartDelimiter;
 	Optional<String> commentEndDelimiter;
 	
-	private Object dataObject;
+	
 	
 	
 	/**
@@ -86,11 +86,11 @@ public class Template  {
 	 */
 	public void generate(Object dataObject, Path outputFilePath) throws IOException {
 		
-		this.dataObject = dataObject;  
+		Map<String, String> valueMap = buildValueMap(dataObject);
 	    
-	    try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
+		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
             List<String> replacements = stream
-            		.map(line -> templateReplace(line))
+            		.map(line -> templateReplace(line, valueMap))
             		.collect(Collectors.toList());
             
             System.out.println(String.join("\n", replacements));
@@ -101,68 +101,6 @@ public class Template  {
 
 	}
 	
-	private String templateReplace(String line) {
-
-		Matcher matcher = fieldPattern.matcher(line);
-
-        return matcher.replaceAll(mr -> buildTemplateSubstitution(mr)); 
-	}	
-	
-	private String buildTemplateSubstitution(MatchResult mr) {
-	
-		String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-		
-		// Field names starting with "template." are ignored
-	    if (fieldName.startsWith("template.")) {
-	    	if (fieldName.substring("template.".length()).equals("comment")) {
-	          return "{{template.comment}}";		
-	    	}
-	    }
-		String fieldValue = "UNKNOWN";
-
-		Class<?> c = dataObject.getClass();
-
-		if (c.isAnnotationPresent(Templatable.class)) {
-
-			Field field;
-			try {
-				field = c.getDeclaredField(fieldName);
-
-				if (field.isAnnotationPresent(TemplateField.class)) {
-					field.setAccessible(true);
-					fieldValue = field.get(dataObject).toString();
-				}
-			}
-			catch (NoSuchFieldException e) {
-				fieldValue = "UNKNOWN";
-			}
-			catch (SecurityException | IllegalAccessException e) {
-				fieldValue =  "ERROR";
-			}
-		}
-
-        StringBuilder builtString = new StringBuilder(fieldValue);
-        if (commentStartDelimiter.isPresent() ) {
-        	builtString.append(" ")
-                       .append(commentStartDelimiter.get())
-                       .append("{{")
-                       .append(fieldName)
-                       .append("=")
-                       .append(fieldValue)
-                       .append("}}");
-        	if (commentEndDelimiter.isPresent()) {
-        		builtString.append(commentEndDelimiter.get());
-        	} else {
-        		builtString.append("\n");
-        	}
-        }
-        
-		return builtString.toString();
-
-	}
-			
-	
-	
 	/**
 	 * Updates a markdown files using the annotated fields in the object .
 	 * 
@@ -172,8 +110,8 @@ public class Template  {
 	public void update(Object object, Path outputFilePath) {
 		//TODO 
 	}
-	
-	
+
+
 	/**
 	 * Reads the specified markup file and creates a new  object of class nodeClass that contains the
 	 * data semantically represented in the file. 
@@ -186,20 +124,104 @@ public class Template  {
 		return null;
 	}
 
+
 	public Path getTemplatePath() {
 		
 		return templatePath;
 	}
 
+
 	public Optional<String> getCommentStartDelimiter() {
 		return commentStartDelimiter;
 	}
 
+
 	public Optional<String> getCommentEndDelimiter() {
 		return commentEndDelimiter;
 	}
+
+
+	private String templateReplace(String line, Map<String, String> valueMap) {
+
+		Matcher templateMatcher = fieldPattern.matcher(line);
+
+		if (templateMatcher.find()) {
+			// Line contains a field
+			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> templateSubstitution(mr, valueMap)); //TODO
+
+			// Now build the meta data that is appended to the end of the line
+			StringBuilder metaData = new StringBuilder();
+			if (commentStartDelimiter.isPresent() ) {
+				metaData.append(commentStartDelimiter.get()).append(line);
+				if (commentEndDelimiter.isPresent()) {
+					metaData.append(commentEndDelimiter.get());
+				}  	
+			}
+
+			Matcher metaDataMatcher = fieldPattern.matcher(metaData);
+			String metaDataLine = metaDataMatcher.replaceAll(mr -> metaDataSubstitution(mr, valueMap));
+
+			return replacedTemplateLine + " " + metaDataLine;
+		} else {
+			return line;
+		}
+
+
+	}	
 	
-    /**
+	private String templateSubstitution(MatchResult mr, Map<String, String> valueMap) {
+	
+		String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
+		
+		// Field names starting with "template." are ignored. Note that these are always alone on a line.
+	    if (fieldName.startsWith("template.")) {
+	    	if (fieldName.substring("template.".length()).equals("comment")) {
+	          return "{{template.comment}}";		
+	    	}
+	    }
+		return valueMap.getOrDefault(fieldName, "UNKNOWN");
+		
+		
+		
+	
+		
+//        StringBuilder builtString = new StringBuilder(fieldValue);
+//        if (commentStartDelimiter.isPresent() ) {
+//        	builtString.append(" ")
+//                       .append(commentStartDelimiter.get())
+//                       .append("{{")
+//                       .append(fieldName)
+//                       .append("=\"")
+//                       .append(fieldValue)
+//                       .append("\"}}");
+//        	if (commentEndDelimiter.isPresent()) {
+//        		builtString.append(commentEndDelimiter.get());
+//        	} else {
+//        		builtString.append("\n");
+//        	}
+//        }
+//        
+//		return builtString.toString();
+
+	}
+	
+	private String metaDataSubstitution(MatchResult mr, Map<String, String> valueMap) {
+	     String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
+		
+		// Field names starting with "template." are ignored. Note that these are always alone on a line.
+	    if (fieldName.startsWith("template.")) {
+	    	if (fieldName.substring("template.".length()).equals("comment")) {
+	          return "{{template.comment}}";		
+	    	}
+	    }
+	    
+	    return "{{" + fieldName + "=\"" + valueMap.getOrDefault(fieldName, "UNKNOWN") + "\"}}";
+		
+	}
+			
+	
+	
+	/**
      * Parser the stream of template lines and extracts the start end end delimiters of comments,
      * @param stream Stream of template lines.
      */
@@ -224,6 +246,37 @@ public class Template  {
 			commentStartDelimiter = Optional.empty();
 		}
     }
+
+
+	private Map<String, String> buildValueMap(Object dataObject) {
+		String fieldValue;
+		
+		Map<String, String>  valueMap = new HashMap<String, String>();
+		
+		Class<?> c = dataObject.getClass();
+	
+		if (c.isAnnotationPresent(Templatable.class)) {
+	
+			for(Field field: c.getDeclaredFields()) {
+				if (field.isAnnotationPresent(TemplateField.class)) {
+					field.setAccessible(true);
+					
+						try {
+							fieldValue = field.get(dataObject).toString();
+						} catch (IllegalArgumentException | IllegalAccessException e) {
+							fieldValue = "ERROR";
+						} 
+					
+					
+					valueMap.put(field.getName(), fieldValue);
+				}
+			}
+		}
+		
+		return valueMap;
+		
+	
+	}
 	
 	
 	
