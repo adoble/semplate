@@ -144,14 +144,16 @@ public class Template  {
 	private String templateReplace(String line, Map<String, String> valueMap) {
 
 		Matcher templateMatcher = fieldPattern.matcher(line);
+		
+		//TODO need to handle the case for {{template.comment}}.
 
-		if (templateMatcher.find()) {
+		if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
 			// Line contains a field
 			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> templateSubstitution(mr, valueMap)); //TODO
 
 			// Now build the meta data that is appended to the end of the line
 			StringBuilder metaData = new StringBuilder();
-			if (commentStartDelimiter.isPresent() ) {
+			if (commentStartDelimiter.isPresent()) { 
 				metaData.append(commentStartDelimiter.get()).append(line);
 				if (commentEndDelimiter.isPresent()) {
 					metaData.append(commentEndDelimiter.get());
