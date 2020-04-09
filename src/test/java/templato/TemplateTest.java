@@ -163,6 +163,21 @@ class TemplateTest {
 
 	}
 	
+	@Test
+	public void testGenerateComplex() {
+		//TODO test with linked classes
+		fail("Nor yet implemented");
+	}
+	
+		
+	@Test
+	public void testGenerateList() {
+		//TODO test with lists
+		fail("Nor yet implemented");
+	}
+	
+	
+	
 	private void copyFromResource(String resourceFileName, Path outputFile)  {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		
