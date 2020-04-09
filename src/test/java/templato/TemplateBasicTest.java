@@ -20,7 +20,7 @@ import org.junit.jupiter.api.*;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 
-class TemplateTest {
+class TemplateBasicTest {
 	final static String templateFileName = "simple_template.md";
 	
 	private static FileSystem fileSystem;
