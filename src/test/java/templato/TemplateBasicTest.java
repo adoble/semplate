@@ -146,7 +146,7 @@ class TemplateBasicTest {
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
 		
 		
-		copyFromResource(resourceFileName, expectedFile);
+		TestUlilities.copyFromResource(resourceFileName, expectedFile);
 		
 		
 		try (Stream<String> stream = Files.lines(expectedFile)) {
@@ -163,31 +163,6 @@ class TemplateBasicTest {
 
 	}
 	
-	@Test
-	public void testGenerateComplex() {
-		//TODO test with linked classes
-		fail("Nor yet implemented");
-	}
 	
-		
-	@Test
-	public void testGenerateList() {
-		//TODO test with lists
-		fail("Nor yet implemented");
-	}
-	
-	
-	
-	private void copyFromResource(String resourceFileName, Path outputFile)  {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		
-		try (InputStream in  = classLoader.getResourceAsStream(resourceFileName)) {
-			Files.copy(in, outputFile);
-		} catch (IOException e) {
-			fail(e.getMessage());
-			
-		}
-		assertTrue(Files.exists(outputFile));
-	}
 
 }
