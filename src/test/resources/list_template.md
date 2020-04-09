@@ -4,6 +4,6 @@
 
 Undisputed works of {{author}}
 
-* [{{{title}}}]({{{link}}}
+* [{{{references.title}}}]({{{references.link}}}
 
 The above can be changed at any time.
