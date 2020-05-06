@@ -19,6 +19,7 @@ import java.lang.reflect.*;
 
 import templato.annotations.Templatable;
 import templato.annotations.TemplateField;
+import templato.annotations.TemplateList;
 
 /**
  * TODO
@@ -30,6 +31,7 @@ public class Template  {
 	final private String templateCommentField = "{{template.comment}}"; //TODO make static
 	
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}"); 
+	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}"); 
 	
 	private Path templatePath;
 	Optional<String> commentStartDelimiter;
@@ -86,14 +88,18 @@ public class Template  {
 	 */
 	public void generate(Object dataObject, Path outputFilePath) throws IOException {
 		
-		Map<String, String> valueMap = buildValueMap(dataObject);
+		Map<String, Object> fieldValueMap = buildFieldValueMap(dataObject);
+		System.out.println(fieldValueMap);
 	    
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
             List<String> replacements = stream
-            		.map(line -> templateReplace(line, valueMap))
+            		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
+            		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
             		.collect(Collectors.toList());
             
-            System.out.println(String.join("\n", replacements));
+            replacements.forEach(s -> System.out.println("--->" + s));
+            
+            //System.out.println(String.join("\n", replacements));
             Files.write(outputFilePath, replacements);
 	    }
 	    
@@ -140,17 +146,68 @@ public class Template  {
 		return commentEndDelimiter;
 	}
 
+	/* Expands any line that contains field references to an Iterable to a stream of template lines, 
+	 * each one of which represents one entry of the list.
+	 */
+	@SuppressWarnings("unchecked")
+	private Stream<String> templateExpand(String line, Map<String, Object> valueMap) {
+		String substitutedLine = line; 
+		List<Map<String, Object>> entries = null;;
+				
+		Matcher fieldMatcher = fieldPattern.matcher(line);
+		if (line.contains(templateCommentField)) {
+			return Stream.of(line);
+		}
+		
+		while (fieldMatcher.find()) {
+			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
+			String fieldNameParts[] = fieldName.split("[.]");  
+			if (fieldNameParts.length > 1 && valueMap.get(fieldNameParts[0]) instanceof List<?>) { // The field name has the form name.name and the value is a list
+				entries = (List<Map<String, Object>>) valueMap.get(fieldNameParts[0]); // Looking at a list so find out how many entries
+				// Now replace  each list field in the line with an indicator showing that this is a list. 
+				// For example:
+				//    {{references.id}} 
+				// is replaced with:
+				//   {{references.id[]}} 
+				// This makes it easier to substitute the index value later when this line is expanded. 
+				substitutedLine = substitutedLine.replace("{{" + fieldNameParts[0] +  "." + fieldNameParts[1] + "}}", 
+						"{{" +  fieldNameParts[0] + "." + fieldNameParts[1] + "[]}}");
+			} 
+		}
+		
+		if (entries != null) {
+			// Now expand the substitutedLine. For instance, if the Iterable field references has three entries then:
+			//   * {{references.id[]}} -> {{references.name[]}}
+			// is transformed to:
+			//   * {{references.id[0]}} -> {{references.name[0]}}
+			//   * {{references.id[1]}} -> {{references.name[1]}}
+			//   * {{references.id[2]}} -> {{references.name[2]}}
+			List<String> expandedLines = new ArrayList<String>();
+			String expandedLine;
+			for (int i = 0; i < entries.size(); i++) {
+				expandedLine = substitutedLine.replace("[]}}", "[" + i + "]}}");
+				expandedLines.add(expandedLine);
+			}
+			return expandedLines.stream();
+		} else {
+			return Stream.of(line);
+		}
 
-	private String templateReplace(String line, Map<String, String> valueMap) {
+		
+	}
+
+	private String templateReplace(String line, Map<String, Object> valueMap) {
 
 		Matcher templateMatcher = fieldPattern.matcher(line);
 		
 		//TODO need to handle the case for {{template.comment}}.
 
 		if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-			// Line contains a field
-			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> templateSubstitution(mr, valueMap)); //TODO
-
+			// Line contains a field or a list 
+			
+			// First replace anything that is a valid field
+			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap)); 
+		
 			// Now build the meta data that is appended to the end of the line
 			StringBuilder metaData = new StringBuilder();
 			if (commentStartDelimiter.isPresent()) { 
@@ -171,7 +228,7 @@ public class Template  {
 
 	}	
 	
-	private String templateSubstitution(MatchResult mr, Map<String, String> valueMap) {
+	private String fieldSubstitution(MatchResult mr, Map<String, Object> valueMap) {
 	
 		String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 		
@@ -181,33 +238,19 @@ public class Template  {
 	          return "{{template.comment}}";		
 	    	}
 	    }
-		return valueMap.getOrDefault(fieldName, "UNKNOWN");
+	    
+	    
+	    String valueString = getFieldValueAsString(fieldName, valueMap);
+	    
+	    
+	    
+	    
+		return valueString;
 		
-		
-		
-	
-		
-//        StringBuilder builtString = new StringBuilder(fieldValue);
-//        if (commentStartDelimiter.isPresent() ) {
-//        	builtString.append(" ")
-//                       .append(commentStartDelimiter.get())
-//                       .append("{{")
-//                       .append(fieldName)
-//                       .append("=\"")
-//                       .append(fieldValue)
-//                       .append("\"}}");
-//        	if (commentEndDelimiter.isPresent()) {
-//        		builtString.append(commentEndDelimiter.get());
-//        	} else {
-//        		builtString.append("\n");
-//        	}
-//        }
-//        
-//		return builtString.toString();
-
 	}
 	
-	private String metaDataSubstitution(MatchResult mr, Map<String, String> valueMap) {
+
+	private String metaDataSubstitution(MatchResult mr, Map<String, Object> valueMap) {
 	     String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 		
 		// Field names starting with "template." are ignored. Note that these are always alone on a line.
@@ -217,26 +260,62 @@ public class Template  {
 	    	}
 	    }
 	    
-	    return "{{" + fieldName + "=\"" + valueMap.getOrDefault(fieldName, "UNKNOWN") + "\"}}";
+	    //return "{{" + fieldName + "=\"" + valueMap.getOrDefault(fieldName, "UNKNOWN") + "\"}}";
+	    String valueString = getFieldValueAsString(fieldName, valueMap);
+	        
+	    return "{{" + fieldName + "=\"" + valueString + "\"}}";
 		
 	}
 			
-	
+	private String getFieldValueAsString(String fieldName, Map<String, Object> fieldValueMap) {
+		String valueString;
+		Object valueObject; 
+		String listFieldName ;
+		String subFieldName;
+		int index;
+
+		if (!fieldName.contains(".")) {
+			if (fieldValueMap.containsKey(fieldName)) {
+				valueObject =  fieldValueMap.get(fieldName);
+				if (valueObject != null) valueString = valueObject.toString();
+				else valueString = "ERROR";
+			} else {
+				valueString ="UNKNOWN";
+			} 
+
+		} else {
+			// Field name is a compound (i.e. with a dot separator) and, by this time, should have been appended 
+			// with the list notation [].
+
+			Scanner scanner = new Scanner(fieldName);
+			scanner.useDelimiter("\\.|\\[|\\]");
+			listFieldName = scanner.next();
+			subFieldName = scanner.next();
+			index = Integer.parseInt(scanner.next());
+			scanner.close();
+
+						
+			// Get the List
+			List<Map<String, Object>> list = (List<Map<String, Object>>)fieldValueMap.get(listFieldName);
+			//Now get the value map for the list entry 
+			Map<String, Object> listEntryMap = list.get(index);
+			
+			// Now get the list entry attribute 
+			valueObject = listEntryMap.get(subFieldName);
+			if (valueObject != null) {
+				valueString = valueObject.toString();
+			} else {
+				valueString = "UNKNOWN";
+			}
+		}
+		return valueString;
+	}
 	
 	/**
      * Parser the stream of template lines and extracts the start end end delimiters of comments,
      * @param stream Stream of template lines.
      */
 	private void parseTemplateStream(Stream<String> stream) {
-		
-		
-		
-		/*
-		 * fields = stream.collect(Collectors.toMap()) Map<Long, Employee> employeesMap
-		 * = employeeList.stream() .collect( Collectors.toMap(Employee::getId,
-		 * Function.identity()) );
-		 */
-		
 		
     	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
 		if (!templateComment.isEmpty()) {
@@ -250,32 +329,56 @@ public class Template  {
     }
 
 
-	private Map<String, String> buildValueMap(Object dataObject) {
-		String fieldValue;
+	@SuppressWarnings("unchecked")  // Suppress warning when casting type Object to type Iterabble. 
+	                                // During runtime the code checks that is is a valid operation.
+	private Map<String, Object> buildFieldValueMap(Object dataObject) {
+		Object fieldValue;
+		Iterable<Object> fieldIterable;
 		
-		Map<String, String>  valueMap = new HashMap<String, String>();
+		Map<String, Object>  fieldValueMap = new HashMap<>();
 		
 		Class<?> c = dataObject.getClass();
 	
 		if (c.isAnnotationPresent(Templatable.class)) {
-	
+
 			for(Field field: c.getDeclaredFields()) {
 				if (field.isAnnotationPresent(TemplateField.class)) {
 					field.setAccessible(true);
-					
-						try {
-							fieldValue = field.get(dataObject).toString();
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							fieldValue = "ERROR";
-						} 
-					
-					
-					valueMap.put(field.getName(), fieldValue);
+
+
+					try {
+						fieldValue = field.get(dataObject);
+						if (!(fieldValue instanceof Iterable)) {
+							// Scalar value
+							fieldValueMap.put(field.getName(), fieldValue);
+						} else {
+							// Vector/Iterable value
+							fieldIterable = (Iterable<Object>) fieldValue;
+
+							// Create a list of maps with the values in them
+							List<Map<String, Object>> listValues = new ArrayList<Map<String, Object>>();
+
+							Map<String, Object> fieldIterationMap;
+
+
+							for (Object listEntry: fieldIterable) {
+								fieldIterationMap = buildFieldValueMap(listEntry);
+								listValues.add(fieldIterationMap);
+							}
+							fieldValueMap.put(field.getName(), listValues);
+							
+
+						}
+
+
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						fieldValue = null; //"ERROR";  //TODO make sure that null is represented as a string "ERROR" in the calling functions
+					} 
 				}
 			}
 		}
-		
-		return valueMap;
+
+		return fieldValueMap;
 		
 	
 	}

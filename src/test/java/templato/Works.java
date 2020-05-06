@@ -13,7 +13,7 @@ public class Works {
 	@TemplateField
 	private String author;
 	
-	@TemplateList
+	@TemplateField
 	List<Reference> references = new ArrayList<Reference>();
 	
 
@@ -32,8 +32,8 @@ public class Works {
 	}
 
 
-	public void setTitle(String string) {
-		// TODO Auto-generated method stub
+	public void setTitle(String title) {
+		this.title = title;
 		
 	}
 
