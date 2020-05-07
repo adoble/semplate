@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class TestUlilities {
+public class TestUtilities {
 	
 	public static void copyFromResource(String resourceFileName, Path outputFile)  {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

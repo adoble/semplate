@@ -22,7 +22,7 @@ import com.google.common.jimfs.Jimfs;
 
 class TemplateListTest {
 	
-	final static String templateFileName = "list_template.md";
+	final static String listTemplateFileName = "list_template.md";
 
 	private static FileSystem fileSystem;
 	private Path rootPath;
@@ -43,15 +43,21 @@ class TemplateListTest {
 
 		//Copy a test template from the resources to the mock file system
 		// TODO use TestUtilites
-		templateFile = templatesPath.resolve(templateFileName);
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream in  = classLoader.getResourceAsStream(templateFileName);
-		Files.copy(in, templateFile);
-		assertTrue(Files.exists(templateFile));
+		
+//		templateFile = templatesPath.resolve(templateFileName);
+//		TestUtilities.copyFromResource(templateFileName, templateFile);  
+//		
+//		assertTrue(Files.exists(templateFile));
 	}
 
 	@Test
 	void testGenerateList() {
+		
+		// Copy into the mock file system the template file we are using from the resources
+		templateFile = templatesPath.resolve(listTemplateFileName);
+		TestUtilities.copyFromResource(listTemplateFileName, templateFile);  
+		
+		assertTrue(Files.exists(templateFile));
 		Template template = new Template();
 		assumeNotNull(template);
 		
@@ -98,7 +104,7 @@ class TemplateListTest {
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
 		
 		
-		TestUlilities.copyFromResource(resourceFileName, expectedFile);
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
 		
 		try (Stream<String> stream = Files.lines(expectedFile)) {
@@ -111,6 +117,77 @@ class TemplateListTest {
 				
 		//assertThat(actualContents, is(expectedContents));
 		assertEquals(expectedContents, actualContents);
+	}
+	
+	@Test
+	void testGenerateFromArray() throws MalformedURLException {
+		String arrayTemplateFileName = "array_template.md";
+		
+		// Copy into the mock file system the template file we are using from the resources
+		Path arrayTemplateFile = templatesPath.resolve(arrayTemplateFileName);
+		TestUtilities.copyFromResource(arrayTemplateFileName, arrayTemplateFile);  
+		
+		assertTrue(Files.exists(arrayTemplateFile));
+		Template template = new Template();
+		assumeNotNull(template);
+		
+		try {
+			template.config(arrayTemplateFile);
+		} catch (IOException e) {
+			fail("Unxpected exception: " + e.getMessage());
+		}
+		
+		// Set up a templatable object that uses an array. 		
+		References references = new References(3);
+		references.add(new Reference("Figuring the Phallogocentric Argument with Respect to the Classical Greek Philosophical Tradition", 
+				                     new URL("http://kenstange.com/nebula/feat013/feat013.html")));
+		references.add(new Reference("A History of Mathematics", 
+				                     new URL("https://archive.org/details/historyofmathema00boye")));
+		references.add(new Reference("Philosophy and Dialogue: Plato's Unwritten Doctrines from a Hermeneutical Point of View", 
+                                     new URL("http://www.bu.edu/wcp/Papers/Anci/AnciRodr.htm")));
+
+		
+			
+		Path outputPath = fileSystem.getPath("array_actual.md");
+		
+		try {
+			template.generate(references, outputPath);
+		}
+		catch (IOException e) {
+			fail(e.getMessage());
+		}
+
+		assertTrue(Files.exists(outputPath));
+		
+		
+		String actualContents = "";
+		try (Stream<String> stream = Files.lines(outputPath)) {
+            actualContents = stream.collect(Collectors.joining());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+			
+		String expectedContents = "";
+		String resourceFileName = "array_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		
+		
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		
+		
+		try (Stream<String> stream = Files.lines(expectedFile)) {
+			
+			expectedContents = stream.collect(Collectors.joining());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}	
+	
+				
+		//assertThat(actualContents, is(expectedContents));
+		assertEquals(expectedContents, actualContents);
+		
+		
 	}
 	
 	@Disabled

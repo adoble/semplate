@@ -89,8 +89,7 @@ public class Template  {
 	public void generate(Object dataObject, Path outputFilePath) throws IOException {
 		
 		Map<String, Object> fieldValueMap = buildFieldValueMap(dataObject);
-		System.out.println(fieldValueMap);
-	    
+			    
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
             List<String> replacements = stream
             		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
@@ -348,12 +347,30 @@ public class Template  {
 
 					try {
 						fieldValue = field.get(dataObject);
-						if (!(fieldValue instanceof Iterable)) {
+						
+						System.out.println(fieldValue.getClass().getName());
+						
+						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
 							// Scalar value
 							fieldValueMap.put(field.getName(), fieldValue);
 						} else {
+							if (field.getType().isArray()) {
+								
+								// Unpack the array. Need to do this as:
+								// a) the array needs to Iterable and for some reason they are not. 
+								// b) Just using simple casting does not seem to work for arrays
+								List<Object> l = new ArrayList<Object>(Array.getLength(fieldValue)); 
+								for (int i= 0; i < Array.getLength(fieldValue); i++) {
+									l.add(Array.get(fieldValue,i));
+								}
+								fieldIterable = (Iterable<Object>) l;
+								
+							} else {
+								// The field value is of type Iterable
+								fieldIterable = (Iterable<Object>) fieldValue;
+							}
 							// Vector/Iterable value
-							fieldIterable = (Iterable<Object>) fieldValue;
+							//fieldIterable = (Iterable<Object>) fieldValue;
 
 							// Create a list of maps with the values in them
 							List<Map<String, Object>> listValues = new ArrayList<Map<String, Object>>();

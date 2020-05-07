@@ -146,7 +146,7 @@ class TemplateBasicTest {
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
 		
 		
-		TestUlilities.copyFromResource(resourceFileName, expectedFile);
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
 		
 		try (Stream<String> stream = Files.lines(expectedFile)) {
