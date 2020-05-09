@@ -119,15 +119,70 @@ public class Template  {
 
 	/**
 	 * Reads the specified markup file and creates a new  object of class nodeClass that contains the
-	 * data semantically represented in the file. 
+	 * data semantically represented in the file.
+	 * 
 	 * @param objectClass
 	 * @param markupFilePath
 	 * @return
 	 */
-	public Object read(Class<Object> objectClass, Path markupFilePath) {
-		//TODO 
-		return null;
+	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
+		Object object;
+		
+		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
+		
+		try {
+			object = objectClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			throw new ReadException();
+		}
+		
+		// Build up a value map from the file
+		//TODO
+		
+		
+		Map<String, Object> valueMap;
+		try (Stream<String> stream= Files.lines(markupFilePath, Charset.defaultCharset())) {
+			//valueMap = stream.
+			stream
+            		.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
+            		//.flatMap(line -> Stream.of(line.split("\\{{2}|\\}{2}")))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
+            		//.flatMap(line -> pattern.splitAsStream(line))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
+            		.flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
+            		//.map(keyValuePairStr -> buildFieldValueMap(keyValuePairStr, valueMap))
+            		.forEach(System.out::println);
+            		
+//            		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
+//            		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
+//            		.collect(Collectors.toMap());
+		} catch (IOException e) {
+			throw new ReadException();
+		}
+		
+		// From the value map set up the returned object
+		//TODO
+		
+		
+		return object;
 	}
+
+
+	private Stream<String> extractKeyValuePair(String line) {
+		List<String> keyValuePairs = new ArrayList<String>();
+		String keyValuePair = "";
+		
+		Matcher matcher = fieldPattern.matcher(line);
+		while(matcher.find()) {
+			// Remove the delimiters
+			keyValuePair = matcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
+			keyValuePairs.add(keyValuePair);
+		}
+	
+		return keyValuePairs.stream();
+	
+	}
+
 
 
 	public Path getTemplatePath() {
@@ -359,6 +414,7 @@ public class Template  {
 								// Unpack the array. Need to do this as:
 								// a) the array needs to Iterable and for some reason they are not. 
 								// b) Just using simple casting does not seem to work for arrays
+								// See https://stackoverflow.com/questions/8095016/unpacking-an-array-using-reflection
 								List<Object> l = new ArrayList<Object>(Array.getLength(fieldValue)); 
 								for (int i= 0; i < Array.getLength(fieldValue); i++) {
 									l.add(Array.get(fieldValue,i));

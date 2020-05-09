@@ -43,9 +43,12 @@ class TemplateBasicTest {
 		
 		//Copy a test template from the resources to the mock file system
 		templateFile = templatesPath.resolve(templateFileName);
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream in  = classLoader.getResourceAsStream(templateFileName);
-		Files.copy(in, templateFile);
+		TestUtilities.copyFromResource(templateFileName, templateFile);
+		/*
+		 * ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		 * InputStream in = classLoader.getResourceAsStream(templateFileName);
+		 * Files.copy(in, templateFile);
+		 */
 		assertTrue(Files.exists(templateFile));
 		
 	}
