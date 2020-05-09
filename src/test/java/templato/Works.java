@@ -42,5 +42,13 @@ public class Works {
 		references.add(reference);
 		
 	}
+	
+	public Reference getReference(int index) {
+		return references.get(index);
+	}
+	
+	public int numberReferences() {
+		return references.size();
+	}
 
 }
