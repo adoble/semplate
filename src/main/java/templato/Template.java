@@ -218,7 +218,7 @@ public class Template  {
 			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 			String fieldNameParts[] = fieldName.split("[.]");  
 			if (fieldNameParts.length > 1 && valueMap.isList(fieldNameParts[0])) { // The field name has the form name.name and the value is a list
-				entries = valueMap.getDataList(fieldNameParts[0]); // Looking at a list so find out how many entries
+				entries = valueMap.getListValue(fieldNameParts[0]); // Looking at a list so find out how many entries
 				// Now replace  each list field in the line with an indicator showing that this is a list. 
 				// For example:
 				//    {{references.id}} 
@@ -331,7 +331,7 @@ public class Template  {
 
 		if (!fieldName.contains(".")) {
 			if (fieldValueMap.containsField(fieldName)) {
-				valueObject =  fieldValueMap.getDataObject(fieldName);
+				valueObject =  fieldValueMap.getDataValue(fieldName);
 				if (valueObject != null) valueString = valueObject.toString();
 				else valueString = "ERROR";
 			} else {
@@ -351,12 +351,12 @@ public class Template  {
 
 						
 			// Get the List
-			List<ValueMap> list = fieldValueMap.getDataList(listFieldName);
+			List<ValueMap> list = fieldValueMap.getListValue(listFieldName);
 			//Now get the value map for the list entry 
 			ValueMap listEntryMap = list.get(index);
 			
 			// Now get the list entry attribute 
-			valueObject = listEntryMap.getDataObject(subFieldName);
+			valueObject = listEntryMap.getDataValue(subFieldName);
 			if (valueObject != null) {
 				valueString = valueObject.toString();
 			} else {
@@ -408,7 +408,7 @@ public class Template  {
 						
 						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
 							// Scalar value
-							fieldValueMap.putObject(field.getName(), fieldValue);
+							fieldValueMap.putObjectValue(field.getName(), fieldValue);
 						} else {
 							if (field.getType().isArray()) {
 								
@@ -439,7 +439,7 @@ public class Template  {
 								fieldIterationMap = buildFieldValueMap(listEntry);
 								listValues.add(fieldIterationMap);
 							}
-							fieldValueMap.putList(field.getName(), listValues);
+							fieldValueMap.putListValue(field.getName(), listValues);
 							
 
 						}

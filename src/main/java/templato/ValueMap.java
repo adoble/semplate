@@ -5,23 +5,23 @@ import java.util.*;
 public class ValueMap {
 	Map<String, Object> valueMap = new HashMap<String, Object>();
 
-	public Object getDataObject(String fieldName) {
+	public Object getDataValue(String fieldName) {
 		return valueMap.get(fieldName);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<ValueMap> getDataList(String fieldName) {
-	  return (List<ValueMap>) getDataObject(fieldName);
+	public List<ValueMap> getListValue(String fieldName) {
+	  return (List<ValueMap>) getDataValue(fieldName);
 		
 	}
 
-	public Object putObject(String fieldName, Object dataObject) {
+	public Object putObjectValue(String fieldName, Object dataObject) {
 			valueMap.put(fieldName,  dataObject);
 		
 		return dataObject;
 	}
 	
-	public List<ValueMap> putList(String fieldName, List<ValueMap> list) {
+	public List<ValueMap> putListValue(String fieldName, List<ValueMap> list) {
 			valueMap.put(fieldName, list);
 		
 		return list; 
