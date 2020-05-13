@@ -88,7 +88,7 @@ public class Template  {
 	 */
 	public void generate(Object dataObject, Path outputFilePath) throws IOException {
 		
-		Map<String, Object> fieldValueMap = buildFieldValueMap(dataObject);
+		ValueMap fieldValueMap = buildFieldValueMap(dataObject);
 			    
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
             List<String> replacements = stream
@@ -142,22 +142,21 @@ public class Template  {
 		//TODO
 		
 		
-		Map<String, Object> valueMap;
 		try (Stream<String> stream= Files.lines(markupFilePath, Charset.defaultCharset())) {
 			//valueMap = stream.
 			stream
-            		.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
-            		//.flatMap(line -> Stream.of(line.split("\\{{2}|\\}{2}")))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
-            		//.flatMap(line -> pattern.splitAsStream(line))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
-            		.flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
-            		//.map(keyValuePairStr -> buildFieldValueMap(keyValuePairStr, valueMap))
-            		
-            		// .collect(ValueMap::new, ValueMap::put, ValueMap::putAll);
-            		.forEach(System.out::println);
-            		
-//            		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
-//            		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
-//            		.collect(Collectors.toMap());
+				.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
+				//.flatMap(line -> Stream.of(line.split("\\{{2}|\\}{2}")))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
+				//.flatMap(line -> pattern.splitAsStream(line))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
+				.flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
+				//.map(keyValuePairStr -> buildFieldValueMap(keyValuePairStr, valueMap))
+	
+				// .collect(ValueMap::new, ValueMap::put, ValueMap::putAll);
+				.forEach(System.out::println);
+	
+				//            		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
+				//            		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
+				//            		.collect(Collectors.toMap());
 		} catch (IOException e) {
 			throw new ReadException();
 		}
@@ -206,9 +205,9 @@ public class Template  {
 	 * each one of which represents one entry of the list.
 	 */
 	@SuppressWarnings("unchecked")
-	private Stream<String> templateExpand(String line, Map<String, Object> valueMap) {
+	private Stream<String> templateExpand(String line, ValueMap valueMap) {
 		String substitutedLine = line; 
-		List<Map<String, Object>> entries = null;;
+		List<ValueMap> entries = null;;
 				
 		Matcher fieldMatcher = fieldPattern.matcher(line);
 		if (line.contains(templateCommentField)) {
@@ -218,8 +217,8 @@ public class Template  {
 		while (fieldMatcher.find()) {
 			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 			String fieldNameParts[] = fieldName.split("[.]");  
-			if (fieldNameParts.length > 1 && valueMap.get(fieldNameParts[0]) instanceof List<?>) { // The field name has the form name.name and the value is a list
-				entries = (List<Map<String, Object>>) valueMap.get(fieldNameParts[0]); // Looking at a list so find out how many entries
+			if (fieldNameParts.length > 1 && valueMap.isList(fieldNameParts[0])) { // The field name has the form name.name and the value is a list
+				entries = valueMap.getDataList(fieldNameParts[0]); // Looking at a list so find out how many entries
 				// Now replace  each list field in the line with an indicator showing that this is a list. 
 				// For example:
 				//    {{references.id}} 
@@ -252,7 +251,7 @@ public class Template  {
 		
 	}
 
-	private String templateReplace(String line, Map<String, Object> valueMap) {
+	private String templateReplace(String line, ValueMap valueMap) {
 
 		Matcher templateMatcher = fieldPattern.matcher(line);
 		
@@ -284,7 +283,7 @@ public class Template  {
 
 	}	
 	
-	private String fieldSubstitution(MatchResult mr, Map<String, Object> valueMap) {
+	private String fieldSubstitution(MatchResult mr, ValueMap valueMap) {
 	
 		String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 		
@@ -306,7 +305,7 @@ public class Template  {
 	}
 	
 
-	private String metaDataSubstitution(MatchResult mr, Map<String, Object> valueMap) {
+	private String metaDataSubstitution(MatchResult mr, ValueMap valueMap) {
 	     String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 		
 		// Field names starting with "template." are ignored. Note that these are always alone on a line.
@@ -323,7 +322,7 @@ public class Template  {
 		
 	}
 			
-	private String getFieldValueAsString(String fieldName, Map<String, Object> fieldValueMap) {
+	private String getFieldValueAsString(String fieldName, ValueMap fieldValueMap) {
 		String valueString;
 		Object valueObject; 
 		String listFieldName ;
@@ -331,8 +330,8 @@ public class Template  {
 		int index;
 
 		if (!fieldName.contains(".")) {
-			if (fieldValueMap.containsKey(fieldName)) {
-				valueObject =  fieldValueMap.get(fieldName);
+			if (fieldValueMap.containsField(fieldName)) {
+				valueObject =  fieldValueMap.getDataObject(fieldName);
 				if (valueObject != null) valueString = valueObject.toString();
 				else valueString = "ERROR";
 			} else {
@@ -352,12 +351,12 @@ public class Template  {
 
 						
 			// Get the List
-			List<Map<String, Object>> list = (List<Map<String, Object>>)fieldValueMap.get(listFieldName);
+			List<ValueMap> list = fieldValueMap.getDataList(listFieldName);
 			//Now get the value map for the list entry 
-			Map<String, Object> listEntryMap = list.get(index);
+			ValueMap listEntryMap = list.get(index);
 			
 			// Now get the list entry attribute 
-			valueObject = listEntryMap.get(subFieldName);
+			valueObject = listEntryMap.getDataObject(subFieldName);
 			if (valueObject != null) {
 				valueString = valueObject.toString();
 			} else {
@@ -385,13 +384,13 @@ public class Template  {
     }
 
 
-	@SuppressWarnings("unchecked")  // Suppress warning when casting type Object to type Iterabble. 
+	@SuppressWarnings("unchecked")  // Suppress warning when casting type Object to type Iterable. 
 	                                // During runtime the code checks that is is a valid operation.
-	private Map<String, Object> buildFieldValueMap(Object dataObject) {
+	private ValueMap buildFieldValueMap(Object dataObject) {
 		Object fieldValue;
 		Iterable<Object> fieldIterable;
 		
-		Map<String, Object>  fieldValueMap = new HashMap<>();
+		ValueMap fieldValueMap = new ValueMap();
 		
 		Class<?> c = dataObject.getClass();
 	
@@ -409,7 +408,7 @@ public class Template  {
 						
 						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
 							// Scalar value
-							fieldValueMap.put(field.getName(), fieldValue);
+							fieldValueMap.putObject(field.getName(), fieldValue);
 						} else {
 							if (field.getType().isArray()) {
 								
@@ -431,16 +430,16 @@ public class Template  {
 							//fieldIterable = (Iterable<Object>) fieldValue;
 
 							// Create a list of maps with the values in them
-							List<Map<String, Object>> listValues = new ArrayList<Map<String, Object>>();
+							List<ValueMap> listValues = new ArrayList<ValueMap>();
 
-							Map<String, Object> fieldIterationMap;
+							ValueMap fieldIterationMap;
 
 
 							for (Object listEntry: fieldIterable) {
 								fieldIterationMap = buildFieldValueMap(listEntry);
 								listValues.add(fieldIterationMap);
 							}
-							fieldValueMap.put(field.getName(), listValues);
+							fieldValueMap.putList(field.getName(), listValues);
 							
 
 						}
