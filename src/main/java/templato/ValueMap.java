@@ -15,7 +15,7 @@ public class ValueMap {
 		
 	}
 
-	public Object putDataObject(String fieldName, Object dataObject) {
+	public Object putObject(String fieldName, Object dataObject) {
 			valueMap.put(fieldName,  dataObject);
 		
 		return dataObject;
