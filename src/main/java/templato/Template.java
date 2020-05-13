@@ -151,6 +151,8 @@ public class Template  {
             		//.flatMap(line -> pattern.splitAsStream(line))   // Now extract the fields as a stream [^\\{]\\{{2}|[^\\\\}]\\\\}{2}\"
             		.flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
             		//.map(keyValuePairStr -> buildFieldValueMap(keyValuePairStr, valueMap))
+            		
+            		// .collect(ValueMap::new, ValueMap::put, ValueMap::putAll);
             		.forEach(System.out::println);
             		
 //            		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
