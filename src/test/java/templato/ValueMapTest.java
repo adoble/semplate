@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import templato.valuemap.*;
+
 class ValueMapTest {
 	ValueMap valueMap;
 	
@@ -31,7 +33,25 @@ class ValueMapTest {
 		assertEquals(LocalDate.of(121, Month.APRIL, 26), valueMap.getDataValue("birthDate"));
 	
 	}
-
+	
+	@Test
+	void testValueEntry() {
+	 
+	  ValueMapEntry entry = new ValueMapEntry("familyName", "Aurelius")	;
+	  valueMap.putEntry(entry);
+	  
+	   
+	  entry = new ValueMapEntry("birthDate", LocalDate.of(121, Month.APRIL, 26))	;
+	  valueMap.putEntry(entry);
+	  
+	  assertTrue(valueMap.containsField("familyName"));
+	  assertEquals("Aurelius", valueMap.getDataValue("familyName"));
+	  assertTrue(valueMap.containsField("birthDate"));
+	  assertEquals(LocalDate.of(121, Month.APRIL, 26), valueMap.getDataValue("birthDate"));
+		
+	   
+	}
+	
 	@Test
 	void testLists() {
 		ValueMap[] expectedMaps = new ValueMap[3];

@@ -1,9 +1,11 @@
-package templato;
+package templato.valuemap;
 
 import java.util.*;
 
 public class ValueMap {
+	
 	Map<String, Object> valueMap = new HashMap<String, Object>();
+	
 
 	public Object getDataValue(String fieldName) {
 		return valueMap.get(fieldName);
@@ -14,10 +16,14 @@ public class ValueMap {
 	  return (List<ValueMap>) getDataValue(fieldName);
 		
 	}
+	
+	public Object putEntry(ValueMapEntry entry) {
+		valueMap.put(entry.getFieldName(), entry.getFieldValue());
+		return entry.getFieldValue();
+	}
 
 	public Object putObjectValue(String fieldName, Object dataObject) {
-			valueMap.put(fieldName,  dataObject);
-		
+		valueMap.put(fieldName,  dataObject);
 		return dataObject;
 	}
 	
