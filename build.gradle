@@ -22,7 +22,7 @@ dependencies {
     //api 'org.apache.commons:commons-math3:3.6.1'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    //implementation 'com.google.guava:guava:26.0-jre'
+    implementation 'com.google.guava:guava:26.0-jre'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
@@ -32,4 +32,16 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
     
     testCompile group: 'com.google.jimfs', name: 'jimfs', version:'1.1'
+    
 }
+
+
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                   'Implementation-Version': project.version)
+    }
+}
+
+version = '0.0.0'
