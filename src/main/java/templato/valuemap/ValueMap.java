@@ -1,40 +1,60 @@
 package templato.valuemap;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ValueMap {
 	
 	Map<String, Object> valueMap = new HashMap<String, Object>();
 	
 
-	public Object getDataValue(String fieldName) {
+	public Object getValue(String fieldName) {
 		return valueMap.get(fieldName);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<ValueMap> getListValue(String fieldName) {
-	  return (List<ValueMap>) getDataValue(fieldName);
+	public List<ValueMap> getList(String fieldName) {
+	  return (List<ValueMap>) getValue(fieldName);
 		
 	}
 	
-	public Object putEntry(ValueMapEntry entry) {
-		valueMap.put(entry.getFieldName(), entry.getFieldValue());
-		return entry.getFieldValue();
-	}
-
-	public Object putObjectValue(String fieldName, Object dataObject) {
+	public Object put(String fieldName, Object dataObject) {
 		valueMap.put(fieldName,  dataObject);
 		return dataObject;
 	}
 	
-	public List<ValueMap> putListValue(String fieldName, List<ValueMap> list) {
-			valueMap.put(fieldName, list);
+	public ValueMap add(String fieldName, ValueMap map) {
+		if (containsField(fieldName) && isList(fieldName)) {
+		   getList(fieldName).add(map);
+		} else {
+			// Create or overwrite
+			List<ValueMap> listValueMaps = new ArrayList<>();
+			listValueMaps.add(map);
+			put(fieldName, listValueMaps);
+		}
 		
-		return list; 
+		return map; 
 	}
 	
-	public void putAll(ValueMap map) {
-		valueMap.putAll(map.valueMap);
+	public void merge(ValueMap sourceMap) {
+		Map<String, Object> mapWithoutLists = copyWithoutLists(sourceMap.valueMap);
+		valueMap.putAll(mapWithoutLists);
+
+		// Append the lists
+		for (Map.Entry<String, Object> sourceEntry : sourceMap.valueMap.entrySet()) {
+			if (sourceEntry.getValue() instanceof List<?>) {
+				@SuppressWarnings("unchecked")
+				List<ValueMap> sourceList = (List<ValueMap>) sourceMap.valueMap.getOrDefault(sourceEntry.getKey(), Collections.emptyList());
+				@SuppressWarnings("unchecked")
+				List<ValueMap> targetList = (List<ValueMap>) valueMap.get(sourceEntry.getKey());
+				if (targetList != null) {
+					targetList.addAll(sourceList);
+				} else {
+					valueMap.put(sourceEntry.getKey(), sourceList);
+				}
+			}
+		}
+
 	}
 
 	public boolean isList(String fieldName) {
@@ -44,5 +64,37 @@ public class ValueMap {
 	public boolean containsField(String fieldName) {
 		return (valueMap.containsKey(fieldName));
 	}
+	
+	@SuppressWarnings("unchecked")
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+
+		for (Map.Entry<String, Object> entry: valueMap.entrySet()) {
+			if (entry.getValue() instanceof List<?>) {
+				List<ValueMap> listValueMaps = (List<ValueMap>) entry.getValue();
+				sb.append(entry.getKey()).append('=');
+				sb.append('[');
+				for (ValueMap v: listValueMaps) {
+					//sb.append(v.toString()).append(',').append('\n'); 
+					sb.append(v.toString()).append('\n'); 
+					sb.append(" ".repeat(entry.getKey().length() + 2));  // Indentation
+				}
+				sb.append(']').append('\n');
+			} else {
+				// Object value
+				sb.append(entry.getKey()).append('=').append(entry.getValue()).append(',');
+			}
+
+		}
+
+
+		return "(" + sb.toString().replaceAll(",$", "") + ")"; // Add parenthesis and remove any trailing commas
+
+	}
+	
+	private static Map<String, Object> copyWithoutLists(Map<String, Object> map) {
+		return map.entrySet().stream().filter(e -> !(e.getValue() instanceof List<?>)).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+	}
+
+
 }
-;
