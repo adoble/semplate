@@ -8,4 +8,4 @@ It works with both [Markdown](https://www.markdownguide.org/getting-started/) an
 
 # Status
 
-Still under development. Probably nothing works right now.
+Still under development. Probably nothing works right now, but I'll tell you when a working version is there. 
