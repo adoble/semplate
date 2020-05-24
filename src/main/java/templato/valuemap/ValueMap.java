@@ -3,11 +3,35 @@ package templato.valuemap;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Maps values to field names. 
+ * 
+ * 
+ * 
+ * @author Andrew Doble
+ *
+ */
+
 public class ValueMap {
 	
 	Map<String, Object> valueMap = new HashMap<String, Object>();
 	
 
+	/**
+	 * Returns the value mapped to the specified field name. 
+	 * 
+	 * The field name  can be a simple field name, e.g.
+	 *   <code>
+	 *   assertEquals("Plato", (String) valueMap.getValue("author");
+	 *   </code>
+	 *   
+	 * or can be a compound field name such as:
+	 *   <code>
+	 *   assertEquals("Plato", (String) getValue("works.2.author");
+	 *   </code> 
+	 * @param fieldName The field name. 
+	 * @return An object representing the value. This can also be a ValueMap object.
+	 */
 	public Object getValue(String fieldName) {
 		return valueMap.get(fieldName);
 	}
@@ -16,6 +40,14 @@ public class ValueMap {
 	public List<ValueMap> getList(String fieldName) {
 	  return (List<ValueMap>) getValue(fieldName);
 		
+	}
+	
+	public ValueMap getValueMap(String fieldName) {
+		return (ValueMap) getValue(fieldName);
+	}
+	
+	public boolean isValueMap(String fieldName) {
+		return (getValue(fieldName) instanceof ValueMap);
 	}
 	
 	public Object put(String fieldName, Object dataObject) {
