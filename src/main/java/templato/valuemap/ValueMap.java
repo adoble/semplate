@@ -29,13 +29,23 @@ public class ValueMap {
 	 *   <code>
 	 *   assertEquals("Plato", (String) getValue("works.2.author");
 	 *   </code> 
-	 * @param fieldName The field name. 
+	 * i.e. the author of the second element* in "works" list. 
+	 * * Strictly speaking this is the element that is mapped to 2 in the "works" list. 
+	 *   
+	 * @param fieldName The field name, either simple or compound. 
 	 * @return An object representing the value. This can also be a ValueMap object.
 	 */
 	public Object getValue(String fieldName) {
 		return valueMap.get(fieldName);
 	}
 	
+	/**
+	 * Returns a List of ValueMaps representing the fieldname/values. 
+	 * 
+	 * getList("works") 
+	 * @param fieldName
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public List<ValueMap> getList(String fieldName) {
 	  return (List<ValueMap>) getValue(fieldName);
