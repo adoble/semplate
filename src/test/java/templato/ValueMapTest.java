@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,17 +58,26 @@ class ValueMapTest {
 
 
 	@Test
-	void testDataObjects() {
-		valueMap.put("name", "Marcus");
-		valueMap.put("familyName", "Aurelius");
-		valueMap.put("birthDate", LocalDate.of(121, Month.APRIL, 26));
+	void testValues() {
 		
-		
-
-		assertEquals("Aurelius", valueMap.getValue("familyName"));
-		assertEquals("Marcus", valueMap.getValue("name"));
-		assertEquals(LocalDate.of(121, Month.APRIL, 26), valueMap.getValue("birthDate"));
+		assertEquals("Augustus", testList[0].getValue("familyName").orElse(""));
+		assertEquals("Gaius", testList[0].getValue("name").orElse(""));
+		assertEquals(LocalDate.of(-63, Month.SEPTEMBER, 23), testList[0].getValue("birthDate").orElse(LocalDate.now()));
 	
+	}
+	
+	@Test
+	void testValueMaps() {
+		valueMap.put("title", "Roman Emperors");
+		
+		valueMap.put("emperor", testList[0]); 
+		
+		assertTrue(valueMap.containsField("emperor"));
+		assertTrue(valueMap.isValueMap("emperor"));
+		
+		assertEquals(testList[0],valueMap.getValueMap("emperor").orElse(ValueMap.empty())); 
+		
+		
 	}
 	
 	@Test
@@ -95,9 +105,19 @@ class ValueMapTest {
 		}
 		
 		assertTrue(valueMap.containsField("emperors"));
-		assertTrue(valueMap.isList("emperors"));
-		List<ValueMap> actualMaps = valueMap.getList("emperors");
+		ValueMap emperorsVM = valueMap.getValueMap("emperors").orElse(valueMap.empty());
+		assertTrue(emperorsVM.containsField("0"));
+		assertTrue(emperorsVM.containsField("1"));
+		assertTrue(emperorsVM.containsField("2"));
 		
+		
+		Set<String> fieldNames = emperorsVM.fieldNames();
+		assertEquals(Set.of("0", "1", "2"), fieldNames);
+		
+		List<ValueMap> actualMaps = new ArrayList<>();
+		for (String fieldName: fieldNames) {
+			actualMaps.add(emperorsVM.getValueMap(fieldName).orElse(ValueMap.empty()));
+		}
 		
 		assertTrue(Arrays.deepEquals(expectedMaps, actualMaps.toArray()));
 		
@@ -121,6 +141,7 @@ class ValueMapTest {
 		expectedMaps[2].put("familyName", "Caesar");  //Ditto
 		expectedMaps[2].put("birthDate", LocalDate.of(37, Month.DECEMBER, 15));
 		
+	
 		ValueMap emperors = new ValueMap();
 		emperors.put("0", expectedMaps[0]);		
 		emperors.put("1", expectedMaps[1]);		
@@ -129,11 +150,12 @@ class ValueMapTest {
 		valueMap.put("emperors", emperors);
 		
 		assertTrue(valueMap.containsField("emperors"));
-		ValueMap actualEmperors = (ValueMap) valueMap.getValue("emperors");  // TODO new function getValueMap() that just returns valuemaps
+		ValueMap actualEmperors = valueMap.getValueMap("emperors").orElse(ValueMap.empty()); 
+		
 		List<ValueMap> actualMaps = new ArrayList<ValueMap>();
-		actualMaps.add((ValueMap)actualEmperors.getValue("0"));
-		actualMaps.add((ValueMap)actualEmperors.getValue("1"));
-		actualMaps.add((ValueMap)actualEmperors.getValue("2"));
+		actualMaps.add(actualEmperors.getValueMap("0").orElse(ValueMap.empty()));
+		actualMaps.add(actualEmperors.getValueMap("1").orElse(ValueMap.empty()));
+		actualMaps.add(actualEmperors.getValueMap("2").orElse(ValueMap.empty()));
 		
 					
 		assertTrue(Arrays.deepEquals(expectedMaps, actualMaps.toArray()));
@@ -156,16 +178,16 @@ class ValueMapTest {
 		
 		valueMap.merge(anotherValueMap);
 		
-		assertEquals("Marcus Aurelius Antoninus", valueMap.getValue("name"));
+		assertEquals("Marcus Aurelius Antoninus", valueMap.getValue("name").orElse(""));
 		assertTrue(valueMap.containsField("reignStart"));
-		assertEquals(LocalDate.of(161, Month.MARCH, 8), valueMap.getValue("reignStart"));
+		assertEquals(LocalDate.of(161, Month.MARCH, 8), valueMap.getValue("reignStart").orElse(""));
 		assertTrue(valueMap.containsField("reignEnd"));
-		assertEquals(LocalDate.of(180, Month.MARCH, 17), valueMap.getValue("reignEnd"));
+		assertEquals(LocalDate.of(180, Month.MARCH, 17), valueMap.getValue("reignEnd").orElse(""));
 		
 	}
 	
 	@Test
-	void testMergeWithList() {
+	void testMergeComplex() {
 		
 		valueMap.put("source", "Wikipedia");
 		valueMap.put("title", "Roman Emperors");
@@ -181,9 +203,9 @@ class ValueMapTest {
 		valueMap.add("emperors", julioClaudianDynasty[2]);
 		
 		assertTrue(valueMap.containsField("emperors"));
-		assertTrue(valueMap.isList("emperors"));
+		assertTrue(valueMap.isValueMap("emperors"));
 		
-        List<ValueMap> actualMaps = valueMap.getList("emperors");
+        List<ValueMap> actualMaps = valueMap.getValueMaps("emperors");
 		assertTrue(Arrays.deepEquals(julioClaudianDynasty, actualMaps.toArray()));
 		
 		ValueMap[] nervaAntonineDynasty = new ValueMap[3];
@@ -201,8 +223,9 @@ class ValueMapTest {
 		// Now add the new dynasty to the old value map
 		valueMap.merge(nervaAntonineDynastyListMap);
 		
-	
-		actualMaps = valueMap.getList("emperors");
+        System.out.println(valueMap);
+        
+		actualMaps = valueMap.getValueMaps("emperors");
 		assertTrue(Arrays.deepEquals(testList, actualMaps.toArray()));
 		
 		System.out.println(actualMaps);
@@ -228,76 +251,40 @@ class ValueMapTest {
 			
 		// Now add the new dynasty to the old value map
 		valueMap.merge(nervaAntonineDynastyListMap);
-		
+			
 		assertTrue(valueMap.containsField("emperors"));
-		List<ValueMap> actualMaps = valueMap.getList("emperors");
+		List<ValueMap> actualMaps = valueMap.getValueMaps("emperors");
 		assertTrue(Arrays.deepEquals(nervaAntonineDynasty, actualMaps.toArray()));
 		
 	}
 	
 	@Test
-	void testMergeWithLotsOfSmallValueMaps() {
-		ValueMap starTrek1 = new ValueMap(); 
-		starTrek1.put("title", "Star Trek");
+	void testMergeWithExistingList() {
+		valueMap.put("source", "Wikipedia");
+		valueMap.put("title", "Roman Emperors");
 		
-		ValueMap starTrek2 = new ValueMap();
-		starTrek2.put("producer", "Gene Roddenberry");
+		valueMap.add("emperors", testList[0]);
+		valueMap.add("emperors", testList[1]);
+		valueMap.add("emperors", testList[2]);
 		
-		ValueMap character1FamilyName = new ValueMap();
-		character1FamilyName.put("familyName", "Kirk");
+		ValueMap nervaAntonineDynastyListMap = new ValueMap();
+		nervaAntonineDynastyListMap.add("emperors", testList[3]);
+		nervaAntonineDynastyListMap.add("emperors", testList[4]);
+		nervaAntonineDynastyListMap.add("emperors", testList[5]);
+		nervaAntonineDynastyListMap.put("comment", "Added Nerva-Antonine Dynasty");
 		
-		ValueMap character1Name = new ValueMap(); 
-		character1Name.put("name", "James");
-		
-		ValueMap character2FamilyName = new ValueMap();
-		character2FamilyName.put("familyName", "McCoy");
-		
-		ValueMap character2Name = new ValueMap(); 
-		character2Name.put("name", "Leonard");
-		
-		ValueMap character3Name = new ValueMap();
-		character3Name.put("name", "Spock");
-		
-		ValueMap character1 = new ValueMap();
-		character1.merge(character1FamilyName);
-		character1.merge(character1Name);
-		
-		ValueMap character2 = new ValueMap();
-		character2.merge(character2FamilyName);
-		character2.merge(character2Name);
-		
-		ValueMap character3 = new ValueMap();
-		character3.merge(character3Name);
-		
-		
-		ValueMap characters = new ValueMap(); 
-		characters.put("1", character1);
-		characters.put("2", character2);
-		characters.put("3", character3);
-		
-		ValueMap characterList = new ValueMap();
-		characterList.put("characters", characters);
-		
-		
-		// Now merge- TODO return merged value map so these can be chained.
-		
-		valueMap.merge(starTrek1); 
-		valueMap.merge(starTrek2);
-		valueMap.merge(characterList);
-		
-		System.out.println("testMergeWithLotsOfSmallValueMaps\n" + valueMap);
-		
-		assertTrue(valueMap.containsField("producer"));
-		assertEquals("Gene Roddenberry", (String) valueMap.getValue("producer"));
-		
-		assertEquals("Leonard", valueMap.getValueMap("characters").getValueMap("2").getValue("name"));
-		
+		valueMap.merge(nervaAntonineDynastyListMap);
+		assertTrue(valueMap.containsField("emperors"));
+		List<ValueMap> actualMaps = valueMap.getValueMaps("emperors");
+		assertTrue(Arrays.deepEquals(testList, actualMaps.toArray()));
 		
 		
 	}
+	
+
 
 	@Test
-	void testIsList() {
+	void testOrdinalValueMap() {
 		ValueMap[] expectedMaps = new ValueMap[3];
 	    Arrays.fill(expectedMaps, new ValueMap());
 		
@@ -318,8 +305,8 @@ class ValueMapTest {
 		}
 		valueMap.put("title", "Roman Emperors");
 		
-		assertTrue(valueMap.isList("emperors"));
-		assertFalse(valueMap.isList("title"));
+		assertTrue(valueMap.isValueMap("emperors"));
+		assertFalse(valueMap.isValueMap("title"));
 		
 		
 	}
@@ -336,5 +323,7 @@ class ValueMapTest {
 		
 		
 	}
+	
+
 
 }
