@@ -1,28 +1,14 @@
 package templato.valuemap;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Maps values to field names. 
- * 
- * 
- * 
+ *  
  * @author Andrew Doble
  *
  */
-
-/**
- * @author T440s
- *
- */
-/**
- * @author T440s
- *
- */
 public class ValueMap {
-	
-
 	
 	Map<String, Object> valueMap = new HashMap<>();
 	
@@ -43,10 +29,10 @@ public class ValueMap {
 	 * * Strictly speaking this is the element that is mapped to 2 in the "works" list. 
 	 *
 	 * If the fieldname has not been specified for the value map or the value is of type ValueMap then 
-	 * and empty Optional is returned. 
+	 * an empty Optional is returned. 
 	 * 
 	 * @param fieldName The field name, either simple or compound. 
-	 * @return An Optional representing the value. 
+	 * @return An Optional containing the value. 
 	 */
 	public Optional<Object> getValue(String fieldName) {
 		
@@ -57,7 +43,27 @@ public class ValueMap {
 	}
 	
 	
-	
+	/**  
+	 * Returns an optional value map that is  mapped to the specified field name. 
+	 * 
+	 * The field name  can be a simple field name, e.g.
+	 *   <code>
+	 *   assertEquals("Plato", (String) valueMap.getValue("author");
+	 *   </code>
+	 *   
+	 * or can be a compound field name such as:
+	 *   <code>
+	 *   assertEquals("Plato", (String) getValue("works.2.author");
+	 *   </code> 
+	 * i.e. the author of the second element* in "works" list. 
+	 * * Strictly speaking this is the element that is mapped to 2 in the "works" list. 
+	 *
+	 * If the fieldname has not been specified for the value map or the value is <b>not of</b>  
+	 * type ValueMap then an empty Optional is returned. 
+	 * 
+	 * @param fieldName The field name, either simple or compound. 
+	 * @return An Optional containing the value map. 
+	 */
 	public Optional<ValueMap> getValueMap(String fieldName) {
 		Object value = valueMap.get(fieldName);
 		if (value == null || !(value instanceof ValueMap)) return Optional.empty();
@@ -66,7 +72,7 @@ public class ValueMap {
 		
 	}
 
-	/** TODO 
+	/** 
 	 * Returns a list of ValueMaps that are subordinate to the specified fieldname.
 	 * For instance:
 	 * <code>
@@ -78,7 +84,7 @@ public class ValueMap {
 	 *   emperors.put("emporers", vm);
 	 *   emperors.getValueMaps("emperors");
 	 * </code> 
-	 * will return the value maps emperors[0],  emperors[1] and emperors[2].
+	 * will return the value maps emperors[0], emperors[1] and emperors[2].
 	 *    
 	 * As such the method can be viewed as returning a list of the value maps that have been added to 
 	 * a field. 
@@ -128,8 +134,7 @@ public class ValueMap {
 		} else {
 			ValueMap subValueMap = new ValueMap();
 			this.put(fieldName.substring(0, index), subValueMap);
-			String subFieldName = fieldName.substring(index + 1);  //TODO merge into following line
-			subValueMap.put(subFieldName, dataObject);
+			subValueMap.put(fieldName.substring(index + 1), dataObject);
 		}
 		
 		return dataObject;
@@ -180,12 +185,6 @@ public class ValueMap {
 	 */
 	public void merge(ValueMap other) {
 		
-//		Map<String, Object> noValueMaps =  other.valueMap.entrySet().stream()
-//			                                 	.filter(e -> !(e.getValue() instanceof ValueMap))
-//				                                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-//		valueMap.putAll(noValueMaps);
-		
-		
 		for (String fieldName: other.fieldNames()) {
 			
 			// Overwrite or add the entries that do not have a value map
@@ -198,12 +197,8 @@ public class ValueMap {
 			for (String ordinalFieldName : ordinalValueMap.fieldNames()) {
 				ordinalValueMap.getValueMap(ordinalFieldName).ifPresent(vm -> this.add(fieldName, vm));
 			}
-			
-			
 		}
-		
-		
-		
+			
 	}
 	
 	/**
@@ -222,7 +217,6 @@ public class ValueMap {
 		return valueMap.keySet();
 	}
 	
-
 
 	/**
 	 * Test if this value map is empty.
@@ -251,7 +245,6 @@ public class ValueMap {
 	/**
 	 * Returns a non-empty string representation of this ValueMaP suitable for debugging.
 	 */
-	@SuppressWarnings("unchecked")
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 
