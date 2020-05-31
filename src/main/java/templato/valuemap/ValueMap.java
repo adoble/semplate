@@ -120,34 +120,22 @@ public class ValueMap {
 	 * @return
 	 */
 	public Object put(String fieldName, Object dataObject) {
-
-		String[] names = fieldName.split(".");  
 		
-		if (names.length == 0) {
-			names = new String[] {fieldName};
+		int index = fieldName.indexOf('.');
+		
+		if (index == -1) {
+			valueMap.put(fieldName, dataObject);
+		} else {
+			ValueMap subValueMap = new ValueMap();
+			this.put(fieldName.substring(0, index), subValueMap);
+			String subFieldName = fieldName.substring(index + 1);  //TODO merge into following line
+			subValueMap.put(subFieldName, dataObject);
 		}
-
-		ValueMap currentValueMap = this;
-
-		for (int i = 0; i < names.length; i++) {
-			if (i == names.length - 1) {
-				// Last part
-				valueMap.put(names[i], dataObject);
-			} else {
-				currentValueMap = getValueMap(names[i]).orElse(ValueMap.empty());
-				if (currentValueMap.isEmpty()) {
-					put(names[i], new ValueMap());
-				}
-				else {
-					currentValueMap.add(names[i], new ValueMap());
-				}
-			}
-
-		}
+		
 		return dataObject;
 	}
 	
-	
+		
 
 	/**
 	 * Add a value map to a field by automatically giving an ordinal number as field name.
@@ -261,35 +249,19 @@ public class ValueMap {
 	}
 	
 	/**
-	 * Returns a non-empty string representation of this ValueMao suitable for debugging.
+	 * Returns a non-empty string representation of this ValueMaP suitable for debugging.
 	 */
 	@SuppressWarnings("unchecked")
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 
 		for (Map.Entry<String, Object> entry: valueMap.entrySet()) {
-			if (entry.getValue() instanceof List<?>) {
-				List<ValueMap> listValueMaps = (List<ValueMap>) entry.getValue();
-				sb.append(entry.getKey()).append('=');
-				sb.append('[');
-				for (ValueMap v: listValueMaps) {
-					//sb.append(v.toString()).append(',').append('\n'); 
-					sb.append(v.toString()).append('\n'); 
-					sb.append(" ".repeat(entry.getKey().length() + 2));  // Indentation
-				}
-				sb.append(']').append('\n');
-			} else {
-				// Object value
 				sb.append(entry.getKey()).append('=').append(entry.getValue()).append(',');
-			}
-
 		}
-
 
 		return "(" + sb.toString().replaceAll(",$", "") + ")"; // Add parenthesis and remove any trailing commas
 
 	}
-	
 	
 
 }

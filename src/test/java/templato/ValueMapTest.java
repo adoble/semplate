@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,6 +64,16 @@ class ValueMapTest {
 		assertEquals("Augustus", testList[0].getValue("familyName").orElse(""));
 		assertEquals("Gaius", testList[0].getValue("name").orElse(""));
 		assertEquals(LocalDate.of(-63, Month.SEPTEMBER, 23), testList[0].getValue("birthDate").orElse(LocalDate.now()));
+		
+		valueMap.put("empty", null);
+		assertEquals(Optional.empty(), valueMap.getValue("empty"));
+		
+		ValueMap consulVM = new ValueMap();
+		consulVM.put("name", "Lucius Junius Brutus");
+		valueMap.put("consul", consulVM);
+		assertEquals(Optional.empty(), valueMap.getValue("consul"));
+		
+		
 	
 	}
 	
@@ -76,6 +87,32 @@ class ValueMapTest {
 		assertTrue(valueMap.isValueMap("emperor"));
 		
 		assertEquals(testList[0],valueMap.getValueMap("emperor").orElse(ValueMap.empty())); 
+		
+		assertEquals(Optional.empty(), valueMap.getValue("emperor"));
+		
+		
+		valueMap.put("null_value", null);
+		assertEquals(Optional.empty(), valueMap.getValueMap("null_value"));
+		
+		assertEquals(Optional.empty(), valueMap.getValueMap("title"));
+		
+		
+	}
+	
+	@Test
+	void testDotNotation() {
+		valueMap.put("emperors.0.name", "Marcus");
+		
+		assertTrue(valueMap.containsField("emperors"));
+		ValueMap emperorsVM = valueMap.getValueMap("emperors").orElse(ValueMap.empty());
+		assertFalse(emperorsVM.isEmpty());
+		
+		assertTrue(emperorsVM.containsField("0"));
+		ValueMap emperorVM = emperorsVM.getValueMap("0").orElse(ValueMap.empty());
+		assertFalse(emperorsVM.isEmpty());
+		
+		assertTrue(emperorVM.containsField("name"));
+		assertEquals("Marcus", emperorVM.getValue("name").orElse(""));
 		
 		
 	}
@@ -223,13 +260,9 @@ class ValueMapTest {
 		// Now add the new dynasty to the old value map
 		valueMap.merge(nervaAntonineDynastyListMap);
 		
-        System.out.println(valueMap);
-        
-		actualMaps = valueMap.getValueMaps("emperors");
+        actualMaps = valueMap.getValueMaps("emperors");
 		assertTrue(Arrays.deepEquals(testList, actualMaps.toArray()));
-		
-		System.out.println(actualMaps);
-		
+	
 	}
 	
 	@Test
@@ -321,6 +354,38 @@ class ValueMapTest {
 		assertTrue(valueMap.containsField("birthDate"));
 		assertFalse(valueMap.containsField("somethingElse"));
 		
+		
+	}
+	
+	@Test
+	void testEmpty() {
+		ValueMap vm = new ValueMap();
+		assertTrue(vm.isEmpty());
+		
+		vm = ValueMap.empty();
+		assertTrue(vm.isEmpty());
+		
+		vm.put("some_fieldname", "some_value");
+		assertFalse(vm.isEmpty());
+		
+		
+	}
+	
+	@Test
+	void testToString() {
+		String expected = "(comment=Not complete,"
+				+ "emperors="
+				+ "(0=(familyName=Augustus,name=Gaius,birthDate=-0063-09-23),"
+				+ "1=(familyName=Tiberius,name=Julius,birthDate=-0042-11-16)),"
+				+ "title=Roman Emperors)";
+		
+		valueMap.put("title", "Roman Emperors");
+		valueMap.put("comment", "Not complete");
+		for (int i = 0; i < 2; i++) {
+		  valueMap.add("emperors", testList[i]);
+		}
+		
+		assertEquals(expected, valueMap.toString());
 		
 	}
 	
