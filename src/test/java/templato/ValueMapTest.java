@@ -29,30 +29,30 @@ class ValueMapTest {
 	    }
 	    
 	    // Julio-Claudian dynasty
-	    testList[0].put("name", "Gaius");
-		testList[0].put("familyName", "Augustus");
+	    testList[0].put("praenomen", "Gaius");
+		testList[0].put("nomen", "Augustus");
 		testList[0].put("birthDate", LocalDate.of(-63, Month.SEPTEMBER, 23));
 		
-		testList[1].put("name", "Julius");
-		testList[1].put("familyName", "Tiberius");
+		testList[1].put("praenomen", "Julius");
+		testList[1].put("nomen", "Tiberius");
 		testList[1].put("birthDate", LocalDate.of(-42, Month.NOVEMBER, 16));
 	    
-		testList[2].put("name", "Gaius");
-		testList[2].put("familyName", "Caligula");
+		testList[2].put("praenomen", "Gaius");
+		testList[2].put("nomen", "Caligula");
 		testList[2].put("birthDate", LocalDate.of(12, Month.AUGUST, 31));
 	    
 	    
 		// Nerva–Antonine dynasty
-		testList[3].put("name", "Marcus");
-		testList[3].put("familyName", "Nerva");
+		testList[3].put("praenomen", "Marcus");
+		testList[3].put("nomen", "Nerva");
 		testList[3].put("birthDate", LocalDate.of(30, Month.NOVEMBER, 8));
 		
-		testList[4].put("name", "Marcus");
-		testList[4].put("familyName", "Aurelius");
+		testList[4].put("praenomen", "Marcus");
+		testList[4].put("nomen", "Aurelius");
 		testList[4].put("birthDate", LocalDate.of(121, Month.APRIL, 26));
 		
-		testList[5].put("name", "Lucius");
-		testList[5].put("familyName", "Commodus");
+		testList[5].put("praenomen", "Lucius");
+		testList[5].put("nomen", "Commodus");
 		testList[5].put("birthDate", LocalDate.of(161, Month.AUGUST, 31));
 		
 	}
@@ -61,15 +61,17 @@ class ValueMapTest {
 	@Test
 	void testValues() {
 		
-		assertEquals("Augustus", testList[0].getValue("familyName").orElse(""));
-		assertEquals("Gaius", testList[0].getValue("name").orElse(""));
+		assertEquals("Augustus", testList[0].getValue("nomen").orElse(""));
+		assertEquals("Gaius", testList[0].getValue("praenomen").orElse(""));
 		assertEquals(LocalDate.of(-63, Month.SEPTEMBER, 23), testList[0].getValue("birthDate").orElse(LocalDate.now()));
 		
 		valueMap.put("empty", null);
 		assertEquals(Optional.empty(), valueMap.getValue("empty"));
 		
 		ValueMap consulVM = new ValueMap();
-		consulVM.put("name", "Lucius Junius Brutus");
+		consulVM.put("praenomen", "Lucius");
+		consulVM.put("nomen", "Junius");
+		consulVM.put("cognomen", "Brutus");
 		valueMap.put("consul", consulVM);
 		assertEquals(Optional.empty(), valueMap.getValue("consul"));
 		
@@ -101,7 +103,7 @@ class ValueMapTest {
 	
 	@Test
 	void testDotNotation() {
-		valueMap.put("emperors.0.name", "Marcus");
+		valueMap.put("emperors.0.praenomen", "Marcus");
 		
 		assertTrue(valueMap.containsField("emperors"));
 		ValueMap emperorsVM = valueMap.getValueMap("emperors").orElse(ValueMap.empty());
@@ -111,8 +113,8 @@ class ValueMapTest {
 		ValueMap emperorVM = emperorsVM.getValueMap("0").orElse(ValueMap.empty());
 		assertFalse(emperorsVM.isEmpty());
 		
-		assertTrue(emperorVM.containsField("name"));
-		assertEquals("Marcus", emperorVM.getValue("name").orElse(""));
+		assertTrue(emperorVM.containsField("praenomen"));
+		assertEquals("Marcus", emperorVM.getValue("praenomen").orElse(""));
 		
 		
 	}
@@ -122,17 +124,20 @@ class ValueMapTest {
 		ValueMap[] expectedMaps = new ValueMap[3];
 	    Arrays.fill(expectedMaps, new ValueMap());
 		
-		expectedMaps[0].put("name", "Gaius Caesar");
-		expectedMaps[0].put("familyName", "Aurelius");
+		expectedMaps[0].put("praenomen", "Marcus");
+		expectedMaps[0].put("nomen", "Aurelius");
+		expectedMaps[0].put("cognomen", "Antoninus Augustus");
 		expectedMaps[0].put("birthDate", LocalDate.of(121, Month.APRIL, 26));
 		
 		
-		expectedMaps[1].put("name", "Marcus");
-		expectedMaps[1].put("familyName", "Aurelius");  // Not historically correct, but it's only a test
-		expectedMaps[1].put("birthDate", LocalDate.of(-100, Month.JULY, 12));
+		expectedMaps[1].put("praenomen", "Lucius");
+		expectedMaps[1].put("nomen", "Septimius");  
+		expectedMaps[1].put("cognomen", "Septimius");
+		expectedMaps[1].put("birthDate", LocalDate.of(189, Month.MARCH, 7));
 		
-		expectedMaps[2].put("name", "Nero Claudius ");
-		expectedMaps[2].put("familyName", "Caesar");  //Ditto
+		expectedMaps[2].put("praenomen", "Nero ");
+		expectedMaps[2].put("nom", "Claudius");  
+		expectedMaps[2].put("cognom", "Augustus Germanicus");
 		expectedMaps[2].put("birthDate", LocalDate.of(37, Month.DECEMBER, 15));
 		
 		
@@ -164,18 +169,21 @@ class ValueMapTest {
 	void testListsUsingValueMaps () {
 		ValueMap[] expectedMaps = new ValueMap[3];
 	    Arrays.fill(expectedMaps, new ValueMap());
-		
-		expectedMaps[0].put("name", "Gaius Caesar");
-		expectedMaps[0].put("familyName", "Aurelius");
+	    
+		expectedMaps[0].put("praenomen", "Marcus");
+		expectedMaps[0].put("nomen", "Aurelius");
+		expectedMaps[0].put("cognomen", "Antoninus Augustus");
 		expectedMaps[0].put("birthDate", LocalDate.of(121, Month.APRIL, 26));
 		
 		
-		expectedMaps[1].put("name", "Marcus");
-		expectedMaps[1].put("familyName", "Aurelius");  // Not historically correct, but it's only a test
-		expectedMaps[1].put("birthDate", LocalDate.of(-100, Month.JULY, 12));
+		expectedMaps[1].put("praenomen", "Titus");
+		expectedMaps[1].put("nomen", "Flavius");
+		expectedMaps[1].put("cognomen", "Vespasianus");
+		expectedMaps[1].put("birthDate", LocalDate.of(9, Month.NOVEMBER, 17));
 		
-		expectedMaps[2].put("name", "Nero Claudius ");
-		expectedMaps[2].put("familyName", "Caesar");  //Ditto
+		expectedMaps[2].put("praenomen", "Nero");
+		expectedMaps[2].put("nomen", "Nero");
+		expectedMaps[2].put("cognomen", "Caesar");  //Ditto
 		expectedMaps[2].put("birthDate", LocalDate.of(37, Month.DECEMBER, 15));
 		
 	
@@ -321,16 +329,16 @@ class ValueMapTest {
 		ValueMap[] expectedMaps = new ValueMap[3];
 	    Arrays.fill(expectedMaps, new ValueMap());
 		
-		expectedMaps[0].put("name", "Gaius Caesar");
-		expectedMaps[0].put("familyName", "Aurelius");
+		expectedMaps[0].put("praenomen", "Gaius");
+		expectedMaps[0].put("nomen", "Aurelius");
 		expectedMaps[0].put("birthDate", LocalDate.of(121, Month.APRIL, 26));
 		
-		expectedMaps[1].put("name", "Marcus");
-		expectedMaps[1].put("familyName", "Aurelius");  // Not historically correct, but it's only a test
+		expectedMaps[1].put("praenomen", "Marcus");
+		expectedMaps[1].put("nomen", "Aurelius");  // Not historically correct, but it's only a test
 		expectedMaps[1].put("birthDate", LocalDate.of(-100, Month.JULY, 12));
 		
-		expectedMaps[2].put("name", "Nero Claudius ");
-		expectedMaps[2].put("familyName", "Caesar");  //Ditto
+		expectedMaps[2].put("praenomen", "Nero");
+		expectedMaps[2].put("nomen", "Claudius ");  //Ditto
 		expectedMaps[2].put("birthDate", LocalDate.of(37, Month.DECEMBER, 15));
 		
 		for (ValueMap vm: expectedMaps) {
@@ -346,11 +354,11 @@ class ValueMapTest {
 
 	@Test
 	void testContainsField() {
-		valueMap.put("name", "Marcus");
-		valueMap.put("familyName", "Aurelius");
+		valueMap.put("praenomen", "Marcus");
+		valueMap.put("nomen", "Aurelius");
 		valueMap.put("birthDate", LocalDate.of(121, Month.APRIL, 26));
 		
-		assertTrue(valueMap.containsField("name"));
+		assertTrue(valueMap.containsField("nomen"));
 		assertTrue(valueMap.containsField("birthDate"));
 		assertFalse(valueMap.containsField("somethingElse"));
 		
@@ -374,9 +382,10 @@ class ValueMapTest {
 	@Test
 	void testToString() {
 		String expected = "(comment=Not complete,"
-				+ "emperors="
-				+ "(0=(familyName=Augustus,name=Gaius,birthDate=-0063-09-23),"
-				+ "1=(familyName=Tiberius,name=Julius,birthDate=-0042-11-16)),"
+				+ "emperors=("
+				+ "0=(praenomen=Gaius,nomen=Augustus,birthDate=-0063-09-23),"
+				+ "1=(praenomen=Julius,nomen=Tiberius,birthDate=-0042-11-16)"
+				+ "),"
 				+ "title=Roman Emperors)";
 		
 		valueMap.put("title", "Roman Emperors");
