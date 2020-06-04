@@ -335,30 +335,30 @@ public class Template  {
 		while (fieldMatcher.find()) {
 			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 			String fieldNameParts[] = fieldName.split("[.]");  
-			if (fieldNameParts.length > 1 && valueMap.isList(fieldNameParts[0])) { // The field name has the form name.name and the value is a list
-				entries = valueMap.getList(fieldNameParts[0]); // Looking at a list so find out how many entries
+			if (fieldNameParts.length > 1 && valueMap.isValueMap(fieldNameParts[0])) { // The field name has the form name.name and the value is a value map
+				entries = valueMap.getValueMaps(fieldNameParts[0]); // Looking at a list so find out how many entries
 				// Now replace  each list field in the line with an indicator showing that this is a list. 
 				// For example:
 				//    {{references.id}} 
 				// is replaced with:
-				//   {{references.id[]}} 
+				//   {{references.[].id}} 
 				// This makes it easier to substitute the index value later when this line is expanded. 
 				substitutedLine = substitutedLine.replace("{{" + fieldNameParts[0] +  "." + fieldNameParts[1] + "}}", 
-						"{{" +  fieldNameParts[0] + "." + fieldNameParts[1] + "[]}}");
+						"{{" +  fieldNameParts[0] + ".[]." + fieldNameParts[1] + "}}");
 			} 
 		}
 		
 		if (entries != null) {
 			// Now expand the substitutedLine. For instance, if the Iterable field references has three entries then:
-			//   * {{references.id[]}} -> {{references.name[]}}
+			//   * {{references.[].id}} -> {{references.[].name}}
 			// is transformed to:
-			//   * {{references.id[0]}} -> {{references.name[0]}}
-			//   * {{references.id[1]}} -> {{references.name[1]}}
-			//   * {{references.id[2]}} -> {{references.name[2]}}
+			//   * {{references.0.id}} -> {{references.0.name}}
+			//   * {{references.1.id}} -> {{references.1.name}}
+			//   * {{references.2.id}} -> {{references.2.name}}
 			List<String> expandedLines = new ArrayList<String>();
 			String expandedLine;
 			for (int i = 0; i < entries.size(); i++) {
-				expandedLine = substitutedLine.replace("[]}}", "[" + i + "]}}");
+				expandedLine = substitutedLine.replace(".[].", "." + i + ".");
 				expandedLines.add(expandedLine);
 			}
 			return expandedLines.stream();
@@ -442,7 +442,7 @@ public class Template  {
 			
 	private String getFieldValueAsString(String fieldName, ValueMap fieldValueMap) {
 		String valueString;
-		Object valueObject; 
+		Optional<Object> valueObject; 
 		String listFieldName ;
 		String subFieldName;
 		int index;
@@ -450,8 +450,7 @@ public class Template  {
 		if (!fieldName.contains(".")) {
 			if (fieldValueMap.containsField(fieldName)) {
 				valueObject =  fieldValueMap.getValue(fieldName);
-				if (valueObject != null) valueString = valueObject.toString();
-				else valueString = "ERROR";
+				valueString = valueObject.orElse("ERROR").toString();
 			} else {
 				valueString ="UNKNOWN";
 			} 
@@ -469,7 +468,7 @@ public class Template  {
 
 						
 			// Get the List
-			List<ValueMap> list = fieldValueMap.getList(listFieldName);
+			List<ValueMap> list = fieldValueMap.getValueMaps(listFieldName);
 			//Now get the value map for the list entry 
 			ValueMap listEntryMap = list.get(index);
 			
