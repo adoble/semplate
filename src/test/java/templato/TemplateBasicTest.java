@@ -100,8 +100,6 @@ class TemplateBasicTest {
 	@Test 
 	void testGenerateSimple() {
 		
-		//fail("Test not implemented");
-		
 		Template template = new Template();
 		assumeNotNull(template);
 		
