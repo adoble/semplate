@@ -78,6 +78,7 @@ class ValueMapTest {
 		
 	
 	}
+
 	
 	@Test
 	void testValueMaps() {
@@ -102,7 +103,7 @@ class ValueMapTest {
 	}
 	
 	@Test
-	void testDotNotation() {
+	void testDotNotationPut() {
 		valueMap.put("emperors.0.praenomen", "Marcus");
 		
 		assertTrue(valueMap.containsField("emperors"));
@@ -115,6 +116,61 @@ class ValueMapTest {
 		
 		assertTrue(emperorVM.containsField("praenomen"));
 		assertEquals("Marcus", emperorVM.getValue("praenomen").orElse(""));
+		
+		
+	}
+	
+	@Test
+	void testDotNotationGetValue1() {
+		valueMap.put("emperors.0.praenomen", "Marcus");
+		
+		Optional<Object> value = valueMap.getValue("emperors.0.praenomen");
+		assertNotNull(value);
+		assertTrue(value.isPresent());
+		assertEquals("Marcus", value.orElse("").toString());
+		
+	}
+	
+	@Test
+	void testDotNotationGetValue2() {
+		ValueMap emperors = new ValueMap();
+		emperors.add("emperors", testList[0]);
+		emperors.add("emperors", testList[1]);
+		emperors.add("emperors", testList[2]);
+		
+		
+		Optional<Object> value = emperors.getValue("emperors.1.praenomen");
+		assertNotNull(value);
+		assertTrue(value.isPresent());
+		assertEquals("Julius", value.orElse("").toString());
+	}
+	
+	@Test
+	void testDotNotationGetValueMap() {
+		ValueMap emperors = new ValueMap();
+		emperors.add("emperors", testList[0]);
+		emperors.add("emperors", testList[1]);
+		emperors.add("emperors", testList[2]);
+		
+		
+		Optional<ValueMap> vm = emperors.getValueMap("emperors.1");
+		assertNotNull(vm);
+		assertFalse(vm.isEmpty());
+		assertEquals(Optional.of("Julius"), vm.flatMap(v -> v.getValue("praenomen")));
+	}
+	
+	@Test 
+	void testDotNotationError() {
+		valueMap.put("emperors.2.praenomen", "Marcus");
+		
+		Optional<Object> value1 = valueMap.getValue("xxx.0.praenomen");  // Does not exist!
+		assertEquals(Optional.empty(), value1);
+		
+		Optional<Object> value2 = valueMap.getValue("emperors.0.praenomen");  // Does not exist!
+		assertEquals(Optional.empty(), value2);
+		
+		Optional<Object> value3 = valueMap.getValue("emperors.2.xxx");  // Does not exist!
+		assertEquals(Optional.empty(), value3);
 		
 		
 	}

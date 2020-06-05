@@ -36,28 +36,42 @@ public class ValueMap {
 	 */
 	public Optional<Object> getValue(String fieldName) {
 		
-		Object value =  valueMap.get(fieldName);
-		if (value == null || value instanceof ValueMap) return Optional.empty();
-		else return Optional.of(value);
+		// Is the fieldname a compound
+		int index = fieldName.indexOf('.');
+		
+		if (index == -1) { 
+			// Not a compound
+			Object value = valueMap.get(fieldName);
+			if (value != null) {
+				if (value instanceof ValueMap) return Optional.empty();
+				else return Optional.of(value);
+			} else return Optional.empty();
+		} else {
+			// Is a compound
+	
+			Optional<ValueMap> subValueMapOptional = this.getValueMap(fieldName.substring(0, index));
+			Optional<Object> returnValue = subValueMapOptional.flatMap(svm -> svm.getValue(fieldName.substring(index +1)));
+			return returnValue;
+				
+		}
 	
 	}
 	
 	
 	/**  
-	 * Returns an optional value map that is  mapped to the specified field name. 
+	 * Returns an optional value map that is mapped to the specified field name. 
 	 * 
 	 * The field name  can be a simple field name, e.g.
 	 *   <code>
-	 *   assertEquals("Plato", (String) valueMap.getValue("author");
+	 *   assertEquals(referenceValueMap, (String) valueMap.getValue("reference");
 	 *   </code>
 	 *   
 	 * or can be a compound field name such as:
 	 *   <code>
-	 *   assertEquals("Plato", (String) getValue("works.2.author");
+	 *   assertEquals(referenceValueMap, (String) getValue("works.2.reference");
 	 *   </code> 
-	 * i.e. the author of the second element* in "works" list. 
-	 * * Strictly speaking this is the element that is mapped to 2 in the "works" list. 
-	 *
+	 * i.e. the value map of the second element* in "works" list. 
+	 * 
 	 * If the fieldname has not been specified for the value map or the value is <b>not of</b>  
 	 * type ValueMap then an empty Optional is returned. 
 	 * 
@@ -65,10 +79,24 @@ public class ValueMap {
 	 * @return An Optional containing the value map. 
 	 */
 	public Optional<ValueMap> getValueMap(String fieldName) {
-		Object value = valueMap.get(fieldName);
-		if (value == null || !(value instanceof ValueMap)) return Optional.empty();
-		else return Optional.of((ValueMap)value);
 		
+		// Is the fieldname a compound
+		int index = fieldName.indexOf('.');
+		
+		if (index == -1) { 
+			// Not a compound
+			Object value = valueMap.get(fieldName);
+			if (value != null) {
+				if (!(value instanceof ValueMap)) return Optional.empty();
+				else return Optional.of((ValueMap) value);
+			} else return Optional.empty();
+		} else {
+			// Is a compound
+			Optional<ValueMap> subValueMapOptional = this.getValueMap(fieldName.substring(0, index));
+			Optional<ValueMap> returnValue = subValueMapOptional.flatMap(svm -> svm.getValueMap(fieldName.substring(index +1)));
+			return returnValue;
+				
+		}
 		
 	}
 
