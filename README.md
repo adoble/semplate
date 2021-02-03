@@ -1,6 +1,6 @@
 #Description
 
-**Templato** is a java library to create and maintain markup documents by:
+**Semplate** is a java library to create and maintain markup documents by:
 * adding  semantic information
 * using user defined templates
 
