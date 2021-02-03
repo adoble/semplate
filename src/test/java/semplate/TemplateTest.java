@@ -1,4 +1,4 @@
-package templato;
+package semplate;
 
 import static org.junit.Assume.assumeNotNull;
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,6 +16,8 @@ import org.junit.jupiter.api.*;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+
+import semplate.Template;
 
 class TemplateTest {
 	final static String templateFileName = "simple_template.md";

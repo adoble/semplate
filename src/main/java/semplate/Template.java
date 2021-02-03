@@ -1,7 +1,7 @@
 /**
  * TODO
  */
-package templato;
+package semplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,8 +1,8 @@
-package templato;
+package semplate;
 
 import java.net.URL;
 
-import templato.annotations.*;
+import semplate.annotations.*;
 
 @Templatable
 public class Work {
