@@ -8,9 +8,7 @@ Plato
 //${work.author="Plato"}
 
 Translation by
-Benjamin
-//${work.translator.firstname}
-Jowett
+Benjamin Jowett
 //${work.translator.name}
 
 // An alternative is: -->

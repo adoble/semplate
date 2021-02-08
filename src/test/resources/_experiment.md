@@ -8,9 +8,7 @@ Plato
 <!--${work.author="Plato"}-->   <!-- No delimiter implies to the white space -->
 
 Translation by
-Benjamin
-<!--${work.translator.firstname}-->
-Jowett
+Benjamin Jowett
 <!--${work.translator.name}-->
 
 <!-- An alternative is: -->
