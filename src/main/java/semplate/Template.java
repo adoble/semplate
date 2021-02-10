@@ -475,7 +475,7 @@ public class Template  {
 			// Now get the list entry attribute 
 			valueObject = listEntryMap.getValue(subFieldName);
 			if (valueObject != null) {
-				valueString = valueObject.toString();
+				valueString = ((Optional<Object>)valueObject).get().toString();
 			} else {
 				valueString = "UNKNOWN";
 			}
