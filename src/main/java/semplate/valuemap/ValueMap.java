@@ -1,4 +1,4 @@
-package templato.valuemap;
+package semplate.valuemap;
 
 import java.util.*;
 

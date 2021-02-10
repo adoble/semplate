@@ -1,7 +1,7 @@
 /**
  * TODO
  */
-package templato;
+package semplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,13 +15,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
+import semplate.annotations.Templatable;
+import semplate.annotations.TemplateField;
+import semplate.annotations.TemplateList;
+import semplate.valuemap.ValueMap;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-
-import templato.annotations.Templatable;
-import templato.annotations.TemplateField;
-import templato.annotations.TemplateList;
-import templato.valuemap.ValueMap;
 
 /**
  * TODO
@@ -462,8 +462,8 @@ public class Template  {
 			Scanner scanner = new Scanner(fieldName);
 			scanner.useDelimiter("\\.|\\[|\\]");
 			listFieldName = scanner.next();
-			subFieldName = scanner.next();
 			index = Integer.parseInt(scanner.next());
+			subFieldName = scanner.next();
 			scanner.close();
 
 						

@@ -1,7 +1,7 @@
-package templato;
+package semplate;
 
 
-import static org.junit.Assume.*;
+import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -20,6 +20,8 @@ import org.junit.jupiter.api.*;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+
+import semplate.Template;
 
 public class TemplateReadTest {
 	final static String templateFileName = "list_template.md";
@@ -61,7 +63,7 @@ public class TemplateReadTest {
 		Works works = null;
 		
 		Template template = new Template();
-		assumeNotNull(template);
+		assumeTrue(template != null);
 		
 		template.config(templateFile);
 		

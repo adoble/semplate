@@ -1,8 +1,8 @@
-package templato;
+package semplate;
 
 
-import templato.annotations.Templatable;
-import templato.annotations.TemplateField;
+import semplate.annotations.Templatable;
+import semplate.annotations.TemplateField;
 
 @Templatable
 public class References {

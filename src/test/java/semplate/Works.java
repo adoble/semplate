@@ -1,8 +1,8 @@
-package templato;
+package semplate;
 
 import java.util.*;
 
-import templato.annotations.*;
+import semplate.annotations.*;
 
 
 @Templatable

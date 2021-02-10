@@ -1,4 +1,4 @@
-package templato;
+package semplate;
 
 import java.util.*;
 

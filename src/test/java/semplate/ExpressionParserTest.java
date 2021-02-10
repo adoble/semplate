@@ -1,10 +1,12 @@
-package templato;
+package semplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
+
+import semplate.ExpressionParser;
 
 class ExpressionParserTest {
 

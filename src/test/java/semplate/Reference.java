@@ -1,9 +1,9 @@
-package templato;
+package semplate;
 
 import java.net.URL;
 
-import templato.annotations.Templatable;
-import templato.annotations.TemplateField;
+import semplate.annotations.Templatable;
+import semplate.annotations.TemplateField;
 
 @Templatable
 public class Reference {

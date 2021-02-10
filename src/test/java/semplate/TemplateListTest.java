@@ -1,7 +1,7 @@
-package templato;
+package semplate;
 
-import static org.junit.Assume.assumeNotNull;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+
+import semplate.Template;
 
 class TemplateListTest {
 	
@@ -49,7 +51,8 @@ class TemplateListTest {
 //		
 //		assertTrue(Files.exists(templateFile));
 	}
-
+	
+	
 	@Test
 	void testGenerateList() {
 		
@@ -59,7 +62,7 @@ class TemplateListTest {
 		
 		assertTrue(Files.exists(templateFile));
 		Template template = new Template();
-		assumeNotNull(template);
+		assumeTrue(template != null);
 		
 		try {
 			template.config(templateFile);
@@ -129,7 +132,7 @@ class TemplateListTest {
 		
 		assertTrue(Files.exists(arrayTemplateFile));
 		Template template = new Template();
-		assumeNotNull(template);
+		assumeTrue(template != null);
 		
 		try {
 			template.config(arrayTemplateFile);

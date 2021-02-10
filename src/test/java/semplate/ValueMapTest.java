@@ -1,4 +1,4 @@
-package templato;
+package semplate;
 
 //import java.util.Calendar;
 import java.time.*;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import templato.valuemap.*;
+import semplate.valuemap.*;
 
 class ValueMapTest {
 	ValueMap valueMap;

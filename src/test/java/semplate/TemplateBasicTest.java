@@ -1,6 +1,7 @@
-package templato;
+package semplate;
 
-import static org.junit.Assume.*;
+//import static org.junit.Assume.*;
+import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -19,6 +20,8 @@ import org.junit.jupiter.api.*;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+
+import semplate.Template;
 
 class TemplateBasicTest {
 	final static String templateFileName = "simple_template.md";
@@ -62,7 +65,8 @@ class TemplateBasicTest {
 	@Test
 	void testConfigWithPath() {
 		Template t = new Template();
-		assumeNotNull(t);
+		//assumeNotNull(t);
+		assumeTrue(t != null);
 		
 		try {
 			t.config(templateFile);
@@ -82,7 +86,7 @@ class TemplateBasicTest {
 	@Test
 	void testConfigWithStream() {
 		Template t = new Template();
-		assumeNotNull(t);
+		assumeTrue(t != null);
 		
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream in = classLoader.getResourceAsStream(templateFileName);
@@ -101,7 +105,7 @@ class TemplateBasicTest {
 	void testGenerateSimple() {
 		
 		Template template = new Template();
-		assumeNotNull(template);
+		assumeTrue(template != null);
 		
 		try {
 			template.config(templateFile);

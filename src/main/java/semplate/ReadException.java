@@ -1,4 +1,4 @@
-package templato;
+package semplate;
 
 public class ReadException extends Exception {
 
