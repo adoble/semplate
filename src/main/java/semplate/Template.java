@@ -137,19 +137,23 @@ public class Template  {
 	 * @return
 	 */
 	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
-		Object object;
+		Object dataObject;
 		
-		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
+		ValueMap valueMap = readValueMap(markupFilePath); 
 		
-		try {
-			object = objectClass.getDeclaredConstructor().newInstance();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			// TODO Auto-generated catch block
-			throw new ReadException();
-		}
+		System.out.println("ValueMap:\n" + valueMap);
 		
-		ArrayList<String> list;
+		dataObject = constructDataObject(objectClass, valueMap);
+		
+			
+		System.out.println(valueMap);
+		
+		
+		return dataObject;
+	}
+
+
+	private ValueMap readValueMap(Path markupFilePath) throws ReadException {
 		ValueMap valueMap; 
 		try (Stream<String> stream= Files.lines(markupFilePath, Charset.defaultCharset())) {
 			 valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
@@ -165,14 +169,28 @@ public class Template  {
 		
 		} catch (IOException e) {
 			throw new ReadException(e);
-		} 
-		
-		System.out.println(valueMap);
-		
-		
-		return object;
+		}
+		return valueMap;
 	}
 	
+	private Object constructDataObject(Class<?> objectClass, ValueMap valueMap) throws ReadException {
+		Object dataObject;
+		
+		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
+		try {
+			dataObject = objectClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			throw new ReadException();
+		}
+		
+		//TODO MAIN WORK HERE TO TAKE THE VALUEMAP AND CONVERT IT INTO AN OBJECT
+		
+		return dataObject;
+	}
+
+
 	private ValueMap constructValueMap(String nameValuePair) {
 		ValueMap valueMap = new ValueMap();
 		
