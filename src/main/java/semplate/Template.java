@@ -20,10 +20,8 @@ import java.util.stream.*;
 
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
-import semplate.annotations.TemplateList;
 import semplate.valuemap.ValueMap;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
