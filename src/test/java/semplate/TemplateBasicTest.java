@@ -32,6 +32,9 @@ class TemplateBasicTest {
 	
 	private Path templateFile;
 	
+	// Test data object
+	Work work;
+	
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -53,6 +56,15 @@ class TemplateBasicTest {
 		 * Files.copy(in, templateFile);
 		 */
 		assertTrue(Files.exists(templateFile));
+		
+		// Set up the test data object
+		work = new Work();
+		work.setAuthor("Plato");
+		work.setTitle("The Republic");
+		work.setTranslator("Benjamin Jowett");
+		work.setSource("Wikisource");
+		work.setSourceLink(new URL("https://en.wikisource.org/wiki/The_Republic"));
+		work.setId(4711);
 		
 	}
 
@@ -113,18 +125,12 @@ class TemplateBasicTest {
 			fail("Unxpected exception: " + e.getMessage());
 		}
 		
-		Work work = new Work();
-		work.setAuthor("Plato");
-		work.setTitle("The Republic");
-		work.setTranslator("Benjamin Jowett");
-		work.setSource("Wikisource");
-		
-				
-		try {
-			work.setSourceLink(new URL(" https://en.wikisource.org/wiki/The_Republic"));
-		} catch (MalformedURLException e) {
-			fail(e.getMessage());
-		}
+			
+		/*
+		 * try { work.setSourceLink(new
+		 * URL(" https://en.wikisource.org/wiki/The_Republic")); } catch
+		 * (MalformedURLException e) { fail(e.getMessage()); }
+		 */
 		
 		Path outputPath = templatesPath.resolve("the_republic.md");
 		
@@ -167,6 +173,38 @@ class TemplateBasicTest {
 		
 
 	}
+	
+	@Test
+	void testReadSimple() throws Exception{
+			
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		template.config(templateFile);
+		
+		Path sourceFile = templatesPath.resolve("simple_expected.md");
+		
+		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
+		
+		Work workExpected = (Work) template.read(Work.class, sourceFile);
+		
+		assertNotNull(workExpected);
+		
+		assertEquals("Plato", workExpected.getAuthor());
+		assertEquals("The Republic", workExpected.getTitle());
+		assertEquals("Benjamin Jowett", workExpected.getTranslator());
+		assertEquals("Wikisource", workExpected.getSource());
+		assertEquals(4711, workExpected.getId());
+	    
+	    URL sourceLink = workExpected.getSourceLink();
+	    assertNotNull(sourceLink);
+	    assertEquals("https://en.wikisource.org/wiki/The_Republic", sourceLink.toString());
+	    
+	    
+		
+	}
+	
+	
 	
 	
 

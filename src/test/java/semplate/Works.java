@@ -8,15 +8,27 @@ import semplate.annotations.*;
 @Templatable
 public class Works {
 	@TemplateField
+	private int id;
+	
+	
+	@TemplateField
 	private String title;
 	
 	@TemplateField
 	private String author;
-	
+
 	@TemplateField
 	List<Reference> references = new ArrayList<Reference>();
 	
+	
+public int getId() {
+		return id;
+	}
 
+
+	public void setId(int id) {
+		this.id = id;
+	}
 	public String getAuthor() {
 		return author;
 	}

@@ -21,6 +21,18 @@ public class Work {
 	
 	@TemplateField
 	private URL sourceLink;
+	
+	@TemplateField
+	private int id;
+	
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public String getTitle() {
 		return title;

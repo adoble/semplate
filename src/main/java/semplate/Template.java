@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -22,6 +25,8 @@ import semplate.valuemap.ValueMap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * TODO
@@ -40,6 +45,8 @@ public class Template  {
 	Map<ParseTokens, Optional<CharSequence>> collectionMap = new HashMap<>();
 	
 	private Path templatePath;
+
+	private String string;
 	Optional<String> commentStartDelimiter;
 	Optional<String> commentEndDelimiter;
 	
@@ -185,9 +192,113 @@ public class Template  {
 			throw new ReadException();
 		}
 		
-		//TODO MAIN WORK HERE TO TAKE THE VALUEMAP AND CONVERT IT INTO AN OBJECT
+		
+		
+		System.out.println("VALUEMAP:\n" + valueMap);
+		
+		// Using the entries in the value map find the corresponding fields and set them.
+		// TODO simple case first
+		Set<String> fieldNames = valueMap.fieldNames();
+		
+		for (String fieldName : fieldNames) {
+			// Get the value
+			if (!valueMap.isValueMap(fieldName)) {
+				Optional<Object> fieldValue = valueMap.getValue(fieldName);
+				System.out.println("   " + fieldName + ":==" + fieldValue.orElse("EMPTY"));
+				
+				Field field;
+				try {
+					field = dataObject.getClass().getDeclaredField(fieldName);
+					if (field.getAnnotation(TemplateField.class) != null ) {
+						setField(dataObject, field, fieldValue);
+							
+					} else {
+						// If the field has not been annotated then silently ignore
+					}
+					
+					//TODO check annotation
+				} catch (NoSuchFieldException | SecurityException e) {
+					// TODO Auto-generated catch block
+					System.out.println("FIELD: fieldname " +  fieldName + " is unknown. " + e);
+				
+				}
+				
+			} else {
+               //TODO --> value is a value map
+			}
+		}
+		
+	
 		
 		return dataObject;
+	}
+
+
+	private void setField(Object dataObject, Field field, Optional<Object> fieldValue) {
+
+		if (fieldValue.isEmpty()) return;
+		String valStr = fieldValue.orElseThrow().toString();
+
+		System.out.println(field.getType());
+		Class<?> fieldType = field.getType();
+
+		field.setAccessible(true);
+
+		try {
+			
+			if (fieldType.equals(String.class)) {
+				field.set(dataObject, valStr); 
+			} else if (fieldType.equals(Integer.TYPE) || fieldType.equals(Integer.class)) {
+				Integer val = Integer.parseInt(valStr);
+				field.setInt(dataObject, val);
+			} else if (fieldType.equals(Short.TYPE) || fieldType.equals(Short.class)) {
+				Short val = Short.parseShort(valStr);
+				field.setInt(dataObject, val);
+			} else if (fieldType.equals(Byte.TYPE) || fieldType.equals(Byte.class)) {
+				Byte val = Byte.parseByte(valStr);
+				field.setInt(dataObject, val);
+			} else if (fieldType.equals(Long.TYPE) || fieldType.equals(Long.class)) { 
+				Long val = Long.parseLong(valStr);
+				field.setLong(dataObject, val);
+			} else if (fieldType.equals(Double.TYPE) || fieldType.equals(Double.class)) { 
+				Double val = Double.parseDouble(valStr);
+				field.setDouble(dataObject, val);
+			} else if (fieldType.equals(Float.TYPE) || fieldType.equals(Float.class)) { 
+				Float val = Float.parseFloat(valStr);
+				field.setDouble(dataObject, val);
+			} else if (fieldType.equals(Boolean.TYPE) || fieldType.equals(Boolean.class)) { 
+				Boolean val = Boolean.parseBoolean(valStr);
+				field.setBoolean(dataObject, val);
+			} else if (fieldType.equals(Character.TYPE) || fieldType.equals(Character.class)) { 
+				Character val = valStr.charAt(0);
+				field.setChar(dataObject, val);
+			} else if (fieldType.equals(String.class)) {
+				System.out.println(valStr);
+				field.set(dataObject, valStr);
+			} 
+			// Dates are formatted according to ISO_LOCAL_DATE or ISO_LOCAL_DATE_TIME. 
+			  else if (fieldType.equals(LocalDate.class)) {
+				LocalDate val = LocalDate.parse(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(LocalDateTime.class)) {
+				LocalDateTime val = LocalDateTime.parse(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(ZonedDateTime.class)) {
+				ZonedDateTime val = ZonedDateTime.parse(valStr);
+				field.set(dataObject, val);
+			}
+			// Use standard string representation of URLs
+			else if (fieldType.equals(URL.class)) {
+				URL val = new URL(valStr);
+				field.set(dataObject, val);
+			} else {
+				System.err.println("Type of " + field.getName() + " is unknown");
+			}
+		} catch (IllegalArgumentException | IllegalAccessException | MalformedURLException e) {
+			System.err.println("ERROR: Cannot set field " + field.getName());
+			System.err.println(e.getMessage());
+		}
+
 	}
 
 
