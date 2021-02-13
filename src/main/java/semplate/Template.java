@@ -8,9 +8,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+<<<<<<< HEAD
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+=======
+import java.nio.file.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.*;
+
+import semplate.annotations.Templatable;
+import semplate.annotations.TemplateField;
+import semplate.valuemap.ValueMap;
+
+import java.lang.reflect.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+>>>>>>> value-map-experiment
 
 /**
  * TODO
