@@ -246,30 +246,54 @@ public class Template  {
 			
 			if (fieldType.equals(String.class)) {
 				field.set(dataObject, valStr); 
-			} else if (fieldType.equals(Integer.TYPE) || fieldType.equals(Integer.class)) {
+			} else if (fieldType.equals(Integer.TYPE)) {
+				int val = Integer.parseInt(valStr);
+				field.setInt(dataObject, val);
+			} else if (fieldType.equals(Integer.class)) {
 				Integer val = Integer.parseInt(valStr);
-				field.setInt(dataObject, val);
-			} else if (fieldType.equals(Short.TYPE) || fieldType.equals(Short.class)) {
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Short.TYPE)) {
+				short val = Short.parseShort(valStr);
+				field.setShort(dataObject, val);
+			} else if (fieldType.equals(Short.class)) {
 				Short val = Short.parseShort(valStr);
-				field.setInt(dataObject, val);
-			} else if (fieldType.equals(Byte.TYPE) || fieldType.equals(Byte.class)) {
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Byte.TYPE)) {
+				byte val = Byte.parseByte(valStr);
+				field.setByte(dataObject, val);
+			} else if (fieldType.equals(Byte.class)) {
 				Byte val = Byte.parseByte(valStr);
-				field.setInt(dataObject, val);
-			} else if (fieldType.equals(Long.TYPE) || fieldType.equals(Long.class)) { 
-				Long val = Long.parseLong(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Long.TYPE)) { 
+				long val = Long.parseLong(valStr);
 				field.setLong(dataObject, val);
-			} else if (fieldType.equals(Double.TYPE) || fieldType.equals(Double.class)) { 
+			} else if (fieldType.equals(Long.class)) { 
+				Long val = Long.parseLong(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Double.TYPE)) { 
+				double val = Double.parseDouble(valStr);
+				field.setDouble(dataObject, val);
+			} else if (fieldType.equals(Double.class)) { 
 				Double val = Double.parseDouble(valStr);
-				field.setDouble(dataObject, val);
-			} else if (fieldType.equals(Float.TYPE) || fieldType.equals(Float.class)) { 
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Float.TYPE)) { 
+				float val = Float.parseFloat(valStr);
+				field.setFloat(dataObject, val);
+			} else if (fieldType.equals(Float.class)) { 
 				Float val = Float.parseFloat(valStr);
-				field.setDouble(dataObject, val);
-			} else if (fieldType.equals(Boolean.TYPE) || fieldType.equals(Boolean.class)) { 
-				Boolean val = Boolean.parseBoolean(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Boolean.TYPE)) { 
+				boolean val = Boolean.parseBoolean(valStr);
 				field.setBoolean(dataObject, val);
-			} else if (fieldType.equals(Character.TYPE) || fieldType.equals(Character.class)) { 
-				Character val = valStr.charAt(0);
+			} else if (fieldType.equals(Boolean.class)) { 
+				Boolean val = Boolean.parseBoolean(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Character.TYPE) ) { 
+				char val = valStr.charAt(0);
 				field.setChar(dataObject, val);
+			} else if (fieldType.equals(Character.class)) {
+				Character val = Character.valueOf(valStr.charAt(0));
+				field.set(dataObject, val);
 			} else if (fieldType.equals(String.class)) {
 				System.out.println(valStr);
 				field.set(dataObject, valStr);

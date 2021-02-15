@@ -10,6 +10,10 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -122,12 +126,6 @@ class TemplateBasicTest {
 			fail("Unxpected exception: " + e.getMessage());
 		}
 		
-			
-		/*
-		 * try { work.setSourceLink(new
-		 * URL(" https://en.wikisource.org/wiki/The_Republic")); } catch
-		 * (MalformedURLException e) { fail(e.getMessage()); }
-		 */
 		
 		Path outputPath = templatesPath.resolve("the_republic.md");
 		
@@ -200,8 +198,6 @@ class TemplateBasicTest {
 	    
 		
 	}
-	
-	
 	
 	
 
