@@ -422,6 +422,55 @@ class ValueMapTest {
 	}
 	
 	@Test
+	void testMerge2() {
+		
+		
+		valueMap.put("praenomen", "Marcus");
+		valueMap.put("nomen", "Aurelius");
+		valueMap.put("birthDate", LocalDate.of(121, Month.APRIL, 26));
+		
+		ValueMap  vmToMerge = new ValueMap();
+		vmToMerge.put("praenomen", "Mark");
+		vmToMerge.put("nomen", "Ori");
+		vmToMerge.put("birthDate", LocalDate.of(2021, Month.APRIL, 26));
+		
+		valueMap.merge(vmToMerge);
+
+		System.out.println(valueMap.toString());
+		
+		assertEquals("(praenomen=Mark,nomen=Ori,birthDate=2021-04-26)", valueMap.toString());
+		
+	}
+	
+	@Test
+	void testMerge3() {
+		
+		valueMap.put("praenomen", "Marcus");
+		valueMap.put("nomen", "Aurelius");
+		valueMap.put("birthDate", LocalDate.of(121, Month.APRIL, 26));
+		
+     	ValueMap child1 = (new ValueMap()).put("praenomen", "Pricilla").put("nomen", "Aurelius");
+        ValueMap toMerge = (new ValueMap()).add("children", child1);
+        valueMap.merge(toMerge);
+        
+        
+        toMerge = (new ValueMap()).add("children",  (new ValueMap().put("praenomen", "Octavia").put("nomen", "Aurelius")));
+        valueMap.merge(toMerge);
+        
+        
+        valueMap.merge((new ValueMap()).add("children",  (new ValueMap().put("praenomen", "Tatiana").put("nomen", "Aurelius"))));
+        
+        assertEquals("(praenomen=Marcus,"
+        		+ "children=(0=(praenomen=Pricilla,nomen=Aurelius),"
+        		+ "1=(praenomen=Octavia,nomen=Aurelius),"
+        		+ "2=(praenomen=Tatiana,nomen=Aurelius)),"
+        		+ "nomen=Aurelius,birthDate=0121-04-26)", 
+        		valueMap.toString());
+    }
+	
+	
+	
+	@Test
 	void testEmpty() {
 		ValueMap vm = new ValueMap();
 		assertTrue(vm.isEmpty());
@@ -431,7 +480,7 @@ class ValueMapTest {
 		
 		vm.put("some_fieldname", "some_value");
 		assertFalse(vm.isEmpty());
-		
+	
 		
 	}
 	

@@ -151,9 +151,11 @@ public class ValueMap {
 	 *    
 	 * @param fieldName The simple or compound field name
 	 * @param dataObject  An object representing the value
-	 * @return
+	 * @return This value map.
+	 * TODO check if the same return value is used for all like this. 
 	 */
-	public Object put(String fieldName, Object dataObject) {
+	//public Object put(String fieldName, Object dataObject) {
+	public ValueMap put(String fieldName, Object dataObject) {
 		
 		int index = fieldName.indexOf('.');
 		
@@ -165,7 +167,8 @@ public class ValueMap {
 			subValueMap.put(fieldName.substring(index + 1), dataObject);
 		}
 		
-		return dataObject;
+		//return dataObject;
+		return this;
 	}
 	
 		
@@ -189,8 +192,9 @@ public class ValueMap {
 	 * 
 	 * @param fieldName The name of field to contain the ordinal mappings to the value maps.
 	 * @param map The value map to be added 
+	 * @return This value map
 	 */
-	public void add(String fieldName, ValueMap map) {
+	public ValueMap add(String fieldName, ValueMap map) {
 		ValueMap ordinalValueMap;
 		
 		if (!containsField(fieldName)) {
@@ -205,13 +209,16 @@ public class ValueMap {
 		Integer maxKey = ordinalValueMap.fieldNames().stream().mapToInt(Integer::parseInt).max().orElse(-1);
 		ordinalValueMap.put(Integer.valueOf(maxKey + 1).toString(), map);
 		
+		return this;
+		
 	}
 	
 	/**
 	 * Merges a value map with this one. 
 	 * @param other The value map to be merged with this. 
+	 * @return This value map (containing the merge)
 	 */
-	public void merge(ValueMap other) {
+	public ValueMap merge(ValueMap other) {
 		
 		for (String fieldName: other.fieldNames()) {
 			
@@ -226,6 +233,8 @@ public class ValueMap {
 				ordinalValueMap.getValueMap(ordinalFieldName).ifPresent(vm -> this.add(fieldName, vm));
 			}
 		}
+		
+		return this;
 			
 	}
 	
@@ -282,6 +291,18 @@ public class ValueMap {
 
 		return "(" + sb.toString().replaceAll(",$", "") + ")"; // Add parenthesis and remove any trailing commas
 
+	}
+	
+	
+	public void prettyPrint() {
+		StringBuffer sb = new StringBuffer();
+
+		for (Map.Entry<String, Object> entry: valueMap.entrySet()) {
+				sb.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
+		}
+
+		System.out.println("(" + sb.toString().replaceAll(",$", "") + ")"); // Add parenthesis and remove any trailing commas
+		
 	}
 	
 
