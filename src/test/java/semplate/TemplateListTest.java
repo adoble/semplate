@@ -52,7 +52,7 @@ class TemplateListTest {
 //		assertTrue(Files.exists(templateFile));
 	}
 	
-	
+	@Disabled
 	@Test
 	void testGenerateList() {
 		
@@ -122,6 +122,7 @@ class TemplateListTest {
 		assertEquals(expectedContents, actualContents);
 	}
 	
+	@Disabled
 	@Test
 	void testGenerateFromArray() throws MalformedURLException {
 		String arrayTemplateFileName = "array_template.md";
