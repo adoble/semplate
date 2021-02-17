@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'semplate'
-include('lib')
+include('semplate-lib')
