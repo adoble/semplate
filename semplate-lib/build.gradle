@@ -42,3 +42,5 @@ tasks.named('test') {
       events "passed", "skipped", "failed"
     }
 }
+
+sourceCompatibility = 11
