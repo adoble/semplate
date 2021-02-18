@@ -34,23 +34,23 @@ import java.net.URL;
 public class Template  {
 	// Special fields are preceded with template
 	final private String templateCommentField = "{{template.comment}}"; //TODO make static
-	
-	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}"); 
-	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}"); 
-	
+
+	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
+	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");
+
 	private static enum ParseTokens {fieldname, subFieldname, index, value};
-	
+
 	Map<ParseTokens, Optional<CharSequence>> collectionMap = new HashMap<>();
-	
+
 	private Path templatePath;
 
 	private String string;
 	Optional<String> commentStartDelimiter;
 	Optional<String> commentEndDelimiter;
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * TODO
 	 * @param templatePath
@@ -62,12 +62,13 @@ public class Template  {
 		collectionMap.put(ParseTokens.subFieldname, Optional.empty());
 		collectionMap.put(ParseTokens.index, Optional.empty());
 		collectionMap.put(ParseTokens.value, Optional.empty());
-	} 
+	}
 
-	
+
 	/**
-	 * TODO
-	 * @param templatePath
+	 * Specifies the template to be used in generating the markdown files.
+	 *
+	 * 	 * @param templatePath A path to the template file.
 	 */
 	public void config(Path templatePath) throws IOException {
 		this.templatePath = templatePath;
@@ -75,19 +76,20 @@ public class Template  {
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
 			parseTemplateStream(stream);
 		}
-		
 
-		
+
+
 	}
-	
-	
+
+
 	/**
-	 * TODO
+	 * Specifies an input stream of the template files used for generating hte markdown files.
+
 	 * @param templateStream
 	 */
-	public void config(InputStream templateStream) throws IOException { 
+	public void config(InputStream templateStream) throws IOException {
 		//TODO
-        
+
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(templateStream));
 		try (Stream<String> stream = reader.lines()) {
@@ -95,71 +97,72 @@ public class Template  {
 		}
 
 	}
-	
+
 	/**
 	 * Generates a markdown file as specified by the template file using the information
-	 * in the node object
+	 * in the data object.
+
 	 * @param dataObject An object annotated with template field information
-	 * @param outputFilePath
+	 * @param outputFilePath Path specifiing the markdown file to be generated
 	 */
 	public void generate(Object dataObject, Path outputFilePath) throws IOException {
-		
+
 		ValueMap fieldValueMap = buildFieldValueMap(dataObject);
-			    
+
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
             List<String> replacements = stream
             		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
             		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
             		.collect(Collectors.toList());
-            
+
             replacements.forEach(s -> System.out.println("--->" + s));
-            
+
             //System.out.println(String.join("\n", replacements));
             Files.write(outputFilePath, replacements);
 	    }
-	    
-	    
+
+
 
 	}
-	
+
 	/**
 	 * Updates a markdown files using the annotated fields in the object .
-	 * 
+	 *
 	 * @param object
 	 * @param outputFilePath
 	 */
 	public void update(Object object, Path outputFilePath) {
-		//TODO 
+		//TODO
 	}
 
 
 	/**
-	 * Reads the specified markup file and creates a new  object of class nodeClass that contains the
-	 * data semantically represented in the file.
-	 * 
-	 * @param objectClass
-	 * @param markupFilePath
+	 * Reads the specified markup file and creates a new  object of class objectClass that contains the
+	 * data semantically represented in the markdown file.
+	 *
+	 * @param objectClass  The class of the data object to be generated.
+	 * @param markupFilePath The path of the markdown file.
 	 * @return
 	 */
 	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
 		Object dataObject;
-		
-		ValueMap valueMap = readValueMap(markupFilePath); 
-		
+
+		ValueMap valueMap = readValueMap(markupFilePath);
+
 		System.out.println("ValueMap:\n" + valueMap);
-		
+
 		dataObject = constructDataObject(objectClass, valueMap);
-		
-			
+
+
 		System.out.println(valueMap);
-		
-		
+
+
 		return dataObject;
 	}
 
 
 	private ValueMap readValueMap(Path markupFilePath) throws ReadException {
-		ValueMap valueMap; 
+		ValueMap valueMap;
 		try (Stream<String> stream= Files.lines(markupFilePath, Charset.defaultCharset())) {
 			 valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
 			      .flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
@@ -168,19 +171,19 @@ public class Template  {
 			      //.collect(ArrayList::new, (r,s) -> accumulateList(r,s), (r, s) -> combineList(r,s));
 			      //.collect(ArrayList<String>::new, (r,s) -> accumulate(r,s), (r1, r2) -> combine(r1,r2));
 			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
-		      //.collect(objectClass.getDeclaredConstructor().newInstance(), 
-		     	 //		  (object, s) -> objectBuilder(object, s), 
+		      //.collect(objectClass.getDeclaredConstructor().newInstance(),
+		     	 //		  (object, s) -> objectBuilder(object, s),
 		     	 //		  (object, s) -> objectBuilder(object, object));
-		
+
 		} catch (IOException e) {
 			throw new ReadException(e);
 		}
 		return valueMap;
 	}
-	
+
 	private Object constructDataObject(Class<?> objectClass, ValueMap valueMap) throws ReadException {
 		Object dataObject;
-		
+
 		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
 		try {
 			dataObject = objectClass.getDeclaredConstructor().newInstance();
@@ -189,45 +192,45 @@ public class Template  {
 			// TODO Auto-generated catch block
 			throw new ReadException();
 		}
-		
-		
-		
+
+
+
 		System.out.println("VALUEMAP:\n" + valueMap);
-		
+
 		// Using the entries in the value map find the corresponding fields and set them.
 		// TODO simple case first
 		Set<String> fieldNames = valueMap.fieldNames();
-		
+
 		for (String fieldName : fieldNames) {
 			// Get the value
 			if (!valueMap.isValueMap(fieldName)) {
 				Optional<Object> fieldValue = valueMap.getValue(fieldName);
 				System.out.println("   " + fieldName + ":==" + fieldValue.orElse("EMPTY"));
-				
+
 				Field field;
 				try {
 					field = dataObject.getClass().getDeclaredField(fieldName);
 					if (field.getAnnotation(TemplateField.class) != null ) {
 						setField(dataObject, field, fieldValue);
-							
+
 					} else {
 						// If the field has not been annotated then silently ignore
 					}
-					
+
 					//TODO check annotation
 				} catch (NoSuchFieldException | SecurityException e) {
 					// TODO Auto-generated catch block
 					System.out.println("FIELD: fieldname " +  fieldName + " is unknown. " + e);
-				
+
 				}
-				
+
 			} else {
                //TODO --> value is a value map
 			}
 		}
-		
-	
-		
+
+
+
 		return dataObject;
 	}
 
@@ -243,9 +246,9 @@ public class Template  {
 		field.setAccessible(true);
 
 		try {
-			
+
 			if (fieldType.equals(String.class)) {
-				field.set(dataObject, valStr); 
+				field.set(dataObject, valStr);
 			} else if (fieldType.equals(Integer.TYPE)) {
 				int val = Integer.parseInt(valStr);
 				field.setInt(dataObject, val);
@@ -264,31 +267,31 @@ public class Template  {
 			} else if (fieldType.equals(Byte.class)) {
 				Byte val = Byte.parseByte(valStr);
 				field.set(dataObject, val);
-			} else if (fieldType.equals(Long.TYPE)) { 
+			} else if (fieldType.equals(Long.TYPE)) {
 				long val = Long.parseLong(valStr);
 				field.setLong(dataObject, val);
-			} else if (fieldType.equals(Long.class)) { 
+			} else if (fieldType.equals(Long.class)) {
 				Long val = Long.parseLong(valStr);
 				field.set(dataObject, val);
-			} else if (fieldType.equals(Double.TYPE)) { 
+			} else if (fieldType.equals(Double.TYPE)) {
 				double val = Double.parseDouble(valStr);
 				field.setDouble(dataObject, val);
-			} else if (fieldType.equals(Double.class)) { 
+			} else if (fieldType.equals(Double.class)) {
 				Double val = Double.parseDouble(valStr);
 				field.set(dataObject, val);
-			} else if (fieldType.equals(Float.TYPE)) { 
+			} else if (fieldType.equals(Float.TYPE)) {
 				float val = Float.parseFloat(valStr);
 				field.setFloat(dataObject, val);
-			} else if (fieldType.equals(Float.class)) { 
+			} else if (fieldType.equals(Float.class)) {
 				Float val = Float.parseFloat(valStr);
 				field.set(dataObject, val);
-			} else if (fieldType.equals(Boolean.TYPE)) { 
+			} else if (fieldType.equals(Boolean.TYPE)) {
 				boolean val = Boolean.parseBoolean(valStr);
 				field.setBoolean(dataObject, val);
-			} else if (fieldType.equals(Boolean.class)) { 
+			} else if (fieldType.equals(Boolean.class)) {
 				Boolean val = Boolean.parseBoolean(valStr);
 				field.set(dataObject, val);
-			} else if (fieldType.equals(Character.TYPE) ) { 
+			} else if (fieldType.equals(Character.TYPE) ) {
 				char val = valStr.charAt(0);
 				field.setChar(dataObject, val);
 			} else if (fieldType.equals(Character.class)) {
@@ -297,8 +300,8 @@ public class Template  {
 			} else if (fieldType.equals(String.class)) {
 				System.out.println(valStr);
 				field.set(dataObject, valStr);
-			} 
-			// Dates are formatted according to ISO_LOCAL_DATE or ISO_LOCAL_DATE_TIME. 
+			}
+			// Dates are formatted according to ISO_LOCAL_DATE or ISO_LOCAL_DATE_TIME.
 			  else if (fieldType.equals(LocalDate.class)) {
 				LocalDate val = LocalDate.parse(valStr);
 				field.set(dataObject, val);
@@ -326,9 +329,9 @@ public class Template  {
 
 	private ValueMap constructValueMap(String nameValuePair) {
 		ValueMap valueMap = new ValueMap();
-		
+
 		Map<String, String> parsedNameValuePair = ExpressionParser.parse(nameValuePair);
-	
+
 		if (parsedNameValuePair.containsKey("subFieldName") && parsedNameValuePair.containsKey("index")) {
 			// List reference pair of the form:
 			//   fieldname.subFieldName[index]="value"
@@ -348,18 +351,18 @@ public class Template  {
 				valueMap.put("ERROR:" , "Meta data incorrect:(" + nameValuePair + ")");
 			}
 		}
-		
+
 		System.out.print("C::" + nameValuePair + "----->");
 		System.out.println(valueMap);
-		
-		
-		 
-	    return valueMap;  
-	
+
+
+
+	    return valueMap;
+
 	}
-	
-	
-	// TODO make this secure if the user has modified the file. 
+
+
+	// TODO make this secure if the user has modified the file.
 	private ValueMap constructValueMapTODELETE(String nameValuePair)  {
 		Optional<String> fieldName = Optional.empty();
 		Optional<String> subFieldName = Optional.empty();
@@ -375,12 +378,12 @@ public class Template  {
 //			System.out.print(", ");
 //			}
 //		System.out.println();
-		
-		System.out.println("Input -->" + nameValuePair);
-		
-		 
 
-		
+		System.out.println("Input -->" + nameValuePair);
+
+
+
+
 		if (parts.length == 2) {
 			fieldName = Optional.of(parts[0]);
 			valueString = Optional.of(parts[1].replace("\"",  ""));  // Removing quotes);
@@ -390,19 +393,19 @@ public class Template  {
 			subFieldName = Optional.of(parts[1]);
 			index = Optional.of(Integer.parseInt(parts[2]));
 			valueString = Optional.of(parts[4].replace("\"",  ""));  // Removing quotes
-		} 
-		
+		}
+
 	    StringBuffer sb = new StringBuffer();
 	    fieldName.ifPresent(s -> sb.append(s));
 	    subFieldName.ifPresent(s -> sb.append('.').append(s));
 	    index.ifPresent(s -> sb.append('[').append(s).append(']'));
 	    valueString.ifPresent(s -> sb.append('=').append(s));
-	    
-	    
-	    
+
+
+
 	    System.out.println(sb);
-	    
-		
+
+
 
 		// Now split the fieldname if it has a list qualifier (e.g. [2])
 //		parts = fieldName.split("\\[|\\]");
@@ -411,27 +414,27 @@ public class Template  {
 //			index = Integer.parseInt(parts[1]);
 //		}
 
-		ValueMap vm = new ValueMap(); 
+		ValueMap vm = new ValueMap();
 //		if (index == null) {
 //			vm.put(fieldName, valueString);
 //		} else {
 //			ValueMap vmList = new ValueMap;
 //			vmList.add
 //			vm.add(fieldName, valueString)
-//		}	
+//		}
 
 
 		return vm;
 
 
 	}
-	
+
 	private void accumulateList(ArrayList<String> r, String s) {
 		System.out.println("ACCUMULATE: " + s);
 		r.add(s);
-	
+
 	}
-	
+
 	private void combineList(ArrayList<String> r1, ArrayList<String> r2) {
 		System.out.println("COMBINE");
 		r1.addAll(r2);
@@ -441,22 +444,22 @@ public class Template  {
 	private Stream<String> extractKeyValuePair(String line) {
 		List<String> keyValuePairs = new ArrayList<String>();
 		String keyValuePair = "";
-		
+
 		Matcher matcher = fieldPattern.matcher(line);
 		while(matcher.find()) {
 			// Remove the delimiters
 			keyValuePair = matcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
 			keyValuePairs.add(keyValuePair);
 		}
-	
+
 		return keyValuePairs.stream();
-	
+
 	}
 
 
 
 	public Path getTemplatePath() {
-		
+
 		return templatePath;
 	}
 
@@ -470,35 +473,35 @@ public class Template  {
 		return commentEndDelimiter;
 	}
 
-	/* Expands any line that contains field references to an Iterable to a stream of template lines, 
+	/* Expands any line that contains field references to an Iterable to a stream of template lines,
 	 * each one of which represents one entry of the list.
 	 */
 	@SuppressWarnings("unchecked")
 	private Stream<String> templateExpand(String line, ValueMap valueMap) {
-		String substitutedLine = line; 
+		String substitutedLine = line;
 		List<ValueMap> entries = null;;
-				
+
 		Matcher fieldMatcher = fieldPattern.matcher(line);
 		if (line.contains(templateCommentField)) {
 			return Stream.of(line);
 		}
-		
+
 		while (fieldMatcher.find()) {
 			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-			String fieldNameParts[] = fieldName.split("[.]");  
+			String fieldNameParts[] = fieldName.split("[.]");
 			if (fieldNameParts.length > 1 && valueMap.isValueMap(fieldNameParts[0])) { // The field name has the form name.name and the value is a value map
 				entries = valueMap.getValueMaps(fieldNameParts[0]); // Looking at a list so find out how many entries
-				// Now replace  each list field in the line with an indicator showing that this is a list. 
+				// Now replace  each list field in the line with an indicator showing that this is a list.
 				// For example:
-				//    {{references.id}} 
+				//    {{references.id}}
 				// is replaced with:
-				//   {{references.[].id}} 
-				// This makes it easier to substitute the index value later when this line is expanded. 
-				substitutedLine = substitutedLine.replace("{{" + fieldNameParts[0] +  "." + fieldNameParts[1] + "}}", 
+				//   {{references.[].id}}
+				// This makes it easier to substitute the index value later when this line is expanded.
+				substitutedLine = substitutedLine.replace("{{" + fieldNameParts[0] +  "." + fieldNameParts[1] + "}}",
 						"{{" +  fieldNameParts[0] + ".[]." + fieldNameParts[1] + "}}");
-			} 
+			}
 		}
-		
+
 		if (entries != null) {
 			// Now expand the substitutedLine. For instance, if the Iterable field references has three entries then:
 			//   * {{references.[].id}} -> {{references.[].name}}
@@ -517,28 +520,28 @@ public class Template  {
 			return Stream.of(line);
 		}
 
-		
+
 	}
 
 	private String templateReplace(String line, ValueMap valueMap) {
 
 		Matcher templateMatcher = fieldPattern.matcher(line);
-		
+
 		//TODO need to handle the case for {{template.comment}}.
 
 		if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-			// Line contains a field or a list 
-			
+			// Line contains a field or a list
+
 			// First replace anything that is a valid field
-			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap)); 
-		
+			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
+
 			// Now build the meta data that is appended to the end of the line
 			StringBuilder metaData = new StringBuilder();
-			if (commentStartDelimiter.isPresent()) { 
+			if (commentStartDelimiter.isPresent()) {
 				metaData.append(commentStartDelimiter.get()).append(line);
 				if (commentEndDelimiter.isPresent()) {
 					metaData.append(commentEndDelimiter.get());
-				}  	
+				}
 			}
 
 			Matcher metaDataMatcher = fieldPattern.matcher(metaData);
@@ -550,50 +553,50 @@ public class Template  {
 		}
 
 
-	}	
-	
+	}
+
 	private String fieldSubstitution(MatchResult mr, ValueMap valueMap) {
-	
+
 		String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-		
+
 		// Field names starting with "template." are ignored. Note that these are always alone on a line.
 	    if (fieldName.startsWith("template.")) {
 	    	if (fieldName.substring("template.".length()).equals("comment")) {
-	          return "{{template.comment}}";		
+	          return "{{template.comment}}";
 	    	}
 	    }
-	    
-	    
+
+
 	    String valueString = getFieldValueAsString(fieldName, valueMap);
-	    
-	    
-	    
-	    
+
+
+
+
 		return valueString;
-		
+
 	}
-	
+
 
 	private String metaDataSubstitution(MatchResult mr, ValueMap valueMap) {
 	     String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-		
+
 		// Field names starting with "template." are ignored. Note that these are always alone on a line.
 	    if (fieldName.startsWith("template.")) {
 	    	if (fieldName.substring("template.".length()).equals("comment")) {
-	          return "{{template.comment}}";		
+	          return "{{template.comment}}";
 	    	}
 	    }
-	    
+
 	    //return "{{" + fieldName + "=\"" + valueMap.getOrDefault(fieldName, "UNKNOWN") + "\"}}";
 	    String valueString = getFieldValueAsString(fieldName, valueMap);
-	        
+
 	    return "{{" + fieldName + "=\"" + valueString + "\"}}";
-		
+
 	}
-			
+
 	private String getFieldValueAsString(String fieldName, ValueMap fieldValueMap) {
 		String valueString;
-		Optional<Object> valueObject; 
+		Optional<Object> valueObject;
 		String listFieldName ;
 		String subFieldName;
 		int index;
@@ -604,10 +607,10 @@ public class Template  {
 				valueString = valueObject.orElse("ERROR").toString();
 			} else {
 				valueString ="UNKNOWN";
-			} 
+			}
 
 		} else {
-			// Field name is a compound (i.e. with a dot separator) and, by this time, should have been appended 
+			// Field name is a compound (i.e. with a dot separator) and, by this time, should have been appended
 			// with the list notation [].
 
 			Scanner scanner = new Scanner(fieldName);
@@ -617,13 +620,13 @@ public class Template  {
 			subFieldName = scanner.next();
 			scanner.close();
 
-						
+
 			// Get the List
 			List<ValueMap> list = fieldValueMap.getValueMaps(listFieldName);
-			//Now get the value map for the list entry 
+			//Now get the value map for the list entry
 			ValueMap listEntryMap = list.get(index);
-			
-			// Now get the list entry attribute 
+
+			// Now get the list entry attribute
 			valueObject = listEntryMap.getValue(subFieldName);
 			if (valueObject != null) {
 				valueString = ((Optional<Object>)valueObject).get().toString();
@@ -633,13 +636,13 @@ public class Template  {
 		}
 		return valueString;
 	}
-	
+
 	/**
      * Parser the stream of template lines and extracts the start end end delimiters of comments,
      * @param stream Stream of template lines.
      */
 	private void parseTemplateStream(Stream<String> stream) {
-		
+
     	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
 		if (!templateComment.isEmpty()) {
 			commentStartDelimiter = Optional.of(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
@@ -652,16 +655,16 @@ public class Template  {
     }
 
 
-	@SuppressWarnings("unchecked")  // Suppress warning when casting type Object to type Iterable. 
+	@SuppressWarnings("unchecked")  // Suppress warning when casting type Object to type Iterable.
 	                                // During runtime the code checks that is is a valid operation.
 	private ValueMap buildFieldValueMap(Object dataObject) {
 		Object fieldValue;
 		Iterable<Object> fieldIterable;
-		
+
 		ValueMap fieldValueMap = new ValueMap();
-		
+
 		Class<?> c = dataObject.getClass();
-	
+
 		if (c.isAnnotationPresent(Templatable.class)) {
 
 			for(Field field: c.getDeclaredFields()) {
@@ -671,25 +674,25 @@ public class Template  {
 
 					try {
 						fieldValue = field.get(dataObject);
-						
+
 						System.out.println(fieldValue.getClass().getName());
-						
+
 						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
 							// Scalar value
 							fieldValueMap.put(field.getName(), fieldValue);
 						} else {
 							if (field.getType().isArray()) {
-								
+
 								// Unpack the array. Need to do this as:
-								// a) the array needs to Iterable and for some reason they are not. 
+								// a) the array needs to Iterable and for some reason they are not.
 								// b) Just using simple casting does not seem to work for arrays
 								// See https://stackoverflow.com/questions/8095016/unpacking-an-array-using-reflection
-								List<Object> l = new ArrayList<Object>(Array.getLength(fieldValue)); 
+								List<Object> l = new ArrayList<Object>(Array.getLength(fieldValue));
 								for (int i= 0; i < Array.getLength(fieldValue); i++) {
 									l.add(Array.get(fieldValue,i));
 								}
 								fieldIterable = (Iterable<Object>) l;
-								
+
 							} else {
 								// The field value is of type Iterable
 								fieldIterable = (Iterable<Object>) fieldValue;
@@ -705,26 +708,26 @@ public class Template  {
 								fieldIterationMap = buildFieldValueMap(listEntry);
 								//listValues.add(fieldIterationMap);
 								fieldValueMap.add(field.getName(), fieldIterationMap);
-								
+
 							}
 							//fieldValueMap.putListValue(field.getName(), listValues);
-							
+
 
 						}
 
 
 					} catch (IllegalArgumentException | IllegalAccessException e) {
 						fieldValue = null; //"ERROR";  //TODO make sure that null is represented as a string "ERROR" in the calling functions
-					} 
+					}
 				}
 			}
 		}
 
 		return fieldValueMap;
-		
-	
+
+
 	}
-	
-	
-	
+
+
+
 }
