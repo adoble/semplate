@@ -9,7 +9,7 @@ More then one type of markdown exists. Which one should be supported?
 
 ## Considered Options
 
-* Support [Markdown- GitHub dialect](https://guides.github.com/features/mastering-markdown/)
+* Support [GitHub Flavored Markdown - GFM](https://guides.github.com/features/mastering-markdown/)
 * Support [CommonMark](https://commonmark.org/)
 * Support [AsciiDoc](https://asciidoc.org/)
 
