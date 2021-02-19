@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html), i.e. version number has form  **MAJOR.MINOR.PATCH**;
+
+* MAJOR version incremented for incompatible API changes,
+* MINOR version incremented for new functionality that is backwards
+  compatible
+* PATCH version incremented for backwards compatible bug fixes.
+
 
 
 ## [Unreleased]
@@ -21,5 +27,4 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 * Simple generation of a markdown file based on a template by using the data in
   a single data object
-* Simple reading of a markdown file and creation of a data object using the data
-  in the sematic information in te markdown file.
+* Simple reading of a markdown file and creation of a data object using the sematic information in the markdown file.
