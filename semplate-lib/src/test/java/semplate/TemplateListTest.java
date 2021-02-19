@@ -121,7 +121,7 @@ class TemplateListTest {
 		assertEquals(expectedContents, actualContents);
 	}
 	
-	@Disabled
+	
 	@Test
 	void testGenerateFromArray() throws MalformedURLException {
 		String arrayTemplateFileName = "array_template.md";
