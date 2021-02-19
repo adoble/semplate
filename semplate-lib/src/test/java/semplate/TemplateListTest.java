@@ -52,7 +52,6 @@ class TemplateListTest {
 //		assertTrue(Files.exists(templateFile));
 	}
 	
-	@Disabled
 	@Test
 	void testGenerateList() {
 		
