@@ -199,6 +199,46 @@ class TemplateBasicTest {
 		
 	}
 	
+	/** Test that an error occurs if the markup file does not exist. 
+	 * 
+	 */
+	@Test
+	void testReadMarkupError() {
+		
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		try {
+			template.config(templateFile);
+		} catch (IOException e) {
+			fail("Cannot read template file: " + e.getMessage());
+		}
+        Path sourceFile = templatesPath.resolve("non-existent.md");
+        
+        assertThrows(ReadException.class, () -> {
+        	template.read(Work.class, sourceFile);
+        });
+		
+	}
+	
+	@Test
+	void testUsingInvalidClass () {
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		try {
+			template.config(templateFile);
+		} catch (IOException e) {
+			fail("Cannot read template file: " + e.getMessage());
+		}
+        Path sourceFile = templatesPath.resolve("simple_expected.md");
+		
+		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
+        
+        assertThrows(ReadException.class, () -> {
+        	template.read(NonValidClass.class, sourceFile);
+        });
+	}
 	
 
 }

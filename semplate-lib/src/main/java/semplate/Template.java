@@ -220,7 +220,7 @@ public class Template  {
 					//TODO check annotation
 				} catch (NoSuchFieldException | SecurityException e) {
 					// TODO Auto-generated catch block
-					System.out.println("FIELD: fieldname " +  fieldName + " is unknown. " + e);
+					System.err.println("FIELD: fieldname " +  fieldName + " is unknown. " + e);
 
 				}
 
@@ -297,9 +297,6 @@ public class Template  {
 			} else if (fieldType.equals(Character.class)) {
 				Character val = Character.valueOf(valStr.charAt(0));
 				field.set(dataObject, val);
-			} else if (fieldType.equals(String.class)) {
-				System.out.println(valStr);
-				field.set(dataObject, valStr);
 			}
 			// Dates are formatted according to ISO_LOCAL_DATE or ISO_LOCAL_DATE_TIME.
 			  else if (fieldType.equals(LocalDate.class)) {

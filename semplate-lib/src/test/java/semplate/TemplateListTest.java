@@ -200,5 +200,10 @@ class TemplateListTest {
 		fail("Nor yet implemented");
 	}
 	
+	@Test
+	public void testReadList() {
+		fail("Not yet implmented");
+	}
+	
 
 }
