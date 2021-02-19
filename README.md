@@ -1,3 +1,4 @@
+![Build](https://github.com/adoble/semplate/workflows/Build/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Description
