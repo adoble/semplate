@@ -293,17 +293,6 @@ public class ValueMap {
 
 	}
 	
-	
-	public void prettyPrint() {
-		StringBuffer sb = new StringBuffer();
 
-		for (Map.Entry<String, Object> entry: valueMap.entrySet()) {
-				sb.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
-		}
-
-		System.out.println("(" + sb.toString().replaceAll(",$", "") + ")"); // Add parenthesis and remove any trailing commas
-		
-	}
-	
 
 }
