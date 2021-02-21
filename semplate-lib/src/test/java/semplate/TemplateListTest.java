@@ -53,7 +53,7 @@ class TemplateListTest {
 	}
 	
 	@Test
-	void testGenerateList() {
+	void testGenerateList() throws Exception {
 		
 		// Copy into the mock file system the template file we are using from the resources
 		templateFile = templatesPath.resolve(listTemplateFileName);
@@ -63,11 +63,9 @@ class TemplateListTest {
 		Template template = new Template();
 		assumeTrue(template != null);
 		
-		try {
-			template.config(templateFile);
-		} catch (IOException e) {
-			fail("Unxpected exception: " + e.getMessage());
-		}
+		
+		template.config(templateFile);
+		
 		
 		Works works = new Works();
 		works.setTitle("The Works of Plato");
@@ -123,7 +121,7 @@ class TemplateListTest {
 	
 	
 	@Test
-	void testGenerateFromArray() throws MalformedURLException {
+	void testGenerateFromArray() throws Exception {
 		String arrayTemplateFileName = "array_template.md";
 		
 		// Copy into the mock file system the template file we are using from the resources
@@ -133,13 +131,9 @@ class TemplateListTest {
 		assertTrue(Files.exists(arrayTemplateFile));
 		Template template = new Template();
 		assumeTrue(template != null);
-		
-		try {
-			template.config(arrayTemplateFile);
-		} catch (IOException e) {
-			fail("Unxpected exception: " + e.getMessage());
-		}
-		
+				
+		template.config(arrayTemplateFile);
+				
 		// Set up a templatable object that uses an array. 		
 		References references = new References(3);
 		references.add(new Reference("Figuring the Phallogocentric Argument with Respect to the Classical Greek Philosophical Tradition", 
@@ -152,25 +146,15 @@ class TemplateListTest {
 		
 			
 		Path outputPath = fileSystem.getPath("array_actual.md");
+				
+		template.generate(references, outputPath);
 		
-		try {
-			template.generate(references, outputPath);
-		}
-		catch (IOException e) {
-			fail(e.getMessage());
-		}
-
 		assertTrue(Files.exists(outputPath));
 		
-		
 		String actualContents = "";
-		try (Stream<String> stream = Files.lines(outputPath)) {
-            actualContents = stream.collect(Collectors.joining());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
 		
-			
+		actualContents = Files.lines(outputPath).collect(Collectors.joining());
+		
 		String expectedContents = "";
 		String resourceFileName = "array_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
@@ -178,19 +162,10 @@ class TemplateListTest {
 		
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
-		
-		try (Stream<String> stream = Files.lines(expectedFile)) {
-			
-			expectedContents = stream.collect(Collectors.joining());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}	
-	
-				
-		//assertThat(actualContents, is(expectedContents));
+		expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+					
 		assertEquals(expectedContents, actualContents);
-		
-		
+	
 	}
 	
 	@Disabled
@@ -201,8 +176,45 @@ class TemplateListTest {
 	}
 	
 	@Test
-	public void testReadList() {
-		fail("Not yet implmented");
+	public void testReadList() throws Exception {
+		templateFile = templatesPath.resolve(listTemplateFileName);
+		TestUtilities.copyFromResource(listTemplateFileName, templateFile);  
+		
+		assertTrue(Files.exists(templateFile));
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		template.config(templateFile);
+		
+		
+		Works works = new Works();
+		works.setTitle("The Works of Plato");
+		works.setAuthor("Plato");
+		works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_(Plato)")));
+		works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_(Plato)")));
+		works.addReference(new Reference("The Republic", new URL("https://en.wikisource.org/wiki/The_Republic_of_Plato")));
+			
+		Path outputPath = fileSystem.getPath("list_actual.md");
+		
+		template.generate(works, outputPath);
+		
+		assumeTrue(Files.exists(outputPath));
+		
+		// Now read in the file and reconstruct the object 
+		Works rWorks = (Works) template.read(Works.class,  outputPath);
+		
+		assertEquals("Plato", rWorks.getAuthor());
+		assertEquals("The Works of Plato", rWorks.getTitle());
+		
+		assertEquals(3, rWorks.numberReferences());
+		assertEquals("Apology", rWorks.getReference(0).getTitle());
+		assertEquals("https://en.wikisource.org/wiki/Apology_(Plato)", rWorks.getReference(0).getLink().toString());
+		assertEquals("Charmides", rWorks.getReference(1).getTitle());
+		assertEquals("https://en.wikisource.org/wiki/Charmides_(Plato)", rWorks.getReference(1).getLink().toString());
+		assertEquals("The Republic", rWorks.getReference(2).getTitle());
+		assertEquals("https://en.wikisource.org/wiki/The_Republic_of_Plato", rWorks.getReference(2).getLink().toString());
+		
+		
 	}
 	
 
