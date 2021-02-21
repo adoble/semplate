@@ -297,7 +297,25 @@ public class ValueMap {
 
 	}
 
-
+   
+	/** 
+	 * Returns a value map containing one value. 
+	 * 
+	 * If the compound field name list contains a single element (e.g "nomen"), and the value is "Augustus", 
+	 * then a value map is created with one field with one value, i.e. 
+	 *      (nomen="Augustus")
+     *
+     * If the compound field name list contains a more then one element then a set of nested value maps 
+     * are created, with the last field name in the list being the field name of the specified value,#
+     * e.g. with a field name list of elements (emperors, 3, nomen) and the value of "Augustus", the 
+     * following nested value ap structure is created: 
+     * 
+     *      (emperors=(3=(nomen="Augustus")))
+	 * 
+	 * @param compoundFieldName An ordered list of fieldnames. 
+	 * @param value The value of the specified field
+	 * @return A ValueMap containing the specified element
+	 */
 	public static ValueMap of(List<String> compoundFieldName, String value) {
 		ValueMap valueMap = new ValueMap();
 		
@@ -319,7 +337,31 @@ public class ValueMap {
 		return valueMap;
 	}
 
-
+	/** 
+	 * Returns a value map containing one value constructed from the specified nameValuePair string. 
+	 * 
+	 * Examples: 
+	 * If the name value pair parameter contains a single element (e.g "nomen"), and the value is "Augustus", then the name value pair 
+	 * is specified using the following string:
+	 *     "nomen=Augustus"
+	 * This created a value map with one name value pair: 
+	 *     (nomen="Augustus")
+     *
+     * If the name value pair parameter contains a list of fieldnames seperated with dot characters, then a set of nested value maps 
+     * are created, with the last field name being the field name of the specified value, e.g. the string:
+     * 
+     *      "emperors.3.nomen=Augustus"
+     *   
+     * results in a nested value map being created, i.e. 
+     * 
+     *      (emperors=(3=(nomen="Augustus")))
+	 * 
+	 * @param nameValuePair A name value pair consisting of a dot separated list of bested field names, an equals sign and 
+	 * then the value in quotes.
+	 *  
+	 * @param value The value of the specified field
+	 * @return A ValueMap containing the specified element
+	 */ 
 	public static ValueMap of(String nameValuePair) {
 		// Extract the (possibly multi-part) field name and the value. 
 		List<String> elements = Splitter.on('=')
