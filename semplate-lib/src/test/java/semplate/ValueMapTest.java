@@ -511,6 +511,8 @@ class ValueMapTest {
 		
 		assertEquals("value", vm.getValue("field").orElse(""));
 		
+		System.out.println(vm);
+		
 	}
 
 	@Test
@@ -536,6 +538,8 @@ class ValueMapTest {
 		
 		assertEquals("Augustus", vmChild2.getValue("nomen").orElse(""));
 		
+		System.out.println(vmRoot);
+		
 		
 	}
 	
@@ -553,6 +557,8 @@ class ValueMapTest {
 		assertFalse(vmChild2.isEmpty());
 		assertTrue(vmChild2.containsField("field3"));
 		assertEquals("value", vmChild2.getValue("field3").orElse(""));
+		
+		System.out.println(vmRoot);
 		
 	}
 	
