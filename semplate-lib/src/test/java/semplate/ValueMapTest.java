@@ -502,7 +502,61 @@ class ValueMapTest {
 		assertEquals(expected, valueMap.toString());
 
 	}
+	
 
+	
+	@Test
+	void testCreationWithString() {
+		ValueMap vm = ValueMap.of("field=value");
+		
+		assertEquals("value", vm.getValue("field").orElse(""));
+		
+	}
+
+	@Test
+	void testCreationWithFieldNameList() {
+		
+		List<String> compoundFieldNameList = new ArrayList<>();
+		
+		compoundFieldNameList.add("emperors");
+		compoundFieldNameList.add("3");
+		compoundFieldNameList.add("nomen");
+		
+		ValueMap vmRoot = ValueMap.of(compoundFieldNameList, "Augustus");
+		assertTrue(vmRoot.containsField("emperors"));
+	   
+		ValueMap vmChild1 = vmRoot.getValueMap("emperors").orElse(ValueMap.empty());
+		assertFalse(vmChild1.isEmpty());
+		assertTrue(vmChild1.containsField("3"));
+		
+		ValueMap vmChild2 = vmChild1.getValueMap("3").orElse(ValueMap.empty());
+		assertFalse(vmChild2.isEmpty());
+		assertTrue(vmChild2.containsField("nomen"));
+		
+		
+		assertEquals("Augustus", vmChild2.getValue("nomen").orElse(""));
+		
+		
+	}
+	
+	
+	@Test
+	void testCreationWithCompoundFieldnameString() {
+		ValueMap vmRoot = ValueMap.of("field1.field2.field3=value");
+		assertTrue(vmRoot.containsField("field1"));
+		
+		ValueMap vmChild1 = vmRoot.getValueMap("field1").orElse(ValueMap.empty());
+		assertFalse(vmChild1.isEmpty());
+		assertTrue(vmChild1.containsField("field2"));
+		
+		ValueMap vmChild2 = vmChild1.getValueMap("field2").orElse(ValueMap.empty());
+		assertFalse(vmChild2.isEmpty());
+		assertTrue(vmChild2.containsField("field3"));
+		assertEquals("value", vmChild2.getValue("field3").orElse(""));
+		
+	}
+	
+	
 
 
 }

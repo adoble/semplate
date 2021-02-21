@@ -2,6 +2,10 @@ package semplate.valuemap;
 
 import java.util.*;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
 /**
  * Maps values to field names. 
  *  
@@ -291,6 +295,47 @@ public class ValueMap {
 
 		return "(" + sb.toString().replaceAll(",$", "") + ")"; // Add parenthesis and remove any trailing commas
 
+	}
+
+
+	public static ValueMap of(List<String> compoundFieldName, String value) {
+		ValueMap valueMap = new ValueMap();
+		
+		// Now parse the fieldname
+		List<String> fieldnameParts = compoundFieldName;
+		
+		if (fieldnameParts.size() == 1) { // This is a simple fieldname value pair
+			valueMap.put(fieldnameParts.get(0), value);
+		} else if  (fieldnameParts.size() > 1) {  
+			// This is a multi-part fieldname so construct nested valueMaps and assign
+			String fullFieldNameHead = fieldnameParts.get(0);
+			List<String> fullFieldNameTail = fieldnameParts.subList(1, fieldnameParts.size()); 
+			
+			ValueMap vm = ValueMap.of(fullFieldNameTail, value);
+			valueMap.put(fullFieldNameHead, vm);
+			
+		}
+		
+		return valueMap;
+	}
+
+
+	public static ValueMap of(String nameValuePair) {
+		// Extract the (possibly multi-part) field name and the value. 
+		List<String> elements = Splitter.on('=')
+				.trimResults(CharMatcher.is('\"')) //Quotes around values are removed
+				.splitToList(nameValuePair);
+		
+				
+		String fullFieldName = elements.get(0);
+		String value = elements.get(1);
+		
+		// Now parse the fieldname
+		List<String> fieldnameParts = Splitter.on('.').splitToList(fullFieldName);
+		
+		ValueMap vm = ValueMap.of(fieldnameParts, value);
+		
+		return vm;
 	}
 	
 
