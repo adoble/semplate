@@ -18,6 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
 import semplate.valuemap.ValueMap;
@@ -28,6 +32,10 @@ import java.net.URL;
 
 /**
  * TODO
+ * @author Andrew
+ *
+ */
+/**
  * @author Andrew
  *
  */
@@ -53,7 +61,7 @@ public class Template  {
 
 	/**
 	 * TODO
-	 * @param templatePath
+	 * @param templatePath 
 	 */
 	public Template() {
 		super();  //TODO required?
@@ -115,9 +123,6 @@ public class Template  {
             		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
             		.collect(Collectors.toList());
 
-            replacements.forEach(s -> System.out.println("--->" + s));
-
-            //System.out.println(String.join("\n", replacements));
             Files.write(outputFilePath, replacements);
 	    }
 
@@ -149,13 +154,7 @@ public class Template  {
 
 		ValueMap valueMap = readValueMap(markupFilePath);
 
-		System.out.println("ValueMap:\n" + valueMap);
-
 		dataObject = constructDataObject(objectClass, valueMap);
-
-
-		System.out.println(valueMap);
-
 
 		return dataObject;
 	}
@@ -167,7 +166,8 @@ public class Template  {
 			 valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
 			      .flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
 			      .filter(s -> !s.contains("template.comment"))  // Filter out the template.comment directive TODO change
-			      .map(nameValuePair -> constructValueMap(nameValuePair))
+			      //.map(nameValuePair -> constructValueMap(nameValuePair))
+			      .map(nameValuePair -> ValueMap.of(nameValuePair))
 			      //.collect(ArrayList::new, (r,s) -> accumulateList(r,s), (r, s) -> combineList(r,s));
 			      //.collect(ArrayList<String>::new, (r,s) -> accumulate(r,s), (r1, r2) -> combine(r1,r2));
 			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
@@ -178,6 +178,7 @@ public class Template  {
 		} catch (IOException e) {
 			throw new ReadException(e);
 		}
+		
 		return valueMap;
 	}
 
@@ -193,10 +194,6 @@ public class Template  {
 			throw new ReadException();
 		}
 
-
-
-		System.out.println("VALUEMAP:\n" + valueMap);
-
 		// Using the entries in the value map find the corresponding fields and set them.
 		// TODO simple case first
 		Set<String> fieldNames = valueMap.fieldNames();
@@ -205,8 +202,7 @@ public class Template  {
 			// Get the value
 			if (!valueMap.isValueMap(fieldName)) {
 				Optional<Object> fieldValue = valueMap.getValue(fieldName);
-				System.out.println("   " + fieldName + ":==" + fieldValue.orElse("EMPTY"));
-
+				
 				Field field;
 				try {
 					field = dataObject.getClass().getDeclaredField(fieldName);
@@ -240,7 +236,6 @@ public class Template  {
 		if (fieldValue.isEmpty()) return;
 		String valStr = fieldValue.orElseThrow().toString();
 
-		System.out.println(field.getType());
 		Class<?> fieldType = field.getType();
 
 		field.setAccessible(true);
@@ -323,117 +318,16 @@ public class Template  {
 
 	}
 
-
-	private ValueMap constructValueMap(String nameValuePair) {
-		ValueMap valueMap = new ValueMap();
-
-		Map<String, String> parsedNameValuePair = ExpressionParser.parse(nameValuePair);
-
-		if (parsedNameValuePair.containsKey("subFieldName") && parsedNameValuePair.containsKey("index")) {
-			// List reference pair of the form:
-			//   fieldname.subFieldName[index]="value"
-			if (parsedNameValuePair.containsKey("fieldName") && parsedNameValuePair.containsKey("value")) {
-			  ValueMap subValueMap = new ValueMap();
-              subValueMap.put(parsedNameValuePair.get("subFieldName"), parsedNameValuePair.get("value"));
-              valueMap.add(parsedNameValuePair.get("fieldName"), subValueMap);
-			} else {
-				valueMap.put("ERROR:" , "Meta data incorrect:(" + nameValuePair + ")");
-			}
-		} else {
-			//Simple value pair of the form:
-			//   fieldName="value"
-			if (parsedNameValuePair.containsKey("fieldName") && parsedNameValuePair.containsKey("value"))
-			 valueMap.put(parsedNameValuePair.get("fieldName"), parsedNameValuePair.get("value"));
-			else {
-				valueMap.put("ERROR:" , "Meta data incorrect:(" + nameValuePair + ")");
-			}
-		}
-
-		System.out.print("C::" + nameValuePair + "----->");
-		System.out.println(valueMap);
+    
 
 
 
-	    return valueMap;
-
-	}
-
-
-	// TODO make this secure if the user has modified the file.
-	private ValueMap constructValueMapTODELETE(String nameValuePair)  {
-		Optional<String> fieldName = Optional.empty();
-		Optional<String> subFieldName = Optional.empty();
-		Optional<String> valueString = Optional.empty();
-		Optional<Integer> index = Optional.empty();
-
-		//Parse the string
-		String[] parts = nameValuePair.split("[.]|=|\\[|\\]");
-
-//		System.out.print("parts:");
-//		for (String part: parts) {
-//			System.out.print(part);
-//			System.out.print(", ");
-//			}
-//		System.out.println();
-
-		System.out.println("Input -->" + nameValuePair);
-
-
-
-
-		if (parts.length == 2) {
-			fieldName = Optional.of(parts[0]);
-			valueString = Optional.of(parts[1].replace("\"",  ""));  // Removing quotes);
-		}
-		if (parts.length == 5) {
-			fieldName = Optional.of(parts[0]);
-			subFieldName = Optional.of(parts[1]);
-			index = Optional.of(Integer.parseInt(parts[2]));
-			valueString = Optional.of(parts[4].replace("\"",  ""));  // Removing quotes
-		}
-
-	    StringBuffer sb = new StringBuffer();
-	    fieldName.ifPresent(s -> sb.append(s));
-	    subFieldName.ifPresent(s -> sb.append('.').append(s));
-	    index.ifPresent(s -> sb.append('[').append(s).append(']'));
-	    valueString.ifPresent(s -> sb.append('=').append(s));
-
-
-
-	    System.out.println(sb);
-
-
-
-		// Now split the fieldname if it has a list qualifier (e.g. [2])
-//		parts = fieldName.split("\\[|\\]");
-//		if (parts.length > 1) {
-//			fieldName = parts[0];
-//			index = Integer.parseInt(parts[1]);
-//		}
-
-		ValueMap vm = new ValueMap();
-//		if (index == null) {
-//			vm.put(fieldName, valueString);
-//		} else {
-//			ValueMap vmList = new ValueMap;
-//			vmList.add
-//			vm.add(fieldName, valueString)
-//		}
-
-
-		return vm;
-
-
-	}
 
 	private void accumulateList(ArrayList<String> r, String s) {
-		System.out.println("ACCUMULATE: " + s);
 		r.add(s);
-
 	}
 
 	private void combineList(ArrayList<String> r1, ArrayList<String> r2) {
-		System.out.println("COMBINE");
 		r1.addAll(r2);
 	}
 
@@ -671,8 +565,6 @@ public class Template  {
 
 					try {
 						fieldValue = field.get(dataObject);
-
-						System.out.println(fieldValue.getClass().getName());
 
 						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
 							// Scalar value
