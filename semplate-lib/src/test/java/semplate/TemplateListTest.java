@@ -175,6 +175,7 @@ class TemplateListTest {
 		fail("Nor yet implemented");
 	}
 	
+	@Disabled
 	@Test
 	public void testReadList() throws Exception {
 		templateFile = templatesPath.resolve(listTemplateFileName);
