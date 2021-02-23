@@ -158,7 +158,6 @@ public class ValueMap {
 	 * @return This value map.
 	 * TODO check if the same return value is used for all like this. 
 	 */
-	//public Object put(String fieldName, Object dataObject) {
 	public ValueMap put(String fieldName, Object dataObject) {
 		
 		int index = fieldName.indexOf('.');
@@ -175,7 +174,44 @@ public class ValueMap {
 		return this;
 	}
 	
+	/**
+	 * Add a value map to a list of value maps associated with a field		
+	 * 
+	 * For instance:
+	 * <code>
+	 *   ValueMap vm = new ValueMap();
+	 *   vm.add("emperors", "0", emperorValueMap[0]);
+	 *   vm.add("emperors", "1", emperorValueMap[1]);
+	 * </code>  
+	 * will:
+	 * a) create a new value map and map it to the field name "emperors"
+	 * b) in the new value map will create a field "0" and map the value map emperorValueMap[0] to it. 
+	 * c) in the new value map will create a field "1" and map the value map emperorValueMap[1] to it. 
+	 * 
+	 * If the following line is then executed: 
+	 * <code>
+	 *   vm.add("emperors", "0", emperorValueMap[3]);
+	 * </code>  
+	 * then the field emperors.0 will be <strong>replaced</strong> by emperorValueMap[3]
+	 * 
+	 * Note: Although the parameter is called ordinalFieldName, the values do not need to be string 
+	 * representations of integers.
+	 * 
+	 * @param fieldName The name of field to contain the mappings to the value maps
+	 * @param ordinalFieldName The name of the field that the added value map is mapped to
+	 * @param map The value map to be added 
+	 * @return This value map
+	 */
+	public ValueMap add(String fieldName, String ordinalFieldName, ValueMap map) {
+        ValueMap ordinalValueMap;
 		
+		ordinalValueMap = getValueMap(fieldName).orElse(ValueMap.empty());
+		ordinalValueMap.put(ordinalFieldName, map);
+		
+	    this.put(fieldName, ordinalValueMap);
+		
+		return this;
+	}
 
 	/**
 	 * Add a value map to a field by automatically giving an ordinal number as field name.
@@ -201,20 +237,15 @@ public class ValueMap {
 	public ValueMap add(String fieldName, ValueMap map) {
 		ValueMap ordinalValueMap;
 		
-		if (!containsField(fieldName)) {
-			ordinalValueMap = new ValueMap(); 
-			put(fieldName, ordinalValueMap);
-		}
-		
+	
 		// Generate an ordinal number as key for the new value map, by first finding the key that 
 		// represents the highest ordinal number and then creating a new key that represents a digit
 		// one higher. 
 		ordinalValueMap = getValueMap(fieldName).orElse(ValueMap.empty());
 		Integer maxKey = ordinalValueMap.fieldNames().stream().mapToInt(Integer::parseInt).max().orElse(-1);
-		ordinalValueMap.put(Integer.valueOf(maxKey + 1).toString(), map);
-		
+		this.add(fieldName, Integer.valueOf(maxKey + 1).toString(), map);
+				
 		return this;
-		
 	}
 	
 	/**
