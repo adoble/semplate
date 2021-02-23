@@ -224,19 +224,47 @@ public class ValueMap {
 	 */
 	public ValueMap merge(ValueMap other) {
 		
+		System.out.println("Merge this --->");
+		System.out.println(other);
+		System.out.println("with this --->");
+		System.out.println(this);
+		
 		for (String fieldName: other.fieldNames()) {
 			
 			// Overwrite or add the entries that do not have a value map
 			other.getValue(fieldName).ifPresent(obj -> this.put(fieldName, obj));
 			
+		    //other.getValueMap(fieldName).ifPresent(obj -> this.merge(obj));
+		    
+		    
+		    if (other.isValueMap(fieldName)) {
+		    	ValueMap otherFieldVM = other.getValueMap(fieldName).get();
+		    	
+		    	if (this.isValueMap((fieldName))) {
+		    		ValueMap thisFieldVM = this.getValueMap(fieldName).get();
+		    		thisFieldVM.merge(otherFieldVM);
+		    	} else {
+		    		//No field present
+		    		this.put(fieldName, otherFieldVM);
+		    	}
+		    	
+		    }
+				
+			
+			
 			// Add the ordinal value maps from the source to the target
 			//other.getValueMap(fieldName).ifPresent(vm -> this.add(fieldName, vm));
 			
-			ValueMap ordinalValueMap = other.getValueMap(fieldName).orElse(ValueMap.empty());
-			for (String ordinalFieldName : ordinalValueMap.fieldNames()) {
-				ordinalValueMap.getValueMap(ordinalFieldName).ifPresent(vm -> this.add(fieldName, vm));
-			}
+//			ValueMap ordinalValueMap = other.getValueMap(fieldName).orElse(ValueMap.empty());
+//			for (String ordinalFieldName : ordinalValueMap.fieldNames()) {
+//				ordinalValueMap.getValueMap(ordinalFieldName).ifPresent(vm -> this.add(fieldName, vm));
+//			}
 		}
+		
+		System.out.println("Merge result --->");
+		System.out.println(this);
+		System.out.println();
+		
 		
 		return this;
 			
