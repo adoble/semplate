@@ -232,9 +232,10 @@ public class ValueMap {
 	 * 
 	 * @param fieldName The name of field to contain the ordinal mappings to the value maps.
 	 * @param map The value map to be added 
+	 * @param startingOrdinal The ordinal number to start from if no mappings exist
 	 * @return This value map
 	 */
-	public ValueMap add(String fieldName, ValueMap map) {
+	public ValueMap add(String fieldName, ValueMap map, int startingOrdinal) {
 		ValueMap ordinalValueMap;
 		
 	
@@ -242,10 +243,17 @@ public class ValueMap {
 		// represents the highest ordinal number and then creating a new key that represents a digit
 		// one higher. 
 		ordinalValueMap = getValueMap(fieldName).orElse(ValueMap.empty());
-		Integer maxKey = ordinalValueMap.fieldNames().stream().mapToInt(Integer::parseInt).max().orElse(-1);
+		Integer maxKey = ordinalValueMap.fieldNames().stream().mapToInt(Integer::parseInt).max().orElse(startingOrdinal - 1);
 		this.add(fieldName, Integer.valueOf(maxKey + 1).toString(), map);
 				
 		return this;
+	}
+	
+	public ValueMap add(String fieldName, ValueMap map) {
+		this.add(fieldName, map, 0); // Start a zero
+		
+		return this;
+		
 	}
 	
 	/**

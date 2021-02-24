@@ -220,6 +220,35 @@ class ValueMapTest {
 		assertEquals("Nerva",    expectedMap.getValue("emperors.3.nomen").orElse(""));
 		
 	}
+	
+	@Test
+	void testAddWithOrdinals() {
+      ValueMap expectedMap = ValueMap.empty();
+      
+      expectedMap.add("emperors", maps[0]);
+      expectedMap.add("emperors", maps[1]);
+      expectedMap.add("emperors", maps[2]);
+      
+      assertEquals("Augustus", expectedMap.getValue("emperors.0.nomen").orElse(""));
+      assertEquals("Tiberius", expectedMap.getValue("emperors.1.nomen").orElse(""));
+      assertEquals("Caligula", expectedMap.getValue("emperors.2.nomen").orElse(""));
+	
+	}
+	
+	@Test
+	void testAddWithOrdinalsAndStart() {
+      ValueMap expectedMap = ValueMap.empty();
+      
+      expectedMap.add("emperors", maps[0], 6);
+      expectedMap.add("emperors", maps[1]);
+      expectedMap.add("emperors", maps[2]);
+      
+      assertEquals("Augustus", expectedMap.getValue("emperors.6.nomen").orElse(""));
+      assertEquals("Tiberius", expectedMap.getValue("emperors.7.nomen").orElse(""));
+      assertEquals("Caligula", expectedMap.getValue("emperors.8.nomen").orElse(""));
+	
+	}
+	
 
 	@Test
 	void testLists() {
@@ -510,11 +539,11 @@ class ValueMapTest {
         valueMap.merge(toMerge);
 
 
-        toMerge = (new ValueMap()).add("children",  (new ValueMap().put("praenomen", "Octavia").put("nomen", "Aurelius")));
+        toMerge = (new ValueMap()).add("children",  (new ValueMap().put("praenomen", "Octavia").put("nomen", "Aurelius")), 1);
         valueMap.merge(toMerge);
 
 
-        valueMap.merge((new ValueMap()).add("children",  (new ValueMap().put("praenomen", "Tatiana").put("nomen", "Aurelius"))));
+        valueMap.merge((new ValueMap()).add("children",  (new ValueMap().put("praenomen", "Tatiana").put("nomen", "Aurelius")), 2));
 
         assertEquals("(praenomen=Marcus,"
         		+ "children=(0=(praenomen=Pricilla,nomen=Aurelius),"
