@@ -5,6 +5,10 @@ import java.net.URL;
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
 
+/**
+ * @author Andrew
+ *
+ */
 @Templatable
 public class Reference {
 	@TemplateField 
@@ -12,6 +16,16 @@ public class Reference {
 	
 	@TemplateField
 	private URL link;
+	
+	
+	/** Templatable classes need to have an empty constructor
+	 * TODO check for this in the code
+	 * TODO document this
+	 * 
+	 */
+	public Reference() {
+		
+	}
 
 	public Reference(String title, URL link) {
 		super();
@@ -34,5 +48,12 @@ public class Reference {
 	public void setLink(URL link) {
 		this.link = link;
 	}
+
+	@Override
+	public String toString() {
+		return "Reference [title=" + title + ", link=" + link + "]";
+	}
+	
+   
 
 }

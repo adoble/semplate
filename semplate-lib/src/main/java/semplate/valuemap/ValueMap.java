@@ -5,6 +5,7 @@ import java.util.*;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * Maps values to field names. 
@@ -121,24 +122,117 @@ public class ValueMap {
 	 * As such the method can be viewed as returning a list of the value maps that have been added to 
 	 * a field. 
 	 * 
+	 * Graphically, with <i>VM</i> being a value map, <i>v</i> being a simple value and <i>f</i> a field name, an example 
+	 * value map structure can be represented as:
+	 * 
+	 *          
+	 *                        +-----------+
+	 *                        |    VM0    |
+	 *                        +--+-+-+-+--+
+	 *        +----------------+ | | | | +---------------+
+	 *        |                  | | | |                 |
+	 *        |       +----------+ | | +---------+       |
+	 *      f1|     f2|            | |         f5|     f6|
+	 *        |       |        +---+ +--+        |       |
+	 *        |       |      f3|      f4|        |       |
+	 *      +---+  +--+--+  +-----+  +-----+  +--+--+  +---+
+	 *      | v1|  | VM1 |  | VM2 |  | VM3 |  | VM4 |  | v2|
+	 *      +---+  +-----+  ++-+-++  +-----+  +-----+  +---+
+	 *                       | | |
+	 *                +------+ | +-------+
+	 *              f7|      f8|       f9|
+	 *             +-----+  +-----+   +-----+
+	 *             | VM5 |  | VM6 |   | VM7 |
+	 *             +-----+  +-----+   +-----+
+	 *
+	 *
+	 * Calling <code>VM0.getValueMaps(f3)</code> would return:
+	 *       {VM5, VM6, VM7}
+	 *       
+	 * Calling <code>VM0.getValueMaps(f2)</code> would return:
+	 *       {} , i.e an empty list
+	 *      
+	 * and calling <code>VM0.getValueMaps(f1) would also return {}.
+	 * 
+	 * @see #getValueMaps()
+	 *            
 	 * @param fieldName The field name of the value maps containing the ordinal field names
 	 * @return A list of value maps 
 	 */
 	public List<ValueMap> getValueMaps(String fieldName) {
-		List<ValueMap> list = new ArrayList<>();
+//		List<ValueMap> list = new ArrayList<>();
+//
+//		Optional<ValueMap> entry = this.getValueMap(fieldName);
+//
+//		Set<String> fieldNameSet = entry.orElse(ValueMap.empty()).fieldNames();
+//		
+//
+//		ValueMap ordinalEntry;
+//		for(String ordinalFieldName : fieldNameSet) {
+//			ordinalEntry = entry.orElse(ValueMap.empty());
+//			ordinalEntry.getValueMap(ordinalFieldName).ifPresent(vm -> list.add(vm));
+//		}
+		
+		checkArgument(this.isValueMap(fieldName), "Fieldname %s does not contain a value map", fieldName);
+		
+		ValueMap fieldVM = this.getValueMap(fieldName).orElse(ValueMap.empty());
+		
+		return fieldVM.getValueMaps();
 
-		Optional<ValueMap> entry = this.getValueMap(fieldName);
 
-		Set<String> fieldNameSet = entry.orElse(ValueMap.empty()).fieldNames();
-
-		ValueMap ordinalEntry;
-		for(String ordinalFieldName : fieldNameSet) {
-			ordinalEntry = entry.orElse(ValueMap.empty());
-			ordinalEntry.getValueMap(ordinalFieldName).ifPresent(vm -> list.add(vm));
+	}
+	
+	/**  Returns a list of all value maps contained in the fields of this value map
+	 * 
+     * Graphically, with VM being a value map, v being a simple value and f a field name, an example 
+	 * value map structure can be represented as:
+	 * 
+	 *          
+	 *                        +-----------+
+	 *                        |    VM0    |
+	 *                        +--+-+-+-+--+
+	 *        +----------------+ | | | | +---------------+
+	 *        |                  | | | |                 |
+	 *        |       +----------+ | | +---------+       |
+	 *      f1|     f2|            | |         f5|     f6|
+	 *        |       |        +---+ +--+        |       |
+	 *        |       |      f3|      f4|        |       |
+	 *      +---+  +--+--+  +-----+  +-----+  +--+--+  +---+
+	 *      | v1|  | VM1 |  | VM2 |  | VM3 |  | VM4 |  | v2|
+	 *      +---+  +-----+  ++-+-++  +-----+  +-----+  +---+
+	 *                       | | |
+	 *                +------+ | +-------+
+	 *              f7|      f8|       f9|
+	 *             +-----+  +-----+   +-----+
+	 *             | VM5 |  | VM6 |   | VM7 |
+	 *             +-----+  +-----+   +-----+
+	 *
+	 *
+	 * Calling <code>VM0.getValueMaps()</code> would return:
+	 *       {VM1, VM2, VM3, VM4}
+	 *       
+	 * Calling <code>VM1.getValueMaps()</code> would return:
+	 *       {VM5, VM6, VM7}
+	 *      
+	 * and calling <code>VM4.getValueMaps would return {}, i.e an empty list.
+	 * 
+	 * 
+	 * @see #getValueMaps(String)
+	 * @return A list of the value maps at the top level of this value map.
+	 */
+	public List<ValueMap> getValueMaps() {
+		List<ValueMap> vmList = new ArrayList<>();
+		
+		Set<String> fieldNameSet = this.fieldNames();
+		
+		
+		for (String fieldName: fieldNameSet) {
+			if (this.isValueMap(fieldName)) {
+				vmList.add(this.getValueMap(fieldName).get());
+			}
 		}
-
-		return list;
-
+		
+		return vmList;
 	}
 	
 	/**
@@ -263,11 +357,6 @@ public class ValueMap {
 	 */
 	public ValueMap merge(ValueMap other) {
 		
-		System.out.println("Merge this --->");
-		System.out.println(other);
-		System.out.println("with this --->");
-		System.out.println(this);
-		
 		for (String fieldName: other.fieldNames()) {
 			
 			// Overwrite or add the entries that do not have a value map
@@ -299,11 +388,6 @@ public class ValueMap {
 //				ordinalValueMap.getValueMap(ordinalFieldName).ifPresent(vm -> this.add(fieldName, vm));
 //			}
 		}
-		
-		System.out.println("Merge result --->");
-		System.out.println(this);
-		System.out.println();
-		
 		
 		return this;
 			
@@ -446,6 +530,9 @@ public class ValueMap {
 		
 		return vm;
 	}
+
+
+	 
 	
 
 

@@ -56,7 +56,6 @@ public class TemplateReadTest {
 	  fileSystem.close();
 	}
 	
-	@Disabled
 	@Test
 	void testRead() throws Exception {
 		

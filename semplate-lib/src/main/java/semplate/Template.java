@@ -21,6 +21,7 @@ import java.util.stream.*;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import static com.google.common.base.Preconditions.*;
 
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
@@ -131,7 +132,8 @@ public class Template  {
 	}
 
 	/**
-	 * Updates a markdown files using the annotated fields in the object .
+	 * Updates a markdown file using the annotated fields in the {@code object}
+	 *  .
 	 *
 	 * @param object
 	 * @param outputFilePath
@@ -187,7 +189,7 @@ public class Template  {
 
 		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
 		try {
-			dataObject = objectClass.getDeclaredConstructor().newInstance();
+			dataObject = objectClass.getDeclaredConstructor().newInstance();  // Note: constructor can be private TODO check this
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			// TODO Auto-generated catch block
@@ -222,6 +224,34 @@ public class Template  {
 
 			} else {
                //TODO --> value is a value map
+				System.out.println(fieldName + "=" + valueMap.getValueMap(fieldName).orElse(ValueMap.empty()));
+				Field field;
+				
+				try {
+					field = dataObject.getClass().getDeclaredField(fieldName);
+					if (field.getAnnotation(TemplateField.class) != null ) {
+						if (field.getType() == List.class) {
+							setListField(dataObject, field, valueMap.getValueMap(fieldName).orElse(ValueMap.empty()));
+						}
+						/*
+					    Options
+						1. target field is a list: determine list of what? (--> move all this code to setListField)
+					          1.1 Create a list of this type and add the elements
+					    2. target fieled is map: determine map of what? dot dot dot (--> move all of this code to setMapField)
+					    3. target field is another type of object : 
+					       3.1 unpack value map needes
+					       3.2 fields of the object need to be filled. This should be recursive.
+					   */
+
+					} else {
+						// If the field has not been annotated then silently ignore
+					}
+				} catch (NoSuchFieldException | SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
 			}
 		}
 
@@ -233,7 +263,7 @@ public class Template  {
 
 	private void setField(Object dataObject, Field field, Optional<Object> fieldValue) {
 
-		if (fieldValue.isEmpty()) return;
+		if (fieldValue.isEmpty()) return;  // TODO replace with checkArgument?
 		String valStr = fieldValue.orElseThrow().toString();
 
 		Class<?> fieldType = field.getType();
@@ -319,7 +349,53 @@ public class Template  {
 	}
 
     
+  /**
+ * @param dataObject
+ * @param field
+ * @param valueMap
+ * @throws IllegalArgumentException if the specified filedis not of type #
+ */
+private void setListField (Object dataObject, Field field, ValueMap valueMap) {
+	  checkArgument(field.getType() == List.class, "The specified field name %s is not of type %s", field.getName(), List.class.getName());
+	  
+	 
+	  //Class<?> fieldType = field.getType();
+      field.setAccessible(true);
 
+	  // Determine the type of list object in the data object ?
+	  Type genericType = field.getGenericType();
+	 
+	  // Extract the parameterised type name
+	  String paraTypeName = Splitter.on('<')
+			  .trimResults(CharMatcher.is('>'))
+			  .omitEmptyStrings()
+			  .splitToList(genericType.getTypeName()).get(1);
+	  	 
+	 // Now construct data objects for that type and fill them out with the data in the value map entries.  
+	 List<ValueMap> vmList = valueMap.getValueMaps();
+	 for (ValueMap vmEntry : vmList) {
+		try {
+			Class<?> paramClass = Class.forName(paraTypeName); //TODO move outside try block
+			
+			// Now construct a data object of paramClass from the value map 
+			Object listEntryDataObject = constructDataObject(paramClass,vmEntry);
+			
+			@SuppressWarnings("unchecked")
+			List<Object> dataObjectList = (List<Object>)field.get(dataObject);
+			
+		    dataObjectList.add(listEntryDataObject)	;	
+	
+		
+		} catch (ReadException | ClassNotFoundException | IllegalArgumentException | IllegalAccessException  e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+	}
+	
+
+	  
+  }
 
 
 

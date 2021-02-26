@@ -249,6 +249,43 @@ class ValueMapTest {
 	
 	}
 	
+	@Test
+	void testGetValueMaps() {
+
+		ValueMap testMap = ValueMap.empty();
+
+		testMap.add("emperors", maps[0], 0);
+		testMap.add("emperors", maps[1]);
+		testMap.add("emperors", maps[2]);
+		
+	    ValueMap vm = testMap.getValueMap("emperors").orElse(ValueMap.empty());
+	    List<ValueMap> vmList = vm.getValueMaps();
+	    
+	    assertEquals("Augustus", vmList.get(0).getValue("nomen").orElse(""));
+	    assertEquals("Tiberius", vmList.get(1).getValue("nomen").orElse(""));
+	    assertEquals("Caligula", vmList.get(2).getValue("nomen").orElse(""));
+		
+	
+	}
+	
+	@Test
+	void testGetValueMapsWithFieldName() {
+		
+		ValueMap testMap = ValueMap.empty();
+
+		testMap.add("emperors", maps[0], 0);
+		testMap.add("emperors", maps[1]);
+		testMap.add("emperors", maps[2]);
+		
+	    List<ValueMap> vm = testMap.getValueMaps("emperors");
+	    
+	    
+	    assertEquals("Augustus", vm.get(0).getValue("nomen").orElse(""));
+	    assertEquals("Tiberius", vm.get(1).getValue("nomen").orElse(""));
+	    assertEquals("Caligula", vm.get(2).getValue("nomen").orElse(""));
+		
+	}
+	
 
 	@Test
 	void testLists() {
