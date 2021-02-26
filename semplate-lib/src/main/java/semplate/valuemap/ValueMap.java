@@ -67,6 +67,7 @@ public class ValueMap {
 	 * Returns an optional value map that is mapped to the specified field name. 
 	 * 
 	 * The field name  can be a simple field name, e.g.
+	 * 
 	 *   <code>
 	 *   assertEquals(referenceValueMap, (String) valueMap.getValue("reference");
 	 *   </code>
@@ -152,7 +153,7 @@ public class ValueMap {
 	 * Calling <code>VM0.getValueMaps(f2)</code> would return:
 	 *       {} , i.e an empty list
 	 *      
-	 * and calling <code>VM0.getValueMaps(f1) would also return {}.
+	 * and calling <code>VM0.getValueMaps(f1)</code> would also return {}.
 	 * 
 	 * @see #getValueMaps()
 	 *            
@@ -214,7 +215,7 @@ public class ValueMap {
 	 * Calling <code>VM1.getValueMaps()</code> would return:
 	 *       {VM5, VM6, VM7}
 	 *      
-	 * and calling <code>VM4.getValueMaps would return {}, i.e an empty list.
+	 * and calling <code>VM4.getValueMaps</code> would return {}, i.e an empty list.
 	 * 
 	 * 
 	 * @see #getValueMaps(String)
@@ -509,8 +510,6 @@ public class ValueMap {
 	 * 
 	 * @param nameValuePair A name value pair consisting of a dot separated list of bested field names, an equals sign and 
 	 * then the value in quotes.
-	 *  
-	 * @param value The value of the specified field
 	 * @return A ValueMap containing the specified element
 	 */ 
 	public static ValueMap of(String nameValuePair) {

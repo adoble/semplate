@@ -1,6 +1,3 @@
-/**
- * TODO
- */
 package semplate;
 
 import java.io.BufferedReader;
@@ -31,13 +28,19 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * TODO
- * @author Andrew
- *
- */
-/**
- * @author Andrew
+
+/** Provides facilities to be able to generate, read and update markdown files using data in POJOs.
+ * 
+ *  
+ * The main functions are:
+ * 
+ * -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a {@link https://en.wikipedia.org/wiki/Plain_old_Java_object POJO. The markdown file contains semantic about the data used. 
+ * 
+ * - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
+ * 
+ * - {@linkplain #update(Object, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
+ * 
+ * @author Andrew Doble
  *
  */
 public class Template  {
@@ -61,8 +64,8 @@ public class Template  {
 
 
 	/**
-	 * TODO
-	 * @param templatePath 
+	 * Constructs and initialises a template object 
+	 * 
 	 */
 	public Template() {
 		super();  //TODO required?

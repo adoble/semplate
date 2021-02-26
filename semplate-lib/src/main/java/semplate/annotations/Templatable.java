@@ -1,6 +1,3 @@
-/**
- * 
- */
 package semplate.annotations;
 
 import static java.lang.annotation.ElementType.TYPE;
@@ -13,8 +10,9 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-/** TODO
- * @author Andrew
+/**Used to annotate classes that can be be used by #semplate.Template
+ * 
+ * @author Andrew Doble
  *
  */
 public @interface Templatable {
