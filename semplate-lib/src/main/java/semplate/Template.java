@@ -34,7 +34,7 @@ import java.net.URL;
  *  
  * The main functions are:
  * 
- * -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a {@link https://en.wikipedia.org/wiki/Plain_old_Java_object POJO. The markdown file contains semantic about the data used. 
+ * -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a POJO. The markdown file contains semantic about the data used. 
  * 
  * - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
  * 
