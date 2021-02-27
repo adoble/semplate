@@ -43,4 +43,13 @@ tasks.named('test') {
     }
 }
 
+javadoc {
+        doLast {
+            copy {
+                from "src/main/docs/img"
+                into "$buildDir/docs/javadoc/resources"
+            }
+        }
+    }
+
 sourceCompatibility = 11

@@ -108,6 +108,8 @@ public class ValueMap {
 
 	/** 
 	 * Returns a list of ValueMaps that are subordinate to the specified fieldname.
+	 * 
+	 * 
 	 * For instance:
 	 * <code>
 	 *   ValueMap[] emperors = .....
@@ -126,7 +128,7 @@ public class ValueMap {
 	 * Graphically, with <i>VM</i> being a value map, <i>v</i> being a simple value and <i>f</i> a field name, an example 
 	 * value map structure can be represented as:
 	 * 
-	 *          
+	 * <code>       
 	 *                        +-----------+
 	 *                        |    VM0    |
 	 *                        +--+-+-+-+--+
@@ -145,8 +147,12 @@ public class ValueMap {
 	 *             +-----+  +-----+   +-----+
 	 *             | VM5 |  | VM6 |   | VM7 |
 	 *             +-----+  +-----+   +-----+
-	 *
-	 *
+	 * 
+	 * </code>
+	 * 
+	 * 
+	 * <img src="./resources/vm-getvaluemaps.png" alt="Value Map Example"/>
+	 * 
 	 * Calling <code>VM0.getValueMaps(f3)</code> would return:
 	 *       {VM5, VM6, VM7}
 	 *       
@@ -269,8 +275,8 @@ public class ValueMap {
 		return this;
 	}
 	
-	/**
-	 * Add a value map to a list of value maps associated with a field		
+	/**  Add a value map to a list of value maps associated with a field.
+	 * 		
 	 * 
 	 * For instance:
 	 * <code>
