@@ -34,13 +34,17 @@ import java.net.URL;
  *  
  * The main functions are:
  * 
- * -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a POJO. The markdown file contains semantic about the data used. 
+ *<p> -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a POJO. The markdown file contains semantic about the data used. 
  * 
- * - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
+ *<p> - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
  * 
- * - {@linkplain #update(Object, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
+ *<p> - {@linkplain #update(Object, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
  * 
  * @author Andrew Doble
+ *
+ */
+/**
+ * @author Andrew
  *
  */
 public class Template  {
@@ -80,7 +84,7 @@ public class Template  {
 	/**
 	 * Specifies the template to be used in generating the markdown files.
 	 *
-	 * 	 * @param templatePath A path to the template file.
+	 * @param templatePath A path to the template file.
 	 */
 	public void config(Path templatePath) throws IOException {
 		this.templatePath = templatePath;
@@ -95,7 +99,7 @@ public class Template  {
 
 
 	/**
-	 * Specifies an input stream of the template files used for generating hte markdown files.
+	 * Specifies an input stream of the template files used for generating the markdown files.
 
 	 * @param templateStream
 	 */
@@ -136,18 +140,18 @@ public class Template  {
 
 	/**
 	 * Updates a markdown file using the annotated fields in the {@code object}
-	 *  .
+	 * 
 	 *
-	 * @param object
-	 * @param outputFilePath
+	 * @param dataObject The object containing the new data
+	 * @param markdownFilePath A path to the markdown file to be updated 
 	 */
-	public void update(Object object, Path outputFilePath) {
+	public void update(Object dataObject, Path markdownFilePath) {
 		//TODO
 	}
 
 
 	/**
-	 * Reads the specified markup file and creates a new  object of class objectClass that contains the
+	 * Reads the specified markdown file and creates a new  object of class objectClass that contains the
 	 * data semantically represented in the markdown file.
 	 *
 	 * @param objectClass  The class of the data object to be generated.
@@ -428,17 +432,35 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 
 
+	/** Returns the path to the markdown file that has been configured. 
+	 * 
+	 * @return The path to the markdown file operated on. 
+	 */
 	public Path getTemplatePath() {
 
 		return templatePath;
 	}
 
 
+	/** Returns the string used for starting comments in the markdown.
+	 * 
+	 * This is setup from the information in the template markdown file specified in during configuration. 
+	 * If no start delimiter string has been specified then this returns Optional.empty(). 
+	 * 
+	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
+	 */
 	public Optional<String> getCommentStartDelimiter() {
 		return commentStartDelimiter;
 	}
 
 
+	/** Returns the string used for ending comments in the markdown.
+	 * 
+	 * This is setup from the information in the template markdown file specified in during configuration. 
+	 * If no end delimiter string has been specified then this returns Optional.empty(). 
+	 * 
+	 * @return An <code>Optional</code> to the string used for ending comments in the markdown. 
+	 */
 	public Optional<String> getCommentEndDelimiter() {
 		return commentEndDelimiter;
 	}
