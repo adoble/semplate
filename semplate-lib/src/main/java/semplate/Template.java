@@ -34,17 +34,13 @@ import java.net.URL;
  *  
  * The main functions are:
  * 
- *<p> -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a POJO. The markdown file contains semantic about the data used. 
+ *<br> -  {@linkplain #generate(Object, Path) generate} - Generate a markdown file using a template and the data in a POJO. The markdown file contains semantic about the data used. 
  * 
- *<p> - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
+ *<br> - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
  * 
- *<p> - {@linkplain #update(Object, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
+ *<br> - {@linkplain #update(Object, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
  * 
  * @author Andrew Doble
- *
- */
-/**
- * @author Andrew
  *
  */
 public class Template  {
