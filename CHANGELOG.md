@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+* New functionality to read templates that contain lists into data objects that have fields using a List<?> interface (e.g. ArrayList etc.). 
+
 ### Changed
 
 
@@ -27,4 +29,4 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 * Simple generation of a markdown file based on a template by using the data in
   a single data object
-* Simple reading of a markdown file and creation of a data object using the sematic information in the markdown file.
+* Simple reading of a markdown file and creation of a data object using the semantic information in the markdown file.
