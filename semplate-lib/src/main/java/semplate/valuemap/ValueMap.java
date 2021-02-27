@@ -111,15 +111,19 @@ public class ValueMap {
 	 * 
 	 * 
 	 * For instance:
-	 * <code>
+	 * 
+	 * <blockquote>
+	 * <pre>
 	 *   ValueMap[] emperors = .....
 	 *   ValueMap vm = new ValueMap();
 	 *   vm.add("emperors", emperors[0]) 
 	 *   vm.add("emperors", emperors[1]) 
 	 *   vm.add("emperors", emperors[2])
-	 *   emperors.put("emporers", vm);
+	 *   emperors.put("emperors", vm);
 	 *   emperors.getValueMaps("emperors");
-	 * </code> 
+	 * </pre>
+	 * </blockquote> 
+	 * 
 	 * will return the value maps emperors[0], emperors[1] and emperors[2].
 	 *    
 	 * As such the method can be viewed as returning a list of the value maps that have been added to 
@@ -128,7 +132,7 @@ public class ValueMap {
 	 * Graphically, with <i>VM</i> being a value map, <i>v</i> being a simple value and <i>f</i> a field name, an example 
 	 * value map structure can be represented as:
 	 * 
-	 * <code>       
+	 * <pre>       
 	 *                        +-----------+
 	 *                        |    VM0    |
 	 *                        +--+-+-+-+--+
@@ -148,18 +152,20 @@ public class ValueMap {
 	 *             | VM5 |  | VM6 |   | VM7 |
 	 *             +-----+  +-----+   +-----+
 	 * 
-	 * </code>
+	 * </pre>
 	 * 
 	 * 
-	 * <img src="./resources/vm-getvaluemaps.png" alt="Value Map Example"/>
-	 * 
-	 * Calling <code>VM0.getValueMaps(f3)</code> would return:
-	 *       {VM5, VM6, VM7}
+	 * <p>Calling <code>VM0.getValueMaps(f3)</code> would return:</p>
+	 * <blockquote>      
+	 *               {VM5, VM6, VM7} 
+	 * </blockquote>
 	 *       
-	 * Calling <code>VM0.getValueMaps(f2)</code> would return:
-	 *       {} , i.e an empty list
+	 * <p>Calling <code>VM0.getValueMaps(f2)</code> would return:</p>
+	 * <blockquote>
+	 *         { } , i.e an empty list
+	 * </blockquote>
 	 *      
-	 * and calling <code>VM0.getValueMaps(f1)</code> would also return {}.
+	 * <p>and calling <code>VM0.getValueMaps(f1)</code> would also return { }.</p>
 	 * 
 	 * @see #getValueMaps()
 	 *            
@@ -194,7 +200,7 @@ public class ValueMap {
      * Graphically, with VM being a value map, v being a simple value and f a field name, an example 
 	 * value map structure can be represented as:
 	 * 
-	 *          
+	 * <pre>         
 	 *                        +-----------+
 	 *                        |    VM0    |
 	 *                        +--+-+-+-+--+
@@ -214,13 +220,18 @@ public class ValueMap {
 	 *             | VM5 |  | VM6 |   | VM7 |
 	 *             +-----+  +-----+   +-----+
 	 *
-	 *
+	 * </pre>
+	 * 
 	 * Calling <code>VM0.getValueMaps()</code> would return:
+	 * <blockquote>
 	 *       {VM1, VM2, VM3, VM4}
+	 * </blockquote>
 	 *       
 	 * Calling <code>VM1.getValueMaps()</code> would return:
+	 * <blockquote>
 	 *       {VM5, VM6, VM7}
-	 *      
+	 * </blockquote>     
+	 * 
 	 * and calling <code>VM4.getValueMaps</code> would return {}, i.e an empty list.
 	 * 
 	 * 
@@ -242,8 +253,8 @@ public class ValueMap {
 		return vmList;
 	}
 	
-	/**
-	 * Sets a mapping between the specified field name and a value object.
+	/** Sets a mapping between the specified field name and a value object.
+	 * 
 	 * 
 	 * Field names can be simple (e.g. "name") or compound. Compound field names are formed 
 	 * using a dot notation, e.g. 
@@ -314,8 +325,7 @@ public class ValueMap {
 		return this;
 	}
 
-	/**
-	 * Add a value map to a field by automatically giving an ordinal number as field name.
+	/** Add a value map to a field by automatically giving an ordinal number as field name.
 	 * 
 	 * For instance:
 	 * <code>
