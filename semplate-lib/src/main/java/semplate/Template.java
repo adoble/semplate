@@ -1,11 +1,13 @@
 package semplate;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -52,13 +54,15 @@ public class Template  {
 
 	private static enum ParseTokens {fieldname, subFieldname, index, value};
 
-	Map<ParseTokens, Optional<CharSequence>> collectionMap = new HashMap<>();
+	private Map<ParseTokens, Optional<CharSequence>> collectionMap = new HashMap<>();
 
 	private Path templatePath;
 
 	private String string;
-	Optional<String> commentStartDelimiter;
-	Optional<String> commentEndDelimiter;
+	private Optional<String> commentStartDelimiter;
+	private Optional<String> commentEndDelimiter;
+	
+	private StringBuffer block = new StringBuffer();;
 
 
 
@@ -139,10 +143,111 @@ public class Template  {
 	 * 
 	 *
 	 * @param dataObject The object containing the new data
-	 * @param markdownFilePath A path to the markdown file to be updated 
+	 * @param markdownFilePath A path to the markdown file to be updated
+	 * @throws ReadException 
 	 */
-	public void update(Object dataObject, Path markdownFilePath) {
-		//TODO
+	public void update(Object dataObject, Path markdownFilePath) throws UpdateException {
+		
+		ValueMap updatedValueMap = buildFieldValueMap(dataObject); 
+
+		// To be safe, copy the markdown file into a temp file in the same directory as the markdown files  before updating
+		Path tempFile = createTempFile(markdownFilePath);
+		
+		// TODO - split into blocks, where a block is text seperated by new lines or metadata. 
+		/*  Blocks ->
+		   # The Republic 
+		   <!--# {{title="The Republic"}}-->
+           .. empty block
+           By: Plato 
+           <!--By: {{author="Plato"}}-->
+
+           Translation by Benjamin Jowett 
+           <!--Translation by {{translator="Benjamin Jowett"}}-->
+           
+           some text
+           some more text
+           
+           Source [Wikisource](https://en.wikisource.org/wiki/The_Republic) 
+           <!--Source [{{source="Wikisource"}}]({{sourceLink="https://en.wikisource.org/wiki/The_Republic"}})-->
+		   
+		 */
+		
+		try (Stream<String> stream = Files.lines(tempFile, Charset.defaultCharset())) {
+			List<String> blocks = stream.flatMap(line -> extractBlock(line))   
+					                    .filter(block -> block.length() > 0)
+					                    .peek(s-> System.out.print(s))
+					                    .collect(Collectors.toList());
+			
+			//blocks.forEach(s -> System.out.println("BLOCK\n" +s));
+			
+		} catch (IOException e)  {
+			throw new UpdateException("TODO", e);
+		}
+		
+
+
+
+	}
+    
+	/* 
+	ANNOTATED BLOCK
+	   # The Republic 
+	   <!--# {{title="The Republic"}}-->
+    ANNOTATED BLOCK
+       By: Plato 
+       <!--By: {{author="Plato"}}-->
+    ANNOTATED BLOCK
+       Translation by Benjamin Jowett 
+       <!--Translation by {{translator="Benjamin Jowett"}}-->
+    ANNOTATED BLOCK
+       some text
+       some more text
+    ANNOTATED BLOCK
+       Source [Wikisource](https://en.wikisource.org/wiki/The_Republic) 
+       <!--Source [{{source="Wikisource"}}]({{sourceLink="https://en.wikisource.org/wiki/The_Republic"}})-->
+	  
+	   
+	   i.e a blocks final line contains the metadata or no meta data at all.
+	 */
+	
+	
+	/**
+	 * Extract blocks 
+	 * @param line
+	 * @return
+	 */
+	private Stream<String> extractBlock(String line) {
+		Stream<String> pipedBlock;
+
+		if (line.trim().length() > 0 ) {  // Not an empty line
+			block.append(line + "\n");
+			pipedBlock = Stream.of("");
+		} else {
+			pipedBlock = Stream.of(block.toString());
+			block.delete(0, block.length() - 1);
+		}
+
+		return pipedBlock;
+	}
+
+	/** Copies a markdown file into a temp file in the same directory as the markdown file
+	 * 
+	 * @param markdownFilePath The path of the markdown file
+	 * @throws ReadException 
+	 */
+	private Path createTempFile(Path markdownFilePath) throws UpdateException {  //TODO is a ReadException the correct way to do this? 
+		Optional<Path> tempPath = Optional.empty();
+		try  {
+			tempPath = Optional.of(Files.createTempFile(markdownFilePath.getParent(), "semplate", "tmp"));
+			System.out.println(tempPath);
+			Files.copy(markdownFilePath, tempPath.orElseThrow(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new UpdateException("Unable to create temporary files whilst updating " +  markdownFilePath.getFileName(), e);
+		} finally {
+			tempPath.ifPresent(p -> p.toFile().deleteOnExit());
+        }
+		
+		return tempPath.orElseThrow(() -> new UpdateException("Unable to create temporary file for  " + markdownFilePath.getFileName()));
 	}
 
 
