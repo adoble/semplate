@@ -4,19 +4,19 @@ This uses the markdown text directly as the value, instead of duplicating it in 
 
     #
     The Republic
-    <!--{title}-->
+    <!--{{title}}-->
 
 The value of title is "The Republic"
 
 Values can be embedded, for instance
 
     * See [Plato's Republic](http://www.wikipedia.com/The_Republic)
-    <!--{referenceTitle}{referenceLink}-->
+    <!--{{referenceTitle}}{{referenceLink}}-->
 
 This uses the markdowns specific inline delimiters and is defined early in the markdown file
 using:
 
-    <!--{template.delimiter-pairs:"()[]"}
+    <!--{{template.delimiter-pairs:"()[]"}}-->
 
 
 ## Formal syntax
@@ -28,7 +28,7 @@ using:
 
     block-value =  text-value / *embedded-value
 
-    embedded-value = [character-sequence] inline-delimiter-start inline-value inline-delimiter-end
+    embedded-value = [character-sequence] inline-delimiter-start inline-value inline-delimiter-end [character-sequence]
 
     text-value = [character-sequence] newline
 
@@ -40,15 +40,17 @@ using:
                      comment-delimiter-end
                      newline
 
-    field-spec = "{" field-name ":" *modifier "}
+    field-spec = "{{" field-name [":" *modifier "]}}""
 
-    inline-delimiter-pair = inline-delimiter-start inline-delimiter-end ;for instance "()" or "[]"
+    inline-delimiter-pair = inline-delimiter-start inline-delimiter-end ;for instance "()" or "[]" 
 
     inline-delimiter-pairs = 1*inline-delimiter-pairs
 
     inline-delimiter-start = character
 
     inline-delimiter-end = character
+
+    modifier = character-sequence ;These are specific to the class of the field and are used to specify, for instance, how the text is formatted.
 
     comment-delimiter-start = *character ; defined in the first lines of the markdown.
 
