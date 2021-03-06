@@ -58,7 +58,6 @@ public class Template  {
 
 	private Path templatePath;
 
-	private String string;
 	private Optional<String> commentStartDelimiter;
 	private Optional<String> commentEndDelimiter;
 	
@@ -173,12 +172,14 @@ public class Template  {
 		 */
 		
 		try (Stream<String> stream = Files.lines(tempFile, Charset.defaultCharset())) {
-			List<String> blocks = stream.flatMap(line -> extractBlock(line))   
+			List<String> blocks = stream.peek(line -> extractCommentDelimiters(line))
+					                    .map(line -> extractBlock(line))   
 					                    .filter(block -> block.length() > 0)
+					                    .map(block -> updateBlock(block, updatedValueMap))
 					                    .peek(s-> System.out.print(s))
 					                    .collect(Collectors.toList());
 			
-			//blocks.forEach(s -> System.out.println("BLOCK\n" +s));
+		   blocks.forEach(s -> System.out.println("BLOCK\n" +s));
 			
 		} catch (IOException e)  {
 			throw new UpdateException("TODO", e);
@@ -210,24 +211,68 @@ public class Template  {
 	   i.e a blocks final line contains the metadata or no meta data at all.
 	 */
 	
+	private void extractCommentDelimiters(String line) {
+
+
+		if (line.contains(templateCommentField)) {
+			List<String> preamble = Splitter.on("{{").splitToList(line);
+			if (preamble.get(0).trim().length() > 0 ) {
+				commentStartDelimiter = Optional.of(preamble.get(0));
+			}
+			else {
+				commentStartDelimiter = Optional.empty();
+			}
+			List<String> postamble = Splitter.on("}}").splitToList(line);
+			if (postamble.get(1).trim().length() > 0 ) {
+				commentEndDelimiter = Optional.of(postamble.get(1));
+			}
+			else {
+				commentEndDelimiter = Optional.empty();
+			}
+		}
+	}
+
 	
-	/**
-	 * Extract blocks 
-	 * @param line
-	 * @return
+	/** Extract blocks of text from the markdown
+	 *
+	 * The blocks of text extracted are either 
+	 * <p> a) the markdown text blocks that are separated by a new line. </p>
+	 * <p> b) Same as (a), but appended with the semantic data that applies to it. The appended 
+	 *        data can preceded by a new line. </p>
+	 *    
+	 * @param line The line being read from the markdown file
+	 * @return A block of text with any semantic information appended. 
 	 */
-	private Stream<String> extractBlock(String line) {
-		Stream<String> pipedBlock;
+	private String extractBlock(String line) {
+		String pipedBlock;
 
 		if (line.trim().length() > 0 ) {  // Not an empty line
 			block.append(line + "\n");
-			pipedBlock = Stream.of("");
+			pipedBlock = "";
 		} else {
-			pipedBlock = Stream.of(block.toString());
+			pipedBlock = (block.toString());
 			block.delete(0, block.length() - 1);
 		}
 
 		return pipedBlock;
+	}
+	
+	/**
+	 * See formal grammer  TODO
+	 *
+	 */
+	
+	private String updateBlock(String blockText, ValueMap valueMap) {
+		checkArgument(blockText.lines().count() <= 2, "The block of text contains %s lines. Only a max. of 2 lines are allowed", blockText.lines().count());
+		
+		List<String> blockTextLines = Splitter.on("\n").splitToList(blockText);
+		
+		for (String line: blockTextLines) {
+			// TODO extractKeyValuePair(line).collect()
+		}
+		
+		return "";
+		
 	}
 
 	/** Copies a markdown file into a temp file in the same directory as the markdown file
@@ -276,14 +321,8 @@ public class Template  {
 			 valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
 			      .flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
 			      .filter(s -> !s.contains("template.comment"))  // Filter out the template.comment directive TODO change
-			      //.map(nameValuePair -> constructValueMap(nameValuePair))
 			      .map(nameValuePair -> ValueMap.of(nameValuePair))
-			      //.collect(ArrayList::new, (r,s) -> accumulateList(r,s), (r, s) -> combineList(r,s));
-			      //.collect(ArrayList<String>::new, (r,s) -> accumulate(r,s), (r1, r2) -> combine(r1,r2));
 			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
-		      //.collect(objectClass.getDeclaredConstructor().newInstance(),
-		     	 //		  (object, s) -> objectBuilder(object, s),
-		     	 //		  (object, s) -> objectBuilder(object, object));
 
 		} catch (IOException e) {
 			throw new ReadException(e);
