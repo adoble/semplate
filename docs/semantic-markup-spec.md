@@ -2,16 +2,15 @@
 
 This uses the markdown text directly as the value, instead of duplicating it in the semantic block, e.g;
 
-    #
-    The Republic
-    <!--{{title}}-->
+    <!--{{title:format="# %s"}}-->
+    # The Republic
 
 The value of title is "The Republic"
 
 Values can be embedded, for instance:
 
-    * See [Plato's Republic](http://www.wikipedia.com/The_Republic)
     <!--{{referenceTitle}}{{referenceLink}}-->
+    * See [Plato's Republic](http://www.wikipedia.com/The_Republic)
 
 This uses the markdowns specific inline delimiters and is defined early in the markdown file
 using:
