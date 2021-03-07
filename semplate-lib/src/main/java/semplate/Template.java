@@ -47,37 +47,19 @@ import java.net.URL;
  */
 public class Template  {
 	// Special fields are preceded with template
-	final private String templateCommentField = "{{template.comment}}"; //TODO make static
+	final private String templateCommentField = "{@template.comment}}"; //TODO make static
 
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
 	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");
 
-	private static enum ParseTokens {fieldname, subFieldname, index, value};
-
-	private Map<ParseTokens, Optional<CharSequence>> collectionMap = new HashMap<>();
-
 	private Path templatePath;
 
-	private Optional<String> commentStartDelimiter;
-	private Optional<String> commentEndDelimiter;
+	//private Optional<String> commentStartDelimiter;
+	//private Optional<String> commentEndDelimiter;
 	
 	private StringBuffer block = new StringBuffer();;
 
-
-
-
-	/**
-	 * Constructs and initialises a template object 
-	 * 
-	 */
-	public Template() {
-		super();  //TODO required?
-
-		collectionMap.put(ParseTokens.fieldname, Optional.empty());
-		collectionMap.put(ParseTokens.subFieldname, Optional.empty());
-		collectionMap.put(ParseTokens.index, Optional.empty());
-		collectionMap.put(ParseTokens.value, Optional.empty());
-	}
+	private  DirectiveSettings settings = new DirectiveSettings();
 
 
 	/**
@@ -138,6 +120,25 @@ public class Template  {
 	}
 
 	/**
+	 * Reads the specified markdown file and creates a new  object of class objectClass that contains the
+	 * data semantically represented in the markdown file.
+	 *
+	 * @param objectClass  The class of the data object to be generated.
+	 * @param markupFilePath The path of the markdown file.
+	 * @return
+	 */
+	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
+		Object dataObject;
+	
+		ValueMap valueMap = readValueMap(markupFilePath);
+	
+		dataObject = constructDataObject(objectClass, valueMap);
+	
+		return dataObject;
+	}
+
+
+	/**
 	 * Updates a markdown file using the annotated fields in the {@code object}
 	 * 
 	 *
@@ -190,46 +191,19 @@ public class Template  {
 
 	}
     
-	/* 
-	ANNOTATED BLOCK
-	   # The Republic 
-	   <!--# {{title="The Republic"}}-->
-    ANNOTATED BLOCK
-       By: Plato 
-       <!--By: {{author="Plato"}}-->
-    ANNOTATED BLOCK
-       Translation by Benjamin Jowett 
-       <!--Translation by {{translator="Benjamin Jowett"}}-->
-    ANNOTATED BLOCK
-       some text
-       some more text
-    ANNOTATED BLOCK
-       Source [Wikisource](https://en.wikisource.org/wiki/The_Republic) 
-       <!--Source [{{source="Wikisource"}}]({{sourceLink="https://en.wikisource.org/wiki/The_Republic"}})-->
-	  
-	   
-	   i.e a blocks final line contains the metadata or no meta data at all.
-	 */
 	
 	private void extractCommentDelimiters(String line) {
 
-
 		if (line.contains(templateCommentField)) {
-			List<String> preamble = Splitter.on("{{").splitToList(line);
-			if (preamble.get(0).trim().length() > 0 ) {
-				commentStartDelimiter = Optional.of(preamble.get(0));
-			}
-			else {
-				commentStartDelimiter = Optional.empty();
-			}
+			List<String> preamble = Splitter.on("{@").trimResults().splitToList(line);
+			settings.commentStartDelimiter(preamble.get(0));
+
 			List<String> postamble = Splitter.on("}}").splitToList(line);
-			if (postamble.get(1).trim().length() > 0 ) {
-				commentEndDelimiter = Optional.of(postamble.get(1));
-			}
-			else {
-				commentEndDelimiter = Optional.empty();
-			}
+			settings.commentEndDelimiter(postamble.get(0));
+
 		}
+
+
 	}
 
 	
@@ -293,25 +267,6 @@ public class Template  {
         }
 		
 		return tempPath.orElseThrow(() -> new UpdateException("Unable to create temporary file for  " + markdownFilePath.getFileName()));
-	}
-
-
-	/**
-	 * Reads the specified markdown file and creates a new  object of class objectClass that contains the
-	 * data semantically represented in the markdown file.
-	 *
-	 * @param objectClass  The class of the data object to be generated.
-	 * @param markupFilePath The path of the markdown file.
-	 * @return
-	 */
-	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
-		Object dataObject;
-
-		ValueMap valueMap = readValueMap(markupFilePath);
-
-		dataObject = constructDataObject(objectClass, valueMap);
-
-		return dataObject;
 	}
 
 
@@ -590,7 +545,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
 	 */
 	public Optional<String> getCommentStartDelimiter() {
-		return commentStartDelimiter;
+		return settings.commentEndDelimiter();
 	}
 
 
@@ -602,7 +557,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for ending comments in the markdown. 
 	 */
 	public Optional<String> getCommentEndDelimiter() {
-		return commentEndDelimiter;
+		return settings.commentEndDelimiter();
 	}
 
 	/* Expands any line that contains field references to an Iterable to a stream of template lines,
@@ -669,12 +624,9 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 			// Now build the meta data that is appended to the end of the line
 			StringBuilder metaData = new StringBuilder();
-			if (commentStartDelimiter.isPresent()) {
-				metaData.append(commentStartDelimiter.get()).append(line);
-				if (commentEndDelimiter.isPresent()) {
-					metaData.append(commentEndDelimiter.get());
-				}
-			}
+			metaData.append(settings.commentStartDelimiter().orElse("")).append(line);
+			metaData.append(settings.commentEndDelimiter().orElse(""));
+			
 
 			Matcher metaDataMatcher = fieldPattern.matcher(metaData);
 			String metaDataLine = metaDataMatcher.replaceAll(mr -> metaDataSubstitution(mr, valueMap));
@@ -770,19 +722,20 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	}
 
 	/**
-     * Parser the stream of template lines and extracts the start end end delimiters of comments,
+     * Parser the stream of template lines and extracts the start and end delimiters of comments,
      * @param stream Stream of template lines.
      */
 	private void parseTemplateStream(Stream<String> stream) {
 
     	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
+    
 		if (!templateComment.isEmpty()) {
-			commentStartDelimiter = Optional.of(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
-			commentEndDelimiter = Optional.of(templateComment.substring(commentStartDelimiter.get().length() + templateCommentField.length(), templateComment.length()));
+			settings.commentStartDelimiter(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
+			settings.commentEndDelimiter(templateComment.substring(settings.commentStartDelimiter().get().length() + templateCommentField.length(), templateComment.length()));
 
 		} else {
-			commentStartDelimiter = Optional.empty();
-			commentStartDelimiter = Optional.empty();
+			settings.commentStartDelimiter("");
+			settings.commentEndDelimiter("");
 		}
     }
 
