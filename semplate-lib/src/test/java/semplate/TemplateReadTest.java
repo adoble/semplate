@@ -57,7 +57,37 @@ public class TemplateReadTest {
 	}
 	
 	@Test
-	void testRead() throws Exception {
+	void testReadSimple() throws Exception{
+			
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		template.config(templateFile);
+		
+		Path sourceFile = templatesPath.resolve("simple_expected.md");
+		
+		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
+		
+		Work workExpected = (Work) template.read(Work.class, sourceFile);
+		
+		assertNotNull(workExpected);
+		
+		assertEquals("Plato", workExpected.getAuthor());
+		assertEquals("The Republic", workExpected.getTitle());
+		assertEquals("Benjamin Jowett", workExpected.getTranslator());
+		assertEquals("Wikisource", workExpected.getSource());
+		assertEquals(4711, workExpected.getId());
+	    
+	    URL sourceLink = workExpected.getSourceLink();
+	    assertNotNull(sourceLink);
+	    assertEquals("https://en.wikisource.org/wiki/The_Republic", sourceLink.toString());
+	    
+	    
+		
+	}
+	
+	@Test
+	void testReadList() throws Exception {
 		
 		Works works = null;
 		
@@ -70,32 +100,65 @@ public class TemplateReadTest {
 		
 		TestUtilities.copyFromResource("list_expected.md", sourceFile);
 		
-        works = (Works) template.read(Works.class, sourceFile);
+	    works = (Works) template.read(Works.class, sourceFile);
+	    
+	    assertNotNull(works);
+	    
+	    assertEquals("Plato", works.getAuthor());
+	    assertEquals("The Works of Plato", works.getTitle());
+	    
+	    assertTrue(works.numberReferences() == 3);
+	    
+	    Reference r;       
+	    r = works.getReference(0);
+	    assertEquals("Apology", r.getTitle() );
+	    assertEquals("https://en.wikisource.org/wiki/Apology_(Plato)", r.getLink().toString());
+	    
+	    r = works.getReference(1);
+	    assertEquals("Charmides", r.getTitle());
+	    assertEquals("https://en.wikisource.org/wiki/Charmides_(Plato)", r.getLink().toString());
+	    
+	    r = works.getReference(2);
+	    assertEquals("The Republic", r.getTitle());
+	    assertEquals("https://en.wikisource.org/wiki/The_Republic_of_Plato", r.getLink().toString());
+	    
+	    	 
+	    }
+
+	/** Test that an error occurs if the markup file does not exist. 
+	 * 
+	 */
+	@Test
+	void testReadMarkupError() throws IOException {
+		
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		template.config(templateFile);
+		
+        Path sourceFile = templatesPath.resolve("non-existent.md");
         
-        assertNotNull(works);
+        assertThrows(ReadException.class, () -> {
+        	template.read(Work.class, sourceFile);
+        });
+		
+	}
+	
+	@Test
+	void testUsingInvalidClass () throws IOException {
+		Template template = new Template();
+		assumeTrue(template != null);
+		
+		template.config(templateFile);
+		
+        Path sourceFile = templatesPath.resolve("simple_expected.md");
+		
+		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
         
-        assertEquals("Plato", works.getAuthor());
-        assertEquals("The Works of Plato", works.getTitle());
-        
-        assertTrue(works.numberReferences() == 3);
-        
-        Reference r;       
-        r = works.getReference(0);
-        assertEquals("Apology", r.getTitle() );
-        assertEquals("https://en.wikisource.org/wiki/Apology_(Plato)", r.getLink().toString());
-        
-        r = works.getReference(1);
-        assertEquals("Charmides", r.getTitle());
-        assertEquals("https://en.wikisource.org/wiki/Charmides_(Plato)", r.getLink().toString());
-        
-        r = works.getReference(2);
-        assertEquals("The Republic", r.getTitle());
-        assertEquals("https://en.wikisource.org/wiki/The_Republic_of_Plato", r.getLink().toString());
-        
-        	 
-        }
-        
-        
+        assertThrows(ReadException.class, () -> {
+        	template.read(NonValidClass.class, sourceFile);
+        });
+	}
 		
 }
 

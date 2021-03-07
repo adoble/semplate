@@ -24,7 +24,7 @@ import com.google.common.jimfs.Jimfs;
 
 import semplate.Template;
 
-class TemplateBasicTest {
+class TemplateGenerateTest {
 	final static String templateFileName = "simple_template.md";
 	
 	private static FileSystem fileSystem;
@@ -75,40 +75,63 @@ class TemplateBasicTest {
 	}
 
 
-	@Test
-	void testConfigWithPath() throws IOException {
-		Template t = new Template();
-		//assumeNotNull(t);
-		assumeTrue(t != null);
-
-		t.config(templateFile);
-
-		assertTrue(t.getTemplatePath().toString().equals("/templates/" + templateFileName));
-
-		assertEquals("<!--", t.getCommentStartDelimiter().orElse(""));
-		assertEquals("-->", t.getCommentEndDelimiter().orElse("")); 
-	}
 	
-	
-	@Test
-	void testConfigWithStream() {
-		Template t = new Template();
-		assumeTrue(t != null);
+	@Test 
+	void testGenerateSimple() {
 		
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream in = classLoader.getResourceAsStream(templateFileName);
+		Template template = new Template();
+		assumeTrue(template != null);
+		
 		try {
-			t.config(in);
+			template.config(templateFile);
 		} catch (IOException e) {
 			fail("Unxpected exception: " + e.getMessage());
 		}
+		
+		
+		Path outputPath = templatesPath.resolve("the_republic.md");
+		
+		try {
+			template.generate(work, outputPath);
+		}
+		catch (IOException e) {
+			fail(e.getMessage());
+		}
 
-		assertTrue(t.getCommentStartDelimiter().get().equals("<!--"));
-		assertTrue(t.getCommentEndDelimiter().get().equals("-->"));
+		assertTrue(Files.exists(outputPath));
+		
+		
+		String actualContents = "";
+		try (Stream<String> stream = Files.lines(outputPath)) {
+            actualContents = stream.collect(Collectors.joining());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+			
+		String expectedContents = "";
+		String resourceFileName = "simple_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		
+		
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		
+		
+		try (Stream<String> stream = Files.lines(expectedFile)) {
+			
+			expectedContents = stream.collect(Collectors.joining());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}	
+	
+				
+		//assertThat(actualContents, is(expectedContents));
+		assertEquals(expectedContents, actualContents);
+		
 
 	}
 	
-	
+
 	
 
 }
