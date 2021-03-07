@@ -609,12 +609,51 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 
 	}
-
+	
 	private String templateReplace(String block, ValueMap valueMap) {
 
 		Matcher templateMatcher = fieldPattern.matcher(block);
 
-		//TODO need to handle the case for {{template.comment}}.
+		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
+		if (templateMatcher.find()) {  // block contains a field or a list
+			
+			// Produce a format string 
+			List<String> formatParts = Splitter.on(fieldPattern).splitToList(block);
+		    StringBuffer format = new StringBuffer();
+			if (formatParts.size() == 2) {
+			    format.append(formatParts.get(0));
+		    	format.append("%s");
+		    	format.append(formatParts.get(1));
+		    } else {
+		    	return "ERROR: cannot parse the following block\n" + block;
+		    }
+			
+			String fieldName = templateMatcher.group().replaceAll("\\{|\\}", ""); 
+	
+			// First replace anything that is a valid field
+			String textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
+
+			// Now build the meta data and prefixed before the modified block
+			StringBuilder semanticBlock = new StringBuilder();
+			semanticBlock.append(settings.commentStartDelimiter().orElse(""))
+                    .append("{{")
+                    .append(fieldName)
+                    
+                    .append(!format.isEmpty() ? ":format=\"" + format + "\"": "")
+                    .append("}}")                    
+			        .append(settings.commentEndDelimiter().orElse(""));
+                    
+			return semanticBlock + "\n" + textValue;
+		} else {
+			return block;
+		}
+
+
+	}
+
+	private String templateReplace_OLD(String block, ValueMap valueMap) {
+
+		Matcher templateMatcher = fieldPattern.matcher(block);
 
 		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
 		if (templateMatcher.find()) {  // block contains a field or a list
