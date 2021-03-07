@@ -545,7 +545,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
 	 */
 	public Optional<String> getCommentStartDelimiter() {
-		return settings.commentEndDelimiter();
+		return settings.commentStartDelimiter();
 	}
 
 
@@ -610,21 +610,21 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 	}
 
-	private String templateReplace(String line, ValueMap valueMap) {
+	private String templateReplace(String block, ValueMap valueMap) {
 
-		Matcher templateMatcher = fieldPattern.matcher(line);
+		Matcher templateMatcher = fieldPattern.matcher(block);
 
 		//TODO need to handle the case for {{template.comment}}.
 
-		if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-			// Line contains a field or a list
+		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
+		if (templateMatcher.find()) {  // block contains a field or a list
 
 			// First replace anything that is a valid field
 			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
 
-			// Now build the meta data that is appended to the end of the line
+			// Now build the meta data that is prefixed before the block
 			StringBuilder metaData = new StringBuilder();
-			metaData.append(settings.commentStartDelimiter().orElse("")).append(line);
+			metaData.append(settings.commentStartDelimiter().orElse("")).append(block);
 			metaData.append(settings.commentEndDelimiter().orElse(""));
 			
 
@@ -633,7 +633,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 			return replacedTemplateLine + " " + metaDataLine;
 		} else {
-			return line;
+			return block;
 		}
 
 
