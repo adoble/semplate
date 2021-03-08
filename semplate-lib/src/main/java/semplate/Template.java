@@ -59,7 +59,7 @@ public class Template  {
 	
 	private StringBuffer block = new StringBuffer();;
 
-	private  DirectiveSettings settings = new DirectiveSettings();
+	private  Delimiters delimiters = new Delimiters();
 
 
 	/**
@@ -196,10 +196,10 @@ public class Template  {
 
 		if (line.contains(templateCommentField)) {
 			List<String> preamble = Splitter.on("{@").trimResults().splitToList(line);
-			settings.commentStartDelimiter(preamble.get(0));
+			delimiters.commentStartDelimiter(preamble.get(0));
 
 			List<String> postamble = Splitter.on("}}").splitToList(line);
-			settings.commentEndDelimiter(postamble.get(0));
+			delimiters.commentEndDelimiter(postamble.get(0));
 
 		}
 
@@ -545,7 +545,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
 	 */
 	public Optional<String> getCommentStartDelimiter() {
-		return settings.commentStartDelimiter();
+		return delimiters.commentStartDelimiter();
 	}
 
 
@@ -557,7 +557,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for ending comments in the markdown. 
 	 */
 	public Optional<String> getCommentEndDelimiter() {
-		return settings.commentEndDelimiter();
+		return delimiters.commentEndDelimiter();
 	}
 
 	/* Expands any line that contains field references to an Iterable to a stream of template lines,
@@ -610,45 +610,49 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 	}
 	
-	private String templateReplace(String block, ValueMap valueMap) {
-
-		Matcher templateMatcher = fieldPattern.matcher(block);
+	private String templateReplace(String inBlock, ValueMap valueMap) {
+		StringBuilder semanticBlock = new StringBuilder();
+		
+		Matcher templateMatcher = fieldPattern.matcher(inBlock);
+		
+		String textValue = inBlock;
 
 		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-		if (templateMatcher.find()) {  // block contains a field or a list
+		while (templateMatcher.find()) {  // block contains a field or a list   ----> WHILE
 			
 			// Produce a format string 
-			List<String> formatParts = Splitter.on(fieldPattern).splitToList(block);
+			List<String> formatParts = Splitter.on(fieldPattern).splitToList(inBlock);
 		    StringBuffer format = new StringBuffer();
 			if (formatParts.size() == 2) {
 			    format.append(formatParts.get(0));
 		    	format.append("%s");
 		    	format.append(formatParts.get(1));
 		    } else {
-		    	return "ERROR: cannot parse the following block\n" + block;
+		    	return delimiters.commentStartDelimiter() 
+		    			+ "   ERROR: cannot parse the following block:" 
+		    			+ delimiters.commentEndDelimiter() 
+		    			+ "\n" 
+		    			+ inBlock;
 		    }
 			
 			String fieldName = templateMatcher.group().replaceAll("\\{|\\}", ""); 
 	
 			// First replace anything that is a valid field
-			String textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
+			textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
 
 			// Now build the meta data and prefixed before the modified block
-			StringBuilder semanticBlock = new StringBuilder();
-			semanticBlock.append(settings.commentStartDelimiter().orElse(""))
+			semanticBlock.append(delimiters.commentStartDelimiter().orElse(""))
                     .append("{{")
                     .append(fieldName)
                     
                     .append(!format.isEmpty() ? ":format=\"" + format + "\"": "")
                     .append("}}")                    
-			        .append(settings.commentEndDelimiter().orElse(""));
+			        .append(delimiters.commentEndDelimiter().orElse(""))
+			        .append("\n");
                     
-			return semanticBlock + "\n" + textValue;
-		} else {
-			return block;
-		}
-
-
+		} 
+       		
+		return semanticBlock + textValue;
 	}
 
 	private String templateReplace_OLD(String block, ValueMap valueMap) {
@@ -663,8 +667,8 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 			// Now build the meta data that is prefixed before the block
 			StringBuilder metaData = new StringBuilder();
-			metaData.append(settings.commentStartDelimiter().orElse("")).append(block);
-			metaData.append(settings.commentEndDelimiter().orElse(""));
+			metaData.append(delimiters.commentStartDelimiter().orElse("")).append(block);
+			metaData.append(delimiters.commentEndDelimiter().orElse(""));
 			
 
 			Matcher metaDataMatcher = fieldPattern.matcher(metaData);
@@ -769,12 +773,12 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
     	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
     
 		if (!templateComment.isEmpty()) {
-			settings.commentStartDelimiter(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
-			settings.commentEndDelimiter(templateComment.substring(settings.commentStartDelimiter().get().length() + templateCommentField.length(), templateComment.length()));
+			delimiters.commentStartDelimiter(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
+			delimiters.commentEndDelimiter(templateComment.substring(delimiters.commentStartDelimiter().get().length() + templateCommentField.length(), templateComment.length()));
 
 		} else {
-			settings.commentStartDelimiter("");
-			settings.commentEndDelimiter("");
+			delimiters.commentStartDelimiter("");
+			delimiters.commentEndDelimiter("");
 		}
     }
 
