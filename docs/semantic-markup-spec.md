@@ -37,8 +37,6 @@ Alternatively a string can be used, for instance, a HTML tag
 
     comment-directive = "{@template.comment}}"
 
-    block = character-sequence / block-value semantic-block / block-value newline semantic-block  
-
     block = semantic-block [*newline] text-value
 
     block-value =  text-value / *embedded-value
