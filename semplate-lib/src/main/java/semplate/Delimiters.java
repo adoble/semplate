@@ -37,28 +37,11 @@ public class Delimiters implements Iterable<Delimiters.Delimiter>{
 	
 	private ArrayList<Delimiter> delimiters = new ArrayList<>();
 	
-//	private Optional<String> commentStartDelimiter;
-//	private Optional<String> commentEndDelimiter;
-//	private Optional<String> startDelimiter;
-//	private Optional<String> endDelimiter;
-
 	public Delimiters() {
 	  //TODO
 	}
 
     
-	
-//	public void delimiterPair(String pair)  {
-//		checkArgument(pair.length() == 2, "The following delimiter pairs was specfied \"%s\", but it it does not contain exactly 2 characters", pair);
-//
-//		startDelimiter = Optional.ofNullable(pair.substring(0, 1));
-//		endDelimiter = Optional.ofNullable(pair.substring(1));
-//	}
-
-
-    
-	
-
 	public void add(String startDelimiter, String endDelimiter) {
 		Delimiter delimiter = (new Delimiter()).start(startDelimiter).end(endDelimiter);
 		delimiters.add(delimiter);
