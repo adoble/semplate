@@ -56,8 +56,6 @@ public class Template  {
 
 	private Path templatePath;
 
-	//private Optional<String> commentStartDelimiter;
-	//private Optional<String> commentEndDelimiter;
 	
 	private StringBuffer block = new StringBuffer();
 	
@@ -694,9 +692,9 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		    	format.append("%s");
 		    	format.append(formatParts.get(1));
 		    } else {
-		    	return delimiters.commentStartDelimiter() 
+		    	return commentDelimiter.start().orElse("") 
 		    			+ "   ERROR: cannot parse the following block:" 
-		    			+ delimiters.commentEndDelimiter() 
+		    			+ commentDelimiter.end().orElse("") 
 		    			+ "\n" 
 		    			+ inBlock;
 		    }
@@ -707,13 +705,13 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 			textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
 
 			// Now build the meta data and prefixed before the modified block
-			semanticBlock.append(delimiters.commentStartDelimiter().orElse(""))
+			semanticBlock.append(commentDelimiter.start().orElse(""))
                     .append("{{")
                     .append(fieldName)
                     
                     .append(!format.isEmpty() ? ":format=\"" + format + "\"": "")
                     .append("}}")                    
-			        .append(delimiters.commentEndDelimiter().orElse(""))
+			        .append(commentDelimiter.end().orElse(""))
 			        .append("\n");
                     
 		} 
