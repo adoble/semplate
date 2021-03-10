@@ -7,19 +7,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.*;
-import java.nio.file.attribute.FileAttribute;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.Optional;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
+import com.google.common.base.*;
 import static com.google.common.base.Preconditions.*;
 
 import semplate.annotations.Templatable;
@@ -48,18 +46,31 @@ import java.net.URL;
 public class Template  {
 	// Special fields are preceded with template
 	final private String templateCommentField = "{@template.comment}}"; //TODO make static
+	
+	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
+	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
 
+	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
-	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");
+	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
 
 	private Path templatePath;
 
 	//private Optional<String> commentStartDelimiter;
 	//private Optional<String> commentEndDelimiter;
 	
-	private StringBuffer block = new StringBuffer();;
+	private StringBuffer block = new StringBuffer();
+	
+	private Delimiter commentDelimiter;
 
 	private  Delimiters delimiters = new Delimiters();
+
+	
+    
+
+	public Template() {
+		
+	}
 
 
 	/**
@@ -70,29 +81,71 @@ public class Template  {
 	public void config(Path templatePath) throws IOException {
 		this.templatePath = templatePath;
 
+//		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
+//			determineCommentDelimiters(stream);
+//		}
+		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
-			parseTemplateStream(stream);
+ 			commentDelimiter = stream.filter(line -> line.contains(templateCommentField))
+ 									 .map(line -> extractCommentDelimiter(line))
+ 									 .findFirst()
+ 									 .get();
 		}
 
+		
+		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
+			delimiters  = stream.filter(line -> line.contains("{@template.delimiter"))    // TODO is this strict enough?
+					            .map(line -> extractDelimiters(line))
+					            .flatMap(delimiterList -> delimiterList.stream())    // Converts the list of delimiters to a stream of single delimiters
+				                .collect(Delimiters::new, Delimiters::add, Delimiters::add);
+		}
 
 
 	}
 
 
 	/**
-	 * Specifies an input stream of the template files used for generating the markdown files.
-
-	 * @param templateStream
+	 * Specifies the name of a template file used for generating the markdown files.
+     * @param templateFileName The name of the template file
 	 */
-	public void config(InputStream templateStream) throws IOException {
-		//TODO
+	public void config(String templateFileName) throws IOException {
+		//this.config(FileSystems.getDefault().getPath(templateFileName));
+		this.config(Path.of(templateFileName));
 
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(templateStream));
-		try (Stream<String> stream = reader.lines()) {
-			parseTemplateStream(stream);
+	}
+	
+	/** Parse a string containing delimiter specification and extract the delimiters. 
+	 * 
+	 * @param line The string contains  the specification
+	 * @return A List of Delimiters.Delimiter objects containing the delimiters 
+	 */
+	//private List<Delimiter> extractDelimiters(String line) {
+	private List<Delimiter> extractDelimiters(String line) {
+		ArrayList<Delimiter> extractedDelimiters = new ArrayList<Delimiter>();
+		Matcher matcher = delimiterDirectivePattern.matcher(line);
+		while(matcher.find()) {
+			Delimiter delimiter = new Delimiter();  //TODO right place? 
+			
+			
+			//Map<String, String> parts = Splitter.on(":").trimResults(CharMatcher.anyOf("{}@")).withKeyValueSeparator(":").split(matcher.group());
+			List<String> parts = Splitter.on(":").trimResults(CharMatcher.anyOf("{}@\"")).splitToList(matcher.group());
+			
+		    // What type of delimiter directive is this?
+		    String delimiterType = parts.get(0);
+		    String delimiterValue = parts.get(1);
+			if (delimiterType.contains("start")) {
+				delimiter.start(delimiterValue);
+			} else if (delimiterType.contains("end")) {
+				delimiter.end(delimiterValue);
+			} else if (delimiterType.contains("pair")) {
+				delimiter.pair(delimiterValue);
+			}
+			
+			extractedDelimiters.add(delimiter);
 		}
-
+		
+		return extractedDelimiters;
+		
 	}
 
 	/**
@@ -173,7 +226,7 @@ public class Template  {
 		 */
 		
 		try (Stream<String> stream = Files.lines(tempFile, Charset.defaultCharset())) {
-			List<String> blocks = stream.peek(line -> extractCommentDelimiters(line))
+			List<String> blocks = stream.peek(line -> extractCommentDelimiter(line))
 					                    .map(line -> extractBlock(line))   
 					                    .filter(block -> block.length() > 0)
 					                    .map(block -> updateBlock(block, updatedValueMap))
@@ -192,18 +245,20 @@ public class Template  {
 	}
     
 	
-	private void extractCommentDelimiters(String line) {
 
-		if (line.contains(templateCommentField)) {
-			List<String> preamble = Splitter.on("{@").trimResults().splitToList(line);
-			delimiters.commentStartDelimiter(preamble.get(0));
+	private Delimiter extractCommentDelimiter(String line) {
+        checkArgument(line.contains(templateCommentField), "The line \"%s\" does not contain a template comment field", line);
+        
+        Delimiter delimiter = new Delimiter();
+		
+        List<String> preamble = Splitter.on("{@").trimResults().splitToList(line);
+		delimiter.start(preamble.get(0));
 
-			List<String> postamble = Splitter.on("}}").splitToList(line);
-			delimiters.commentEndDelimiter(postamble.get(0));
+		List<String> postamble = Splitter.on("}}").splitToList(line);
+		delimiter.end(postamble.get(1));
 
-		}
-
-
+		return delimiter;
+		
 	}
 
 	
@@ -545,7 +600,8 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
 	 */
 	public Optional<String> getCommentStartDelimiter() {
-		return delimiters.commentStartDelimiter();
+		//return delimiters.commentStartDelimiter();
+		return commentDelimiter.start();
 	}
 
 
@@ -557,7 +613,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @return An <code>Optional</code> to the string used for ending comments in the markdown. 
 	 */
 	public Optional<String> getCommentEndDelimiter() {
-		return delimiters.commentEndDelimiter();
+		return commentDelimiter.end();
 	}
 
 	/* Expands any line that contains field references to an Iterable to a stream of template lines,
@@ -618,9 +674,19 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		String textValue = inBlock;
 
 		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-		while (templateMatcher.find()) {  // block contains a field or a list   ----> WHILE
+		while (templateMatcher.find()) {  // block contains a field or a list   
 			
-			// Produce a format string 
+			// Produce a format or pattern string 
+			
+			// Is the field surrounded by a specified delimiter? 
+			String fieldEnvironment = ""; 
+			if (templateMatcher.start() != 0 && templateMatcher.end() < inBlock.length() -1) {
+			   fieldEnvironment = inBlock.substring(templateMatcher.start() -1, templateMatcher.end() + 1);
+			}
+			if ( delimiters.suround(fieldEnvironment)) {
+				System.out.println("JA");
+			}
+					
 			List<String> formatParts = Splitter.on(fieldPattern).splitToList(inBlock);
 		    StringBuffer format = new StringBuffer();
 			if (formatParts.size() == 2) {
@@ -768,7 +834,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
      * Parser the stream of template lines and extracts the start and end delimiters of comments,
      * @param stream Stream of template lines.
      */
-	private void parseTemplateStream(Stream<String> stream) {
+	private void determineCommentDelimiters(Stream<String> stream) {
 
     	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
     

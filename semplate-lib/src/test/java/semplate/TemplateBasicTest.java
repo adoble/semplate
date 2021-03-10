@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -91,18 +92,18 @@ class TemplateBasicTest {
 	
 	
 	@Test
-	void testConfigWithStream() {
+	void testConfigWithName(@TempDir Path tempDir) throws IOException{
 		Template t = new Template();
 		assumeTrue(t != null);
 		
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream in = classLoader.getResourceAsStream(templateFileName);
-		try {
-			t.config(in);
-		} catch (IOException e) {
-			fail("Unxpected exception: " + e.getMessage());
-		}
-
+        Path sourceFile = tempDir.resolve("simple_expected.md");
+		
+	    TestUtilities.copyFromResource("simple_expected.md", sourceFile);
+		
+		String templateFileName = sourceFile.toString();
+				
+		t.config(templateFileName);		
+		
 		assertTrue(t.getCommentStartDelimiter().get().equals("<!--"));
 		assertTrue(t.getCommentEndDelimiter().get().equals("-->"));
 
