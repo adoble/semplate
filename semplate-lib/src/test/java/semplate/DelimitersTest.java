@@ -75,6 +75,35 @@ class DelimitersTest {
 		assertThrows(IllegalArgumentException.class, () -> delimiters.addPair("<!>"));
 	}
 	
+	@Test
+	void testAddDelimiterObject() {
+		Delimiters delimiters = new Delimiters();
+		
+		Delimiter d1 = new Delimiter().pair("()");
+		Delimiter d2 = new Delimiter().start("//");
+		
+		delimiters.add(d1);
+		delimiters.add(d2);
+		
+		assertEquals(2, delimiters.number());
+		
+		int i = 0;
+		for (Delimiter d : delimiters) {
+		  if (i == 0) {
+			  assertEquals("(", d.start().orElse(""));
+			  assertEquals(")", d.end().orElse(""));
+		  }
+		  if (i == 1) {
+			  assertEquals("//", d.start().orElse(""));
+			  assertTrue(d.end().isEmpty());
+		  }
+		  i++;
+		}
+		
+		
+	}
+	
+	
 	@Test 
 	void testIterateDelimiters() {
 		String[] testStarts = {"(", "[", "<", "<span>"};
@@ -88,13 +117,69 @@ class DelimitersTest {
 		delimiters.add(testStarts[3], testEnds[3]);
         
 		int i = 0;
-        for (Delimiters.Delimiter delim: delimiters) {
+        for (Delimiter delim: delimiters) {
         	assertEquals(testStarts[i], delim.start().orElse(""));
         	i++;
         }
         
 	}
 
+	@Test
+	void testAddDelimitersObject() {
+		Delimiter[] testData = {
+				new Delimiter().start("<").end(">"), 
+				new Delimiter().start("[").end("]"), 
+				new Delimiter().start("<").end(">"), 
+				new Delimiter().start("[").end("]")
+         		};
+		
+		Delimiters delimiters = new Delimiters();
+		
+		delimiters.add(testData[0]);
+		delimiters.add(testData[1]);
+		Delimiters extraDelimiters = new Delimiters();
+		
+		extraDelimiters.add(testData[2]);
+		extraDelimiters.add(testData[3]);
+		
+		delimiters.add(extraDelimiters);
+		
+		assertEquals(4, delimiters.number());
+
+        int i = 0;
+		for (Delimiter d: delimiters) {
+			d.start().equals(testData[i].start());   			
+			d.end().equals(testData[i].end());   	
+			i++;
+		}
+		
+	}
 	
+	@Test 
+	void testSurround() {
+		Delimiters delimiters = new Delimiters();
+
+		delimiters.addPair("()");
+		delimiters.addPair("[]");
+		delimiters.addPair("<>");
+		
+		assertTrue(delimiters.suround("(hello)"));
+		assertTrue(delimiters.suround("<Loret ipsum>"));
+		assertTrue(delimiters.suround("[value]"));
+		assertTrue(delimiters.suround("[]"));
+		
+		assertFalse(delimiters.suround("hello"));
+		assertFalse(delimiters.suround("(hello"));
+		assertFalse(delimiters.suround("hello)"));
+		assertFalse(delimiters.suround("preamble(hello)"));
+		assertFalse(delimiters.suround("(hello)postamble"));
+		assertFalse(delimiters.suround("preamble(hello)postamble"));
+		assertFalse(delimiters.suround(""));
+		
+		
+		
+		
+
+  }
 
 }
