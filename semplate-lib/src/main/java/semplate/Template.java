@@ -667,56 +667,64 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	private String templateReplace(String inBlock, ValueMap valueMap) {
 		StringBuilder semanticBlock = new StringBuilder();
 		
-		Matcher templateMatcher = fieldPattern.matcher(inBlock);
+		Matcher templateMatcher = fieldPattern.matcher(inBlock);  // TODO refactor to fieldMatcher
 		
 		String textValue = inBlock;
-
-		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-		while (templateMatcher.find()) {  // block contains a field or a list   
-			
-			// Produce a format or pattern string 
-			
-			// Is the field surrounded by a specified delimiter? 
-			String fieldEnvironment = ""; 
-			if (templateMatcher.start() != 0 && templateMatcher.end() < inBlock.length() - 1) {
-			   fieldEnvironment = inBlock.substring(templateMatcher.start() -1, templateMatcher.end() + 1);
+		
+		
+		// If there are any delimiter pairs in the block , process them
+		boolean delimitersInBlock = false;
+		for (Delimiter delimiter: delimiters) {
+			Pattern pattern = delimiter.pattern();
+			Matcher matcher = pattern.matcher(inBlock);
+			while (matcher.find()) {  // find text segments that star and finish with delimiters
+				String textSegment = matcher.group();
+				templateMatcher = fieldPattern.matcher(textSegment); // Does this text segment contain a field. 
+				if (templateMatcher.find()) {
+					delimitersInBlock = true;
+					// Assemble the semantic block 
+					semanticBlock.append("{{")
+					.append(templateMatcher.group()) // The field name
+					.append("pattern=\"")
+					.append(delimiter.start().get())
+					.append("%s")
+					.append(delimiter.end().get())
+					.append("\"}}");
+				}
 			}
-			if ( delimiters.suround(fieldEnvironment)) {
-				System.out.println("JA");
-				assert(false) ; // GOT HERE
-			}
-					
-			List<String> formatParts = Splitter.on(fieldPattern).splitToList(inBlock);
-		    StringBuffer format = new StringBuffer();
-			if (formatParts.size() == 2) {
-			    format.append(formatParts.get(0));
-		    	format.append("%s");
-		    	format.append(formatParts.get(1));
-		    } else {
-		    	return commentDelimiter.start().orElse("") 
-		    			+ "   ERROR: cannot parse the following block:" 
-		    			+ commentDelimiter.end().orElse("") 
-		    			+ "\n" 
-		    			+ inBlock;
-		    }
-			
-			String fieldName = templateMatcher.group().replaceAll("\\{|\\}", ""); 
-	
-			// First replace anything that is a valid field
-			textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
-
-			// Now build the meta data and prefixed before the modified block
-			semanticBlock.append(commentDelimiter.start().orElse(""))
-                    .append("{{")
-                    .append(fieldName)
-                    
-                    .append(!format.isEmpty() ? ":format=\"" + format + "\"": "")
-                    .append("}}")                    
-			        .append(commentDelimiter.end().orElse(""))
-			        .append("\n");
-                    
 		} 
-       		
+				
+		
+		if (!delimitersInBlock) {  // No delimiters in block so just create a single value semantic block using format 
+			if (templateMatcher.find()) {  // The block can only now contain one field  TODO see if we can extend this later
+				String fieldName = templateMatcher.group().replaceAll("\\{|\\}", "");
+				semanticBlock.append("{{")
+				             .append(fieldName);
+				
+				List<String> formatParts = Splitter.on(fieldPattern).splitToList(inBlock);
+				StringBuffer format = new StringBuffer();
+				if (formatParts.size() == 2) {
+					format.append(formatParts.get(0));
+					format.append("%s");
+					format.append(formatParts.get(1));
+				} else {
+					return commentDelimiter.start().orElse("") + "   ERROR: cannot parse the following block:"
+							+ commentDelimiter.end().orElse("") + "\n" + inBlock;
+				} 
+				semanticBlock.append(format)
+				             .append("}}");
+			}
+                       
+		}
+		
+		// Now round of the semantic block with the comment delimiters
+		semanticBlock.insert(0, commentDelimiter.start().orElse(""));
+		semanticBlock.append(commentDelimiter.end().orElse("")).append("\n");
+
+
+		// Now replace every thing in the in block that is a valid field using the value map
+		textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
+
 		return semanticBlock + textValue;
 	}
 
