@@ -7,8 +7,7 @@ import java.util.*;
 
 
 public class Delimiters implements Iterable<Delimiter>{
-	private Delimiter comment = new Delimiter();
-	
+		
 	private ArrayList<Delimiter> delimiters = new ArrayList<>();
 	
 	public void add(String startDelimiter, String endDelimiter) {
@@ -48,25 +47,7 @@ public class Delimiters implements Iterable<Delimiter>{
 		return delimiters.get(index).end();
 	}
 
-    public Optional<String> commentStartDelimiter() {
-		return comment.start();
-	}
-
-
-	public void commentStartDelimiter(String commentStartDelimiter) {
-		this.comment.start(commentStartDelimiter);
-	}
-
-	public Optional<String> commentEndDelimiter() {
-		return comment.end();
-	}
-
-
-	public void commentEndDelimiter(String commentEndDelimiter) {
-		this.comment.end(commentEndDelimiter);
-	}
-
-
+   
 	@Override
 	public Iterator<Delimiter> iterator() {
 		return delimiters.iterator();

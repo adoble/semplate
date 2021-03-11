@@ -7,30 +7,6 @@ import org.junit.jupiter.api.Test;
 
 class DelimitersTest {
 
-	@Test
-	void testCommentDelimiters() {
-		Delimiters delimiters = new Delimiters();
-		
-		delimiters.commentStartDelimiter("[");
-		assertEquals("[", delimiters.commentStartDelimiter().orElse(""));
-		
-		delimiters.commentEndDelimiter(")");
-		assertEquals(")", delimiters.commentEndDelimiter().orElse(""));
-		
-		delimiters.commentStartDelimiter("<!--");
-		assertEquals("<!--", delimiters.commentStartDelimiter().orElse(""));
-		
-		delimiters.commentEndDelimiter("-->");
-		assertEquals("-->", delimiters.commentEndDelimiter().orElse(""));
-		
-		delimiters.commentStartDelimiter("");
-		assertTrue(delimiters.commentStartDelimiter().isEmpty());
-		
-		delimiters.commentEndDelimiter("");
-		assertTrue(delimiters.commentEndDelimiter().isEmpty());
-		
-		
-	}
 	
 	@Test
 	void testAddDelimiters() { 

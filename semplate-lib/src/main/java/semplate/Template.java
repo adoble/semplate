@@ -678,11 +678,12 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 			
 			// Is the field surrounded by a specified delimiter? 
 			String fieldEnvironment = ""; 
-			if (templateMatcher.start() != 0 && templateMatcher.end() < inBlock.length() -1) {
+			if (templateMatcher.start() != 0 && templateMatcher.end() < inBlock.length() - 1) {
 			   fieldEnvironment = inBlock.substring(templateMatcher.start() -1, templateMatcher.end() + 1);
 			}
 			if ( delimiters.suround(fieldEnvironment)) {
 				System.out.println("JA");
+				assert(false) ; // GOT HERE
 			}
 					
 			List<String> formatParts = Splitter.on(fieldPattern).splitToList(inBlock);
@@ -731,8 +732,8 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 			// Now build the meta data that is prefixed before the block
 			StringBuilder metaData = new StringBuilder();
-			metaData.append(delimiters.commentStartDelimiter().orElse("")).append(block);
-			metaData.append(delimiters.commentEndDelimiter().orElse(""));
+			metaData.append(commentDelimiter.start().orElse("")).append(block);
+			metaData.append(commentDelimiter.end().orElse(""));
 			
 
 			Matcher metaDataMatcher = fieldPattern.matcher(metaData);
@@ -837,12 +838,12 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
     	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
     
 		if (!templateComment.isEmpty()) {
-			delimiters.commentStartDelimiter(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
-			delimiters.commentEndDelimiter(templateComment.substring(delimiters.commentStartDelimiter().get().length() + templateCommentField.length(), templateComment.length()));
+			commentDelimiter.start(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
+			commentDelimiter.end(templateComment.substring(commentDelimiter.start().get().length() + templateCommentField.length(), templateComment.length()));
 
 		} else {
-			delimiters.commentStartDelimiter("");
-			delimiters.commentEndDelimiter("");
+			commentDelimiter.start("");
+			commentDelimiter.end("");
 		}
     }
 
