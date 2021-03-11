@@ -71,6 +71,11 @@ public class Delimiters implements Iterable<Delimiter>{
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return "Delimiters [delimiters=" + delimiters + "]";
+	}
+
 
 
 
