@@ -38,25 +38,28 @@ public class Delimiter {
 	
 	/* Returns a Pattern object that matches text between the two delimiters.
 	 *
-	 * Both the start and end delimiters need to be defined, otherwise an IllegalArgumentExecption is thrown. 
-	 * 	 *
-	 * The pattern object matches  the following regex( s is the start delimiter, e is the end delimiter)
+	 * The pattern object matches  the following - simplified - regex ( s is the start delimiter, e is the end delimiter)
 	 * 
 	 * <code>
-	 *        s[^e]*e    
+	 *        s[^e]*e     start and end delimiters defined
+	 *        [^e]*e      no start delimiter defined
+	 *        s[^s]*      no end delimiter defined
+	 *        ^.*$        no start and end delimiter defined, i.e returns the whole line
+	 * </code>        
 	 *	      
 	 * @returns A Pattern object 
-	 * @throws IllegalArgumentException
+	 * 
 	 */
 	public Pattern pattern() {
-		checkArgument(start().isPresent() && end().isPresent(), "Both deimiters have not been defined.");
-
-	
-		String spec =  this.start().map(s -> Pattern.quote(s)).get() 
-				+ "[^" + this.end().map(e -> Pattern.quote(e)).get() + "]*" 
-				+ this.end().map(e -> Pattern.quote(e)).orElse("\\n");
-
-
+		
+		String spec =  this.start().map(s -> Pattern.quote(s)).orElse("") 
+				+ "[" + this.end().map(e -> "^" + Pattern.quote(e)).orElse(this.start().map(s -> "^" + Pattern.quote(s)).orElse(".")) + "]*" 
+				+ this.end().map(e -> Pattern.quote(e)).orElse("");
+		
+		// If no start and end delimiters are defined then create a pattern to match a whole line. 
+		if (this.start.isEmpty() && this.end.isEmpty()) 
+			spec = "^.*$";
+		
 		Pattern p = Pattern.compile(spec);
 
 		return p;

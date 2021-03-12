@@ -82,13 +82,47 @@ class DelimiterTest {
 		String result = matcher.group();
 		assertEquals("(some text)", result);
 		
-		delimiter.start("(").end("");
-		assertThrows(IllegalArgumentException.class, () ->  delimiter.pattern());
-		
-		delimiter.start("").end(")");
-		assertThrows(IllegalArgumentException.class, () ->  delimiter.pattern());
-		
 	}
+	
+	@Test
+	void testPatternWithNoEndDelimiter() {
+		String text = "This contains (some text) in delimiters\n";
+
+		delimiter.start("(").end("");
+		Pattern pattern = delimiter.pattern();
+		Matcher matcher = pattern.matcher(text);
+		assertTrue(matcher.find(0));
+		String result = matcher.group();
+		assertEquals("(some text) in delimiters\n", result);
+
+	}
+	
+	@Test
+	void testPatternWithNoStartDelimiter() {
+		String text = "This contains (some text) in delimiters\n";
+
+		delimiter.start("").end(")");
+		Pattern pattern = delimiter.pattern();
+		Matcher matcher = pattern.matcher(text);
+		assertTrue(matcher.find(0));
+		String result = matcher.group();
+		assertEquals("This contains (some text)", result);
+
+	}
+	
+	@Test
+	void testPatternWithNoDelimiters() {
+		String text = "This contains (some text) in delimiters\n";
+
+		delimiter.start("").end("");
+		Pattern pattern = delimiter.pattern();
+		Matcher matcher = pattern.matcher(text);
+		assertTrue(matcher.find(0));
+		String result = matcher.group();
+		assertEquals("This contains (some text) in delimiters", result);
+
+	}
+	
 	
 	
 }
