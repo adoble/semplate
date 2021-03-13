@@ -69,7 +69,7 @@ class DelimiterTest {
 
 	@Test
 	void testPattern() {
-		String text = "This contains (some text) in delimiters\n";
+		String text = "This contains (some text) in delimiters";
 		
 		delimiter.pair("()");
 		Pattern pattern = delimiter.pattern();
@@ -85,21 +85,42 @@ class DelimiterTest {
 	}
 	
 	@Test
+	void testPatternWithMutiCharacterDelimiters() {
+		String text = "The word population in <span>{{year}}</span> is <span>{{population}}</span> according to the World Bank.";
+		
+		delimiter.start("<span>").end("</span>");
+		
+        Pattern pattern = delimiter.pattern();
+		
+		Matcher matcher = pattern.matcher(text);
+		System.out.println(matcher);
+		
+		assertTrue(matcher.find(0));
+		String result = matcher.group();
+		assertEquals("<span>{{year}}</span>", result);
+		
+		assertTrue(matcher.find());
+		result = matcher.group();
+		assertEquals("<span>{{population}}</span>", result);
+		
+	}
+	
+	@Test
 	void testPatternWithNoEndDelimiter() {
-		String text = "This contains (some text) in delimiters\n";
+		String text = "This contains (some text) in delimiters";
 
 		delimiter.start("(").end("");
 		Pattern pattern = delimiter.pattern();
 		Matcher matcher = pattern.matcher(text);
 		assertTrue(matcher.find(0));
 		String result = matcher.group();
-		assertEquals("(some text) in delimiters\n", result);
+		assertEquals("(some text) in delimiters", result);
 
 	}
 	
 	@Test
 	void testPatternWithNoStartDelimiter() {
-		String text = "This contains (some text) in delimiters\n";
+		String text = "This contains (some text) in delimiters";
 
 		delimiter.start("").end(")");
 		Pattern pattern = delimiter.pattern();
@@ -112,7 +133,7 @@ class DelimiterTest {
 	
 	@Test
 	void testPatternWithNoDelimiters() {
-		String text = "This contains (some text) in delimiters\n";
+		String text = "This contains (some text) in delimiters";
 
 		delimiter.start("").end("");
 		Pattern pattern = delimiter.pattern();
