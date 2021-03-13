@@ -36,29 +36,27 @@ public class Delimiter {
 		return this.start(delimiterPair.substring(0, 1)).end(delimiterPair.substring(1));
 	}
 	
-	/* Returns a Pattern object that matches text between the two delimiters.
+	/* Returns a Pattern object that matches text between the two delimiters. The delimiters are included in the result. 
 	 *
-	 * The pattern object matches  the following - simplified - regex ( s is the start delimiter, e is the end delimiter)
+	 * The pattern object matches the following - simplified - regex ( s is the start delimiter, 
+	 * e is the end delimiter and a, b are respectively start and end delimiters with more then 
+	 * one character)
 	 * 
 	 * <code>
-	 *        s[^e]*e     start and end delimiters defined
-	 *        [^e]*e      no start delimiter defined
-	 *        s[^s]*      no end delimiter defined
-	 *        ^.*$        no start and end delimiter defined, i.e returns the whole line
-	 * </code>        
-	 *	      
+	 *       s.*?e     start and end delimiters defined
+	 *       s.*?$     no end delimiter defined
+	 *       ^.*?e     no start delimiter defined
+	 *       .*?       no start and end delimiter defined, i.e returns the whole line
+	 *  </code>
+	 *  
 	 * @returns A Pattern object 
 	 * 
 	 */
 	public Pattern pattern() {
 		
-		String spec =  this.start().map(s -> Pattern.quote(s)).orElse("") 
-				+ "[" + this.end().map(e -> "^" + Pattern.quote(e)).orElse(this.start().map(s -> "^" + Pattern.quote(s)).orElse(".")) + "]*" 
-				+ this.end().map(e -> Pattern.quote(e)).orElse("");
-		
-		// If no start and end delimiters are defined then create a pattern to match a whole line. 
-		if (this.start.isEmpty() && this.end.isEmpty()) 
-			spec = "^.*$";
+		String spec =  this.start().map(s -> Pattern.quote(s)).orElse("^") 
+				+ ".*?" 
+				+ this.end.map(e -> Pattern.quote(e)).orElse("$");
 		
 		Pattern p = Pattern.compile(spec);
 
