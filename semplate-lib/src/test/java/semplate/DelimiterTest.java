@@ -144,6 +144,33 @@ class DelimiterTest {
 
 	}
 	
+    @Test
+	void testInsert() {
+    	delimiter.start("(").end(")");
+    	
+    	Delimiter insert = new Delimiter().start("{{").end("}}");
+    	delimiter.insert(insert);
+    	
+    	assertEquals("({{", delimiter.start().orElse(""));
+    	assertEquals("}})", delimiter.end().orElse(""));
+    	
+       	delimiter.start("(").end("");
+    	delimiter.insert(insert);
+    	assertEquals("({{", delimiter.start().orElse(""));
+    	assertEquals("}}", delimiter.end().orElse(""));
+    	
+    	delimiter.start("").end(")");
+    	delimiter.insert(insert);
+    	assertEquals("{{", delimiter.start().orElse(""));
+    	assertEquals("}})", delimiter.end().orElse(""));
+    	
+    	delimiter.start("(").end(")");
+    	insert.start("").end("");
+    	assertEquals("(", delimiter.start().orElse(""));
+    	assertEquals(")", delimiter.end().orElse(""));
+		
+	}
+	
 	
 	
 }
