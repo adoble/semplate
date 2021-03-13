@@ -38,9 +38,8 @@ public class Delimiter {
 	
 	/* Returns a Pattern object that matches text between the two delimiters. The delimiters are included in the result. 
 	 *
-	 * The pattern object matches the following - simplified - regex ( s is the start delimiter, 
-	 * e is the end delimiter and a, b are respectively start and end delimiters with more then 
-	 * one character)
+	 * The pattern object matches the following - simplified - regex (s is the start delimiter, 
+	 * e is the end delimiter )
 	 * 
 	 * <code>
 	 *       s.*?e     start and end delimiters defined
