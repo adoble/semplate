@@ -2,6 +2,9 @@ package semplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -151,11 +154,39 @@ class DelimitersTest {
 		assertFalse(delimiters.suround("(hello)postamble"));
 		assertFalse(delimiters.suround("preamble(hello)postamble"));
 		assertFalse(delimiters.suround(""));
-		
-		
-		
-		
 
   }
+	
+@Test
+void testPattern() {
+	String text = "The word population in <span>{{year}}</span> is <span>{{population}}</span> according to [{{source}}]({{sourceLink}}).";
+	
+	Delimiters delimiters = new Delimiters();
+	
+	delimiters.add("<span>", "</span>");
+	delimiters.addPair("()");
+	delimiters.addPair("[]");
+	
+	Pattern pattern = delimiters.pattern();
+	
+	System.out.println(pattern);
+	
+	Matcher matcher = pattern.matcher(text);
+	
+	while ( matcher.find()) {
+		System.out.println(matcher.group());
+	}
+	
+	assertTrue(matcher.find(0));
+	assertEquals("<span>{{year}}</span>", matcher.group());
+	assertTrue(matcher.find());
+	assertEquals("<span>{{population}}</span>", matcher.group());
+	assertTrue(matcher.find());
+	assertEquals("[{{source}}]", matcher.group());
+	assertTrue(matcher.find());
+	assertEquals("({{sourceLink}})", matcher.group());
+	
+	
+}	
 
 }

@@ -3,6 +3,9 @@ package semplate;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.*;
+import java.util.regex.Pattern;
+
+import com.google.common.base.Joiner;
 
 
 
@@ -69,6 +72,24 @@ public class Delimiters implements Iterable<Delimiter>{
 			}
 		}
 		return false;
+	}
+	
+	/** Constructs a pattern that matches all of the added delimiters. 
+	 * 
+	 * @return A Pattern object
+	 */
+	public Pattern pattern() {
+		ArrayList<String> patternSpecs = new ArrayList<String>();
+		
+		for (Delimiter d: delimiters) {
+			patternSpecs.add(d.pattern().pattern());   // Append pattern as a string
+		}
+		
+		String completeSpec = Joiner.on("|").join(patternSpecs); // 
+		
+		Pattern pattern = Pattern.compile(completeSpec);
+		
+		return pattern;
 	}
 
 	@Override
