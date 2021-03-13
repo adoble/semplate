@@ -56,8 +56,8 @@ public class Delimiters implements Iterable<Delimiter>{
 		return delimiters.iterator();
 	}
 
-	/* 
-	 * Is the string s surrounded by one of the specified delimiters
+	/* Is the string s surrounded by one of the specified delimiters
+	 * 
 	 * @param s The string to be tested
 	 */
 	public boolean suround(String s) {
@@ -76,13 +76,17 @@ public class Delimiters implements Iterable<Delimiter>{
 	
 	/** Constructs a pattern that matches all of the added delimiters. 
 	 * 
+	 * If no delimiters have been added then matched the whole text.
+	 * 
 	 * @return A Pattern object
 	 */
 	public Pattern pattern() {
 		ArrayList<String> patternSpecs = new ArrayList<String>();
 		
-		for (Delimiter d: delimiters) {
-			patternSpecs.add(d.pattern().pattern());   // Append pattern as a string
+		if (delimiters.size() > 0) {
+		     delimiters.forEach(d -> patternSpecs.add(d.pattern().pattern()));
+		} else {
+			patternSpecs.add("^.*$");
 		}
 		
 		String completeSpec = Joiner.on("|").join(patternSpecs); // 

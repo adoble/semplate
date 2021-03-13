@@ -157,36 +157,43 @@ class DelimitersTest {
 
   }
 	
-@Test
-void testPattern() {
-	String text = "The word population in <span>{{year}}</span> is <span>{{population}}</span> according to [{{source}}]({{sourceLink}}).";
+	@Test
+	void testPattern() {
+		String text = "The word population in <span>{{year}}</span> is <span>{{population}}</span> according to [{{source}}]({{sourceLink}}).";
+
+		Delimiters delimiters = new Delimiters();
+
+		delimiters.add("<span>", "</span>");
+		delimiters.addPair("()");
+		delimiters.addPair("[]");
+
+		Pattern pattern = delimiters.pattern();
+
+		Matcher matcher = pattern.matcher(text);
+
+		assertTrue(matcher.find(0));
+		assertEquals("<span>{{year}}</span>", matcher.group());
+		assertTrue(matcher.find());
+		assertEquals("<span>{{population}}</span>", matcher.group());
+		assertTrue(matcher.find());
+		assertEquals("[{{source}}]", matcher.group());
+		assertTrue(matcher.find());
+		assertEquals("({{sourceLink}})", matcher.group());
+
+
+	}	
 	
-	Delimiters delimiters = new Delimiters();
-	
-	delimiters.add("<span>", "</span>");
-	delimiters.addPair("()");
-	delimiters.addPair("[]");
-	
-	Pattern pattern = delimiters.pattern();
-	
-	System.out.println(pattern);
-	
-	Matcher matcher = pattern.matcher(text);
-	
-	while ( matcher.find()) {
-		System.out.println(matcher.group());
+	@Test
+	void testPatternWithNoDelimiters() {
+		String text = "The word population in <span>{{year}}</span> is <span>{{population}}</span> according to [{{source}}]({{sourceLink}}).";
+
+		Delimiters delimiters = new Delimiters();  // No delimiters
+		Pattern pattern = delimiters.pattern();
+			
+		Matcher matcher = pattern.matcher(text);
+		assertTrue(matcher.find(0));
+		assertEquals(text, matcher.group());
+		
 	}
-	
-	assertTrue(matcher.find(0));
-	assertEquals("<span>{{year}}</span>", matcher.group());
-	assertTrue(matcher.find());
-	assertEquals("<span>{{population}}</span>", matcher.group());
-	assertTrue(matcher.find());
-	assertEquals("[{{source}}]", matcher.group());
-	assertTrue(matcher.find());
-	assertEquals("({{sourceLink}})", matcher.group());
-	
-	
-}	
 
 }
