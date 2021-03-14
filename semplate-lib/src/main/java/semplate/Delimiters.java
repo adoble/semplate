@@ -9,7 +9,7 @@ import com.google.common.base.Joiner;
 
 
 
-public class Delimiters implements Iterable<Delimiter>{
+public class Delimiters implements Iterable<Delimiter>, Cloneable {
 		
 	private ArrayList<Delimiter> delimiters = new ArrayList<>();
 	
@@ -60,7 +60,7 @@ public class Delimiters implements Iterable<Delimiter>{
 	 * 
 	 * @param s The string to be tested
 	 */
-	public boolean suround(String s) {
+	public boolean isDelimited(String s) {
 		if (s.length() < 2) return false;
 		
 		Optional<String> startChar  = Optional.of(s.substring(0, 1));
@@ -72,6 +72,14 @@ public class Delimiters implements Iterable<Delimiter>{
 			}
 		}
 		return false;
+	}
+	
+	public Delimiters insertAll(String s, String e) {
+		Delimiter insert = new Delimiter().start(s).end(e);
+		
+		delimiters.forEach(d -> d.insert(insert));
+		
+		return this;
 	}
 	
 	/** Constructs a pattern that matches all of the added delimiters. 
@@ -94,6 +102,31 @@ public class Delimiters implements Iterable<Delimiter>{
 		Pattern pattern = Pattern.compile(completeSpec);
 		
 		return pattern;
+	}
+	
+	
+	
+
+//	@Override
+//	protected Delimiters clone() throws CloneNotSupportedException {
+//		Delimiters cloned = new Delimiters();
+//		
+//		for(Delimiter d: delimiters) {
+//			cloned.add(d);
+//		}
+//			
+//		
+//		return cloned;
+//	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public Delimiters clone() throws CloneNotSupportedException {
+			
+		Delimiters clone = (Delimiters) super.clone();
+		clone.delimiters = (ArrayList<Delimiter>) this.delimiters.clone();  // Deep copy
+		
+		return clone;
 	}
 
 	@Override

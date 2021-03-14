@@ -2,6 +2,8 @@ package semplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -142,18 +144,18 @@ class DelimitersTest {
 		delimiters.addPair("[]");
 		delimiters.addPair("<>");
 		
-		assertTrue(delimiters.suround("(hello)"));
-		assertTrue(delimiters.suround("<Loret ipsum>"));
-		assertTrue(delimiters.suround("[value]"));
-		assertTrue(delimiters.suround("[]"));
+		assertTrue(delimiters.isDelimited("(hello)"));
+		assertTrue(delimiters.isDelimited("<Loret ipsum>"));
+		assertTrue(delimiters.isDelimited("[value]"));
+		assertTrue(delimiters.isDelimited("[]"));
 		
-		assertFalse(delimiters.suround("hello"));
-		assertFalse(delimiters.suround("(hello"));
-		assertFalse(delimiters.suround("hello)"));
-		assertFalse(delimiters.suround("preamble(hello)"));
-		assertFalse(delimiters.suround("(hello)postamble"));
-		assertFalse(delimiters.suround("preamble(hello)postamble"));
-		assertFalse(delimiters.suround(""));
+		assertFalse(delimiters.isDelimited("hello"));
+		assertFalse(delimiters.isDelimited("(hello"));
+		assertFalse(delimiters.isDelimited("hello)"));
+		assertFalse(delimiters.isDelimited("preamble(hello)"));
+		assertFalse(delimiters.isDelimited("(hello)postamble"));
+		assertFalse(delimiters.isDelimited("preamble(hello)postamble"));
+		assertFalse(delimiters.isDelimited(""));
 
   }
 	
@@ -195,5 +197,55 @@ class DelimitersTest {
 		assertEquals(text, matcher.group());
 		
 	}
+	
+	@Test
+	void testInsertAll() {
+		Delimiters delimiters = new Delimiters();
+		
+		delimiters.addPair("()");
+		delimiters.addPair("[]");
+		delimiters.addPair("<>");
+		
+		delimiters.insertAll("{{", "}}");
+		
+		for (Delimiter d: delimiters) {
+			assertEquals(3, d.start().orElse("").length());
+			assertEquals("{{", d.start().orElse("").substring(1, 3));
+		
+			assertEquals(3, d.end().orElse("").length());
+			assertEquals("}}", d.end().orElse("").substring(0, 2));
+		
+		}
+		
+	}
+	
+	@Test
+	void testClone( ) throws CloneNotSupportedException {
+        Delimiters delimiters = new Delimiters();
+		
+        Delimiter[] testDelimiters = {  
+        		new Delimiter().pair("()"),
+        		new Delimiter().pair("[]"),
+        		new Delimiter().pair("<>")
+        };
+
+      for (Delimiter d: testDelimiters) {
+    	  delimiters.add(d);
+      }
+		
+		Delimiters clone = delimiters.clone();
+		
+		  Delimiter[] results = new Delimiter[3];
+		  
+		  int i = 0;
+		  for (Delimiter d: clone) {
+	    	  results[i++] = d;
+	      }
+			  
+		assertArrayEquals(testDelimiters, results);
+		
+	}
+	
+	
 
 }
