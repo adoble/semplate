@@ -15,7 +15,7 @@ Values can be embedded, for instance:
     * See [Plato's Republic](http://www.wikipedia.com/The_Republic)
 
 This uses the markdowns specific inline delimiters and is defined early in the markdown file
-using:
+using *(Note: the start and end delimiter need to be defined on the same line, only one delimiter pair can be defined per line)*:
 
     <!-{@template.delimiter.start:"("}}{@template.delimiter.end:")"}}-->
     <!-{@template.delimiter.start:"["}}{@template.delimiter.end:"]"}}-->
@@ -24,6 +24,7 @@ or less verbose as:
 
     <!--{@template.delimiter.pair:"()"}}{@template.delimiter.pair:"[]"}}-->
 
+*(Note: more than one pair can be defined on a line)*
 Alternatively a string can be used, for instance, a HTML tag
 
     <!--{@template.delimiter.start:"<span>"}}{@template.delimiter.end:"</span>"}}
@@ -48,12 +49,15 @@ Alternatively a string can be used, for instance, a HTML tag
     inline-value = [character-sequence]
 
     semantic-block = comment-delimiter-start
-                     field-spec
-                     *[field-spec]
+                     [outline-field-spec | *inline-field-spec]
                      comment-delimiter-end
                      newline
 
-    field-spec = "{{" field-name [":" *format-spec "]}}""
+    field-spec = inline-field-space / outline-field-spec
+    
+    outline-field-spec = "{{" field-name [":" *format-spec "]}}""
+    
+    inline-field-spec = "{{" fieldname pattern-spec "}}"
 
     directive = "{@" directive-name ["=" directive-value] "}}"
 
