@@ -50,6 +50,8 @@ public class Template  {
 	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
 	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
 
+	final private static Pattern directiveLine = Pattern.compile("[\\{@r[^}]*\\}{2}]*");
+	
 	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
 	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
@@ -107,7 +109,6 @@ public class Template  {
      * @param templateFileName The name of the template file
 	 */
 	public void config(String templateFileName) throws IOException {
-		//this.config(FileSystems.getDefault().getPath(templateFileName));
 		this.config(Path.of(templateFileName));
 
 	}
@@ -151,16 +152,19 @@ public class Template  {
 	 * in the data object.
 
 	 * @param dataObject An object annotated with template field information
-	 * @param outputFilePath Path specifiing the markdown file to be generated
+	 * @param outputFilePath Path specifying the markdown file to be generated
 	 */
-	public void generate(Object dataObject, Path outputFilePath) throws IOException {
+	public void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
 
 		ValueMap fieldValueMap = buildFieldValueMap(dataObject);
-
+        
+		// Expand the inline delimiters with the field delimiters so that only these are selected. 
+		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
+		
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
             List<String> replacements = stream
-            		.flatMap(line -> templateExpand(line, fieldValueMap))  // Expand any lists
-            		.map(line -> templateReplace(line, fieldValueMap))     // Replace the fields and add meta data
+            		.flatMap(line -> templateExpand(line, fieldValueMap))                    // Expand any lists
+            		.map(line -> templateReplace(line, fieldValueMap, expandedDelimiters))   // Replace the fields and add semantic information
             		.collect(Collectors.toList());
 
             Files.write(outputFilePath, replacements);
@@ -230,8 +234,6 @@ public class Template  {
 					                    .map(block -> updateBlock(block, updatedValueMap))
 					                    .peek(s-> System.out.print(s))
 					                    .collect(Collectors.toList());
-			
-		   blocks.forEach(s -> System.out.println("BLOCK\n" +s));
 			
 		} catch (IOException e)  {
 			throw new UpdateException("TODO", e);
@@ -311,7 +313,6 @@ public class Template  {
 		Optional<Path> tempPath = Optional.empty();
 		try  {
 			tempPath = Optional.of(Files.createTempFile(markdownFilePath.getParent(), "semplate", "tmp"));
-			System.out.println(tempPath);
 			Files.copy(markdownFilePath, tempPath.orElseThrow(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new UpdateException("Unable to create temporary files whilst updating " +  markdownFilePath.getFileName(), e);
@@ -379,7 +380,6 @@ public class Template  {
 
 			} else {
                //TODO --> value is a value map
-				System.out.println(fieldName + "=" + valueMap.getValueMap(fieldName).orElse(ValueMap.empty()));
 				Field field;
 				
 				try {
@@ -617,7 +617,6 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	/* Expands any line that contains field references to an Iterable to a stream of template lines,
 	 * each one of which represents one entry of the list.
 	 */
-	@SuppressWarnings("unchecked")
 	private Stream<String> templateExpand(String line, ValueMap valueMap) {
 		String substitutedLine = line;
 		List<ValueMap> entries = null;;
@@ -664,68 +663,74 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 
 	}
 	
-	private String templateReplace(String inBlock, ValueMap valueMap) {
+	private String templateReplace(String inBlock, ValueMap valueMap, Delimiters delimiters) {
 		StringBuilder semanticBlock = new StringBuilder();
+		Matcher fieldMatcher = fieldPattern.matcher(inBlock);  // TODO refactor to fieldMatcher
+				
+		// Assemble the semantic block 
+		// First assemble any inline field specs and add them to the semantic block 
+		Pattern delimiterPattern = delimiters.pattern();
+		Matcher delimiterMatcher  = delimiterPattern.matcher(inBlock);
+		semanticBlock = delimiterMatcher.results()
+		                .map(mr -> mr.group())   // Map to the string  s{{f}}e
+		                .map(s -> mapInlineFieldSpec(s))
+		                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
 		
-		Matcher templateMatcher = fieldPattern.matcher(inBlock);  // TODO refactor to fieldMatcher
 		
-		String textValue = inBlock;
-		
-		
-		// If there are any delimiter pairs in the block , process them
-		boolean delimitersInBlock = false;
-		for (Delimiter delimiter: delimiters) {
-			Pattern pattern = delimiter.pattern();
-			Matcher matcher = pattern.matcher(inBlock);
-			while (matcher.find()) {  // find text segments that star and finish with delimiters
-				String textSegment = matcher.group();
-				templateMatcher = fieldPattern.matcher(textSegment); // Does this text segment contain a field. 
-				if (templateMatcher.find()) {
-					delimitersInBlock = true;
-					// Assemble the semantic block 
-					semanticBlock.append("{{")
-					.append(templateMatcher.group()) // The field name
-					.append("pattern=\"")
-					.append(delimiter.start().get())
-					.append("%s")
-					.append(delimiter.end().get())
-					.append("\"}}");
+		boolean noInlineFieldsFound = (semanticBlock.length() == 0);
+	    
+		if (noInlineFieldsFound) {
+			// A text block has the form
+			//   a{{f}}b  where a, b are string with 0 or more characters, f is the field name
+			// Need to map this to the outline field spec:
+			//   {{f:pattern="a%s%b"}}
+			if (fieldMatcher.find()) {
+				List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").splitToList(inBlock);
+				
+				semanticBlock.append("{{").append(parts.get(1));
+				String preamble = parts.get(0);
+				String postamble = parts.get(2);
+				
+				if (!preamble.isEmpty() || !postamble.isEmpty()) {
+					semanticBlock.append(":pattern=\"").append(preamble).append("%s").append(postamble).append("\"");
 				}
+				semanticBlock.append("}}");
 			}
-		} 
-				
-		
-		if (!delimitersInBlock) {  // No delimiters in block so just create a single value semantic block using format 
-			if (templateMatcher.find()) {  // The block can only now contain one field  TODO see if we can extend this later
-				String fieldName = templateMatcher.group().replaceAll("\\{|\\}", "");
-				semanticBlock.append("{{")
-				             .append(fieldName);
-				
-				List<String> formatParts = Splitter.on(fieldPattern).splitToList(inBlock);
-				StringBuffer format = new StringBuffer();
-				if (formatParts.size() == 2) {
-					format.append(formatParts.get(0));
-					format.append("%s");
-					format.append(formatParts.get(1));
-				} else {
-					return commentDelimiter.start().orElse("") + "   ERROR: cannot parse the following block:"
-							+ commentDelimiter.end().orElse("") + "\n" + inBlock;
-				} 
-				semanticBlock.append(format)
-				             .append("}}");
-			}
-                       
+			
 		}
 		
-		// Now round of the semantic block with the comment delimiters
-		semanticBlock.insert(0, commentDelimiter.start().orElse(""));
-		semanticBlock.append(commentDelimiter.end().orElse("")).append("\n");
-
-
+		// Now surround the semantic block in comments
+		if (!semanticBlock.isEmpty()) {
+			semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
+			             .append(commentDelimiter.end().orElse(""));
+		}
+		
 		// Now replace every thing in the in block that is a valid field using the value map
-		textValue =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
+		String textValue =  fieldMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
 
 		return semanticBlock + textValue;
+	}
+	
+	/* Takes string of the form 
+	 *      <s>{{<f>}}<e>
+	 * where <s> is the start delimiter, <f> is the field name and <e> is the end delimiter, and maps
+	 * them to an inline field spec of the form:
+	 * {{<f>:pattern="<s>%s<e>"}}
+	 * 
+	 * @param s The string to be mapped
+	 * @return The inline field spec
+	 * 
+	 */
+	private StringBuffer mapInlineFieldSpec(String s) {
+		StringBuffer sb = new StringBuffer();
+		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults().splitToList(s);
+		
+		checkArgument(parts.size() == 3, "The string \"%s\" is ill formed", s); 
+		
+		sb.append("{{").append(parts.get(1)).append(":pattern=\"").append(parts.get(0)).append("%s").append(parts.get(2)).append("\"}}");
+		
+		return sb;
+		
 	}
 
 	private String templateReplace_OLD(String block, ValueMap valueMap) {

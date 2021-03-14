@@ -77,7 +77,7 @@ class TemplateGenerateTest {
 
 	
 	@Test 
-	void testGenerateSimple() {
+	void testGenerateSimple() throws Exception{
 		
 		Template template = new Template();
 		assumeTrue(template != null);
@@ -91,13 +91,8 @@ class TemplateGenerateTest {
 		
 		Path outputPath = templatesPath.resolve("the_republic.md");
 		
-		try {
-			template.generate(work, outputPath);
-		}
-		catch (IOException e) {
-			fail(e.getMessage());
-		}
-
+		template.generate(work, outputPath);
+		
 		assertTrue(Files.exists(outputPath));
 		
 		
