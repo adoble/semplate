@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+* The semantic block is now is at the start of a markdown block and the value of any field is directly extracted from the text itself rather than being in the semantic markdown. 
+* A formal specification of the semantically marked up files added
 * New functionality to read templates that contain lists into data objects that have fields using a List<?> interface (e.g. ArrayList etc.). 
 
 ### Changed
