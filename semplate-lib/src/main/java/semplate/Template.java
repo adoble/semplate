@@ -665,14 +665,26 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	}
 	
 	private String templateReplace(String inBlock, ValueMap valueMap, Delimiters delimiters) {
+	   if (inBlock.contains("{@") && inBlock.contains("}}")) {
+		   // Directives are passed through without any further processing
+		   return inBlock;
+		   
+	   }
+	   
+	   if (!inBlock.contains("{{")) {
+		   // Any text block without any fields is passed through without any further processing
+		   return inBlock;
+	   }
+		
 		StringBuilder semanticBlock = new StringBuilder();
-		Matcher fieldMatcher = fieldPattern.matcher(inBlock);  // TODO refactor to fieldMatcher
+		Matcher fieldMatcher = fieldPattern.matcher(inBlock);
 				
 		// Assemble the semantic block 
 		// First assemble any inline field specs and add them to the semantic block 
 		Pattern delimiterPattern = delimiters.pattern();
 		Matcher delimiterMatcher  = delimiterPattern.matcher(inBlock);
 		semanticBlock = delimiterMatcher.results()
+				.peek(mr -> System.out.println("MR      " + mr.group()))
 		                .map(mr -> mr.group())   // Map to the string  s{{f}}e
 		                .map(s -> mapInlineFieldSpec(s))
 		                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
@@ -726,7 +738,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		StringBuffer sb = new StringBuffer();
 		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults().splitToList(s);
 		
-		checkArgument(parts.size() == 3, "The string \"%s\" is ill formed", s); 
+		checkArgument(parts.size() == 3, "The string \"%s\" is malformed", s); 
 		
 		sb.append("{{").append(parts.get(1)).append(":pattern=\"").append(parts.get(0)).append("%s").append(parts.get(2)).append("\"}}");
 		
