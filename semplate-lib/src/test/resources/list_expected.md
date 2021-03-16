@@ -1,11 +1,17 @@
-<!--{{template.comment}}-->
+<!--{@template.comment}}-->
+<!--{@template.delimiter.pair:"()"}}{@template.delimiter.pair:"[]"}}-->
 
-# The Works of Plato <!--# {{title="The Works of Plato"}}-->
+<!--{{title:pattern="# %s"}}-->
+# The Works of Plato
 
-Undisputed works of Plato <!--Undisputed works of {{author="Plato"}}-->
+<!--{{author:pattern="Undisputed works of %s"}}-->
+Undisputed works of Plato
 
-* [Apology](https://en.wikisource.org/wiki/Apology_(Plato)) <!--* [{{references.0.title="Apology"}}]({{references.0.link="https://en.wikisource.org/wiki/Apology_(Plato)"}})-->
-* [Charmides](https://en.wikisource.org/wiki/Charmides_(Plato)) <!--* [{{references.1.title="Charmides"}}]({{references.1.link="https://en.wikisource.org/wiki/Charmides_(Plato)"}})-->
-* [The Republic](https://en.wikisource.org/wiki/The_Republic_of_Plato) <!--* [{{references.2.title="The Republic"}}]({{references.2.link="https://en.wikisource.org/wiki/The_Republic_of_Plato"}})-->
+<!--{{references.0.title:pattern="[%s]"}}{{references.0.link:pattern="(%s)"}}-->
+* [Apology](https://en.wikisource.org/wiki/Apology_(Plato))
+<!--{{references.1.title:pattern="[%s]"}}{{references.1.link:pattern="(%s)"}}-->
+* [Charmides](https://en.wikisource.org/wiki/Charmides_(Plato))
+<!--{{references.2.title:pattern="[%s]"}}{{references.2.link:pattern="(%s)"}}-->
+* [The Republic](https://en.wikisource.org/wiki/The_Republic_of_Plato)
 
 The above can be changed at any time.
