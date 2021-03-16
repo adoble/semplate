@@ -34,10 +34,7 @@ class TemplateBasicTest {
 	
 	private Path templateFile;
 	
-	// Test data object
-	Work work;
 	
-
 	@BeforeEach
 	void setUp() throws Exception {
 		// Set up the mock file system
@@ -59,15 +56,7 @@ class TemplateBasicTest {
 		 */
 		assertTrue(Files.exists(templateFile));
 		
-		// Set up the test data object
-		work = new Work();
-		work.setAuthor("Plato");
-		work.setTitle("The Republic");
-		work.setTranslator("Benjamin Jowett");
-		work.setSource("Wikisource");
-		work.setSourceLink(new URL("https://en.wikisource.org/wiki/The_Republic"));
-		work.setId(4711);
-		
+			
 	}
 
 	@AfterEach
@@ -77,11 +66,10 @@ class TemplateBasicTest {
 
 
 	@Test
-	void testConfigWithPath() throws IOException {
+	void testConfigWithPath() throws IOException, ReadException {
 		Template t = new Template();
-		//assumeNotNull(t);
 		assumeTrue(t != null);
-
+		
 		t.config(templateFile);
 
 		assertTrue(t.getTemplatePath().toString().equals("/templates/" + templateFileName));
@@ -92,7 +80,7 @@ class TemplateBasicTest {
 	
 	
 	@Test
-	void testConfigWithName(@TempDir Path tempDir) throws IOException{
+	void testConfigWithName(@TempDir Path tempDir) throws IOException, ReadException{
 		Template t = new Template();
 		assumeTrue(t != null);
 		
@@ -109,7 +97,21 @@ class TemplateBasicTest {
 
 	}
 	
-	
+	@Test
+	void testTemplateHasNoCommentDirective(@TempDir Path tempDir) throws IOException, ReadException{
+		Template t = new Template();
+		assumeTrue(t != null);
+		
+        Path sourceFile = tempDir.resolve("no_comment_directive.md");
+		
+	    TestUtilities.copyFromResource("no_comment_directive.md", sourceFile);
+		
+		String templateFileName = sourceFile.toString();
+				
+		assertThrows(ReadException.class, () -> t.config(templateFileName));		
+		
+		
+	}
 	
 
 }
