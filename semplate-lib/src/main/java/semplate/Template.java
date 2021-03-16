@@ -78,7 +78,7 @@ public class Template  {
 	 *
 	 * @param templatePath A path to the template file.
 	 */
-	public void config(Path templatePath) throws IOException {
+	public void config(Path templatePath) throws IOException, ReadException {
 		this.templatePath = templatePath;
 
 //		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
@@ -86,10 +86,11 @@ public class Template  {
 //		}
 		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
- 			commentDelimiter = stream.filter(line -> line.contains(templateCommentField))
+ 			commentDelimiter = stream.peek(System.out::println).filter(line -> line.contains(templateCommentField))
  									 .map(line -> extractCommentDelimiter(line))
+ 									
  									 .findFirst()
- 									 .get();
+ 									 .orElseThrow(() -> new ReadException("No template.comment directive found in template."));
 		}
 
 		
@@ -108,7 +109,7 @@ public class Template  {
 	 * Specifies the name of a template file used for generating the markdown files.
      * @param templateFileName The name of the template file
 	 */
-	public void config(String templateFileName) throws IOException {
+	public void config(String templateFileName) throws IOException, ReadException {
 		this.config(Path.of(templateFileName));
 
 	}
