@@ -129,7 +129,7 @@ public class TemplateReadTest {
 	 * 
 	 */
 	@Test
-	void testReadMarkupError() throws IOException {
+	void testReadMarkupError() throws IOException, ReadException {
 		
 		Template template = new Template();
 		assumeTrue(template != null);
@@ -145,7 +145,7 @@ public class TemplateReadTest {
 	}
 	
 	@Test
-	void testUsingInvalidClass () throws IOException {
+	void testUsingInvalidClass () throws IOException, ReadException {
 		Template template = new Template();
 		assumeTrue(template != null);
 		
