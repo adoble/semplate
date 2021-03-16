@@ -746,32 +746,6 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		
 	}
 
-	private String templateReplace_OLD(String block, ValueMap valueMap) {
-
-		Matcher templateMatcher = fieldPattern.matcher(block);
-
-		//if (templateMatcher.find() &&  !line.contains(templateCommentField)) {
-		if (templateMatcher.find()) {  // block contains a field or a list
-
-			// First replace anything that is a valid field
-			String replacedTemplateLine =  templateMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
-
-			// Now build the meta data that is prefixed before the block
-			StringBuilder metaData = new StringBuilder();
-			metaData.append(commentDelimiter.start().orElse("")).append(block);
-			metaData.append(commentDelimiter.end().orElse(""));
-			
-
-			Matcher metaDataMatcher = fieldPattern.matcher(metaData);
-			String metaDataLine = metaDataMatcher.replaceAll(mr -> metaDataSubstitution(mr, valueMap));
-
-			return replacedTemplateLine + " " + metaDataLine;
-		} else {
-			return block;
-		}
-
-
-	}
 
 	private String fieldSubstitution(MatchResult mr, ValueMap valueMap) {
 
