@@ -33,5 +33,16 @@ class FieldTest {
 		assertEquals(" postamble", field.delimiter().end().orElse(""));
 
 	}
+	
+	@Test
+	void testFieldWithoutPattern() {
+		assertThrows(IllegalArgumentException.class, () -> Field.of("{{fieldname}}"));
+	}
+	
+	@Test
+	void testMalformedField( ) {
+		assertThrows(IllegalArgumentException.class, () -> Field.of("{{kj koj dvd"));
+		
+	}
 
 }
