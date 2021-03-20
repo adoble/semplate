@@ -9,13 +9,11 @@ import com.google.common.base.*;
 import static com.google.common.base.Preconditions.*;
 
 class Field {
-	//final private static String fieldPatternSpec = "\\{{2}[^\\}]*\\}{2}";
-	
 	final private static Pattern fieldPattern = Pattern.compile("\\{\\{(?<field>.*?):pattern=\"(?<start>.*?)%s(?<end>.*?)\"\\}\\}");
 	
 	
-	private String fieldName; 	
-    private Delimiter delimiter;
+	private String fieldName = ""; 	
+    private Delimiter delimiter = new Delimiter();
     
     static Field of(String fieldString) {
     	Matcher matcher = fieldPattern.matcher(fieldString);
@@ -24,7 +22,7 @@ class Field {
 
     	Field field = new Field();
     	// Parse the field string. These are of the form {{fieldname:pattern="pattern"}}
-    	field.fieldName = matcher.group("name");
+    	field.fieldName = matcher.group("field");
     	
     	field.delimiter.start(matcher.group("start")).end(matcher.group("end"));
     	
@@ -37,6 +35,6 @@ class Field {
     }
     
     Delimiter delimiter() {
-    	return delimiter();
+    	return delimiter;
     }
 }
