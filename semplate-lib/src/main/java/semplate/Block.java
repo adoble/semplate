@@ -1,67 +1,100 @@
 package semplate;
 
-import java.util.*;
 import static com.google.common.base.Preconditions.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import semplate.*;
 import semplate.valuemap.*;
 
-public class Block {
-	String semantics;
-	StringBuffer text;
+class Block {    String semanticBlockLine;
+	StringBuffer text = new StringBuffer();
 	
-	public Block() {
-		semantics = "";
-		text = new StringBuffer();
-		
-	}
+	ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
 	
-	private Block(String semanticBlockLine) {
-		super();
+	Block() { super(); }
 		
+	/** A factory method to create a new block using the line containing the semantic block
+	 * 
+	 * @param semanticBlockLine  Contains the field specifications
+	 * @return A block based on the field specifications in semanticBlockLine
+	 */
+    static Block semantics(String semanticBlockLine) { 
+		Block block = new Block();
 		checkArgument(semanticBlockLine != null, "Cannot construct a Block with a null parameter");
-		semantics = semanticBlockLine;
-	}
-	
-	
-	public  Block semantics(String sematicBlockLine) { return new Block(sematicBlockLine); }
+		//checkArgument(isSemanticBlock(semanticBlockLine), "Argument string \"%s\" does not form a semantic block.", semanticBlockLine); 
 
-	public static Block empty() { return new Block();}
+		Pattern fieldPattern = FieldSpec.pattern();
+		Matcher fieldMatcher = fieldPattern.matcher(semanticBlockLine);  
+
+		while (fieldMatcher.find()) {
+			FieldSpec field = FieldSpec.of(fieldMatcher.group());
+			block.fieldSpecs.add(field); 
+		}
+
+		return block; 
+	}
+
+	static Block empty() { return new Block();}
 	
-	public boolean isEmpty() {  
-		return semantics.isEmpty() && text.isEmpty();
+	boolean isEmpty() {  
+		return fieldSpecs.isEmpty() && text.isEmpty();
 	}
 	
-	public Block appendTextValue(CharSequence textValueLine) {
-		//text.append(textValueLine).append("\n");
-		//text = text.flatMap(s -> s.append(textValueLine).append("\n")); 
-		text.append(textValueLine).append("\n"); 
+	Block appendText(CharSequence textValueLine) {
+		text.append(textValueLine); 
 		
 		return this;
 	}
 	
-	public Block init() {
-		semantics = "";
+	Block init() {
 		text = new StringBuffer();;
+		fieldSpecs.clear();
+		
 		return this;
 	}
 	
-	public ValueMap toValueMap() {
+	ValueMap toValueMap() {
+
 		
 		ValueMap valueMap = new ValueMap();
-		valueMap.put("author", "Plato");
-		valueMap.put("title", "Test Title");
+		
+		for (FieldSpec fieldSpec: fieldSpecs) {
+			// Assemble a regex with matcher to find the first element specified by the field specification
+			//String regex = ".*?";
+			String regex = fieldSpec.delimiter().start().map(d -> Pattern.quote(d)).orElse("^");  // Quote the start delimiter 
+			regex +=  "(?<value>.*?)";
+            regex += fieldSpec.delimiter().end().map(d -> Pattern.quote(d)).orElse("$");  // Quote the start delimiter 
+            
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(this.text.toString());
+                       
+            if (matcher.find()) {
+			   String value = matcher.group("value");  // Just take the first one found
+			   valueMap.put(fieldSpec.fieldName(), value);
+            }
+		}
 		
 		return valueMap;
 		
 	}
 	
+	Delimiter[] delimiters() {
+		Delimiter[] delimiters = new Delimiter[fieldSpecs.size()];
+		
+		for (int i = 0; i < fieldSpecs.size(); i++) {
+			delimiters[i] = fieldSpecs.get(i).delimiter();
+		}
+		return delimiters;
+	}
+	
 		 
-	public static boolean isSemanticBlock(String line) { return line.contains("{@") && line.contains("}}"); }
-
 	@Override
 	public String toString() {
-		return "Block [semantics=" + semantics + ", text=" + text + "]";
+		return "Block [semantics=" + semanticBlockLine + ", text=" + text + "]";
 	} 
 	
 	
