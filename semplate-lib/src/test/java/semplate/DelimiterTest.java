@@ -170,6 +170,38 @@ class DelimiterTest {
     	assertEquals(")", delimiter.end().orElse(""));
 		
 	}
+    
+    @Test
+    void testEquals() {
+    	Delimiter testDelimiter = new Delimiter().start("(").end(")");
+    	delimiter.start("(").end(")");
+    	assertTrue(delimiter.equals(testDelimiter));
+    	
+    	testDelimiter.start("<span>").end("</span>");
+    	delimiter.start("<span>").end("</span>");
+    	assertTrue(delimiter.equals(testDelimiter));
+    	    	
+    	testDelimiter = new Delimiter().start("[").end("]");
+    	delimiter.start("(").end(")");
+    	assertFalse(delimiter.equals(testDelimiter));
+    	
+    	delimiter = new Delimiter();
+    	testDelimiter = new Delimiter().start("//");
+    	delimiter.start("//");
+    	assertTrue(delimiter.equals(testDelimiter));
+    	
+    	testDelimiter = new Delimiter().start("//").end("");
+    	delimiter.start("//");
+    	assertTrue(delimiter.equals(testDelimiter));
+    	
+    	testDelimiter.start("<span>").end("</span>");
+    	delimiter.start("span").end("</span>");
+    	assertFalse(delimiter.equals(testDelimiter));
+    	
+    	
+    	
+    	
+    }
 	
 	
 	

@@ -78,9 +78,34 @@ public class Delimiter {
 		return p;
 
 	}
+	
+	/**  Tests if the supplied delimiter is equal to this delimiter. 
+	 * 
+	 * Equals is defined as both are empty of the start and end delimiters are the same. 
+	 * 
+	 * @param obj The delimiter object to be tested
+	 * @return True if the delimiters are equals
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		//return this.start().equals(testDelimiter.start()) && this.end().equals(testDelimiter.end());
+		
+		if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Delimiter testDelimiter = (Delimiter) obj;
+
+        return this.start().equals(testDelimiter.start()) && this.end().equals(testDelimiter.end());
+}
 
 	@Override
-	public String toString() { return "Delimiter [start=" + start + ", end=" + end + "]"; }
+	public String toString() { 
+		return "Delimiter [start=" + start + ", end=" + end + "]"; 
+	}
 
 	
 
