@@ -1,26 +1,24 @@
 package semplate;
 
-import java.util.*;
-import java.util.Optional;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.*;
 import static com.google.common.base.Preconditions.*;
 
-class Field {
+class FieldSpec {
 	final private static Pattern fieldPattern = Pattern.compile("\\{\\{(?<field>.*?):pattern=\"(?<start>.*?)%s(?<end>.*?)\"\\}\\}");
 	
 	
 	private String fieldName = ""; 	
     private Delimiter delimiter = new Delimiter();
     
-    static Field of(String fieldString) {
+    static FieldSpec of(String fieldString) {
     	Matcher matcher = fieldPattern.matcher(fieldString);
     	
     	checkArgument(matcher.matches(), "Argument \"%s\"  does not match a field specification", fieldString);
 
-    	Field field = new Field();
+    	FieldSpec field = new FieldSpec();
     	// Parse the field string. These are of the form {{fieldname:pattern="pattern"}}
     	field.fieldName = matcher.group("field");
     	
@@ -36,5 +34,9 @@ class Field {
     
     Delimiter delimiter() {
     	return delimiter;
+    }
+    
+    static Pattern pattern() {
+    	return fieldPattern;
     }
 }

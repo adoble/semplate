@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class FieldTest {
+class FieldSpecTest {
 	
 	String[] testStrings = {
 							"{{source:pattern=\"[%s]\"}}",
@@ -17,17 +17,17 @@ class FieldTest {
 	@Test
 	void test() {
 
-		Field field = Field.of(testStrings[0]);
+		FieldSpec field = FieldSpec.of(testStrings[0]);
 		assertEquals("source", field.fieldName());
 		assertEquals("[", field.delimiter().start().orElse(""));
 		assertEquals("]", field.delimiter().end().orElse(""));
 
-		field = Field.of(testStrings[1]);
+		field = FieldSpec.of(testStrings[1]);
 		assertEquals("sourceLink", field.fieldName());
 		assertEquals("(", field.delimiter().start().orElse(""));
 		assertEquals(")", field.delimiter().end().orElse(""));
 
-		field = Field.of(testStrings[2]);
+		field = FieldSpec.of(testStrings[2]);
 		assertEquals("text", field.fieldName());
 		assertEquals("Preamble ", field.delimiter().start().orElse(""));
 		assertEquals(" postamble", field.delimiter().end().orElse(""));
@@ -36,12 +36,12 @@ class FieldTest {
 	
 	@Test
 	void testFieldWithoutPattern() {
-		assertThrows(IllegalArgumentException.class, () -> Field.of("{{fieldname}}"));
+		assertThrows(IllegalArgumentException.class, () -> FieldSpec.of("{{fieldname}}"));
 	}
 	
 	@Test
 	void testMalformedField( ) {
-		assertThrows(IllegalArgumentException.class, () -> Field.of("{{kj koj dvd"));
+		assertThrows(IllegalArgumentException.class, () -> FieldSpec.of("{{kj koj dvd"));
 		
 	}
 
