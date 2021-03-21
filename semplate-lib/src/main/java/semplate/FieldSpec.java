@@ -39,4 +39,9 @@ class FieldSpec {
     static Pattern pattern() {
     	return fieldPattern;
     }
+
+	@Override
+	public String toString() {
+		return "FieldSpec [fieldName=" + fieldName + ", delimiter=" + delimiter + "]";
+	}
 }
