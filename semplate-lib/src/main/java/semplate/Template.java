@@ -657,12 +657,15 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 			//   * {{references.[].id}} -> {{references.[].name}}
 			// is transformed to:
 			//   * {{references.0.id}} -> {{references.0.name}}
+			//
 			//   * {{references.1.id}} -> {{references.1.name}}
+			//
 			//   * {{references.2.id}} -> {{references.2.name}}
+			//
 			List<String> expandedLines = new ArrayList<String>();
 			String expandedLine;
 			for (int i = 0; i < entries.size(); i++) {
-				expandedLine = substitutedLine.replace(".[].", "." + i + ".");
+				expandedLine = substitutedLine.replace(".[].", "." + i + ".") + "\n";   // Terminated with a newline to make it a block
 				expandedLines.add(expandedLine);
 			}
 			return expandedLines.stream();
