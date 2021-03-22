@@ -21,19 +21,40 @@ class BlockTest {
 	}
 
 	@Test
-	void testSemantics() {
+	void testInitialise() {
 		String semanticBlockLine = "<!--{{source:pattern=\"[%s]\"}}{{sourceLink:pattern=\"(%s)\"}}-->";
 		Delimiter[] expected = {
 				                   new Delimiter().start("[").end("]"),
                  				   new Delimiter().start("(").end(")"),
 		                       };
 
-		Block block = Block.semantics(semanticBlockLine);
+		Block block = new Block().initialise(semanticBlockLine);
 
 		Delimiter[] results = block.delimiters();
 		
 		assertArrayEquals(expected, results);
 
+	}
+	
+	@Test
+	void testTerminate() {
+		Block block = new Block(); 
+		
+		assertTrue(block.isTerminated());
+		
+		block.initialise("<!--{{source:pattern=\"[%s]\"}}");
+		assertFalse(block.isTerminated());
+		
+		block.appendText("The [first] line.");
+		block.appendText("A second line.");
+		
+		assertFalse(block.isTerminated());
+		block.terminate();
+		
+		assertTrue(block.isTerminated());
+		
+		assertThrows(IllegalStateException.class, () -> block.appendText("A line after termination"));
+		
 	}
 
 	@Test
@@ -46,24 +67,9 @@ class BlockTest {
 
 	
 	@Test
-	void testInit() {
-		String semanticBlockLine = "<!--{{source:pattern=\"[%s]\"}}{{sourceLink:pattern=\"(%s)\"}}-->";
-		Block block = Block.semantics(semanticBlockLine);
-		block.appendText("The first line.");
-		block.appendText("A second line.");
-		block.appendText("This will be the third line.");
-		
-		assertFalse(block.isEmpty());
-		
-		block.init();
-		
-		assertTrue(block.isEmpty());
-	}
-
-	@Test
 	void testToValueMap() {
 		String semanticBlockLine = "<!--{{field1:pattern=\"[%s]\"}}{{field2:pattern=\"(%s)\"}}-->";
-		Block block = Block.semantics(semanticBlockLine);
+		Block block = new Block().initialise(semanticBlockLine);
 		block.appendText("The [first] line.");
 		block.appendText("A second line.");
 		block.appendText("This will be the (third line).");

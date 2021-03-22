@@ -4,38 +4,45 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import semplate.*;
 import semplate.valuemap.*;
 
-class Block {    String semanticBlockLine;
-	StringBuffer text = new StringBuffer();
+class Block {    StringBuffer text = new StringBuffer();
 	
 	ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
 	
-	Block() { super(); }
+	boolean terminated = true;
+	
+	Block() { 
+		super(); 
+	}
 		
-	/** A factory method to create a new block using the line containing the semantic block
+	/** 
 	 * 
 	 * @param semanticBlockLine  Contains the field specifications
 	 * @return A block based on the field specifications in semanticBlockLine
 	 */
-    static Block semantics(String semanticBlockLine) { 
-		Block block = new Block();
+    Block initialise(String semanticBlockLine) { 
 		checkArgument(semanticBlockLine != null, "Cannot construct a Block with a null parameter");
-		//checkArgument(isSemanticBlock(semanticBlockLine), "Argument string \"%s\" does not form a semantic block.", semanticBlockLine); 
-
+		checkState(terminated);
+		
+		terminated = false;
+		text = new StringBuffer();
+		fieldSpecs.clear();
+		
 		Pattern fieldPattern = FieldSpec.pattern();
 		Matcher fieldMatcher = fieldPattern.matcher(semanticBlockLine);  
 
 		while (fieldMatcher.find()) {
 			FieldSpec field = FieldSpec.of(fieldMatcher.group());
-			block.fieldSpecs.add(field); 
+			this.fieldSpecs.add(field); 
 		}
 
-		return block; 
+		return this; 
 	}
 
 	static Block empty() { return new Block();}
@@ -45,16 +52,22 @@ class Block {    String semanticBlockLine;
 	}
 	
 	Block appendText(CharSequence textValueLine) {
+		checkState(!terminated);
+		
 		text.append(textValueLine); 
 		
 		return this;
 	}
 	
-	Block init() {
-		text = new StringBuffer();;
-		fieldSpecs.clear();
-		
-		return this;
+	static Function <String, Block> block() {
+		Block block = new Block(); 
+		return line -> { 
+			             if (line.isBlank()) { block.terminate(); return block;}  
+		                 //else if (line.contains("{{") && line.contains("}}")) {block.semantics(line); return block;}
+		                 else if (line.contains("{{") && line.contains("}}")) {block.initialise(line); return block;}
+                         else if (!block.isTerminated()) {block.appendText(line); return Block.empty();}
+                         else {return Block.empty();}  // Line has text that does not have an associated semantic block
+		               };
 	}
 	
 	ValueMap toValueMap() {
@@ -78,6 +91,7 @@ class Block {    String semanticBlockLine;
             }
 		}
 		
+		System.out.println(valueMap);
 		return valueMap;
 		
 	}
@@ -91,11 +105,22 @@ class Block {    String semanticBlockLine;
 		return delimiters;
 	}
 	
+	Block terminate() {
+		terminated = true;
+
+		return this;
+	}
+	
+	boolean isTerminated() {
+		return terminated;
+	}
 		 
 	@Override
 	public String toString() {
-		return "Block [semantics=" + semanticBlockLine + ", text=" + text + "]";
-	} 
+		return "Block [fieldSpecs=" + fieldSpecs + ", text=" + text + "]";
+	}
+
+
 	
 	
 }
