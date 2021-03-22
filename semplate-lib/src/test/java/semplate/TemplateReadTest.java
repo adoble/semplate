@@ -122,11 +122,11 @@ public class TemplateReadTest {
 	    Reference r;       
 	    r = works.getReference(0);
 	    assertEquals("Apology", r.getTitle() );
-	    assertEquals("https://en.wikisource.org/wiki/Apology_(Plato)", r.getLink().toString());
+	    assertEquals("https://en.wikisource.org/wiki/Apology_%28Plato%29", r.getLink().toString());
 	    
 	    r = works.getReference(1);
 	    assertEquals("Charmides", r.getTitle());
-	    assertEquals("https://en.wikisource.org/wiki/Charmides_(Plato)", r.getLink().toString());
+	    assertEquals("https://en.wikisource.org/wiki/Charmides_%28Plato%29", r.getLink().toString());
 	    
 	    r = works.getReference(2);
 	    assertEquals("The Republic", r.getTitle());

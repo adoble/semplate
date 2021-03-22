@@ -336,11 +336,11 @@ public class Template  {
 			//			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
 			//		
 
-			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> Add a blank lines to the stream of lines so that all blocks are correctly terinates 
-	                  .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
-	                  .filter(b -> !b.isEmpty())       // --> <block> Filter out any empty blocks
-	                  .map(b -> b.toValueMap())       // --> <valueMap> : Read the values and create a value map 
-                    .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
+			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terinates 
+	                         .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
+	                         .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
+	                         .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
+                             .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
 		
 		} catch (IOException e) {
 			throw new ReadException(e);
