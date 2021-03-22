@@ -147,8 +147,8 @@ class TemplateGenerateTest {
 		works.setTitle("The Works of Plato");
 		works.setAuthor("Plato");
 		try {
-			works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_(Plato)")));
-			works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_(Plato)")));
+			works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_%28Plato%29")));
+			works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_%28Plato%29")));
 			works.addReference(new Reference("The Republic", new URL("https://en.wikisource.org/wiki/The_Republic_of_Plato")));
 		} catch (MalformedURLException e) {
 			fail(e.getMessage());
