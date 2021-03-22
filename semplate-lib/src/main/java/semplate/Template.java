@@ -327,17 +327,26 @@ public class Template  {
 
 	private ValueMap readValueMap(Path markupFilePath) throws ReadException {
 		ValueMap valueMap;
-		try (Stream<String> stream= Files.lines(markupFilePath, Charset.defaultCharset())) {
-			 valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
-			      .flatMap(line -> extractKeyValuePair(line))   // Now extract the key value pairs as Strings
-			      .filter(s -> !s.contains("template.comment"))  // Filter out the template.comment directive TODO change
-			      .map(nameValuePair -> ValueMap.of(nameValuePair))
-			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
+		try (Stream<String> lines = Files.lines(markupFilePath, Charset.defaultCharset())) {
 
+			//			valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
+			//			      .flatMap(line -> extractKeyValuePair(line))      // Now extract the key value pairs as Strings
+			//			      .filter(s -> !s.contains("template.comment"))    // Filter out the template.comment directive TODO change
+			//			      .map(nameValuePair -> ValueMap.of(nameValuePair))
+			//			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
+			//		
+
+			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> Add a blank lines to the stream of lines so that all blocks are correctly terinates 
+	                  .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
+	                  .filter(b -> !b.isEmpty())       // --> <block> Filter out any empty blocks
+	                  .map(b -> b.toValueMap())       // --> <valueMap> : Read the values and create a value map 
+                    .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
+		
 		} catch (IOException e) {
 			throw new ReadException(e);
 		}
-		
+
+
 		return valueMap;
 	}
 
