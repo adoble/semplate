@@ -84,48 +84,26 @@ class TemplateGenerateTest {
 		Template template = new Template();
 		assumeTrue(template != null);
 		
-		try {
-			template.config(templateFile);
-		} catch (IOException e) {
-			fail("Unxpected exception: " + e.getMessage());
-		}
 		
-		
+		template.config(templateFile);
+				
 		Path outputPath = templatesPath.resolve("the_republic.md");
 		
 		template.generate(work, outputPath);
 		
 		assertTrue(Files.exists(outputPath));
 		
+		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
 		
-		String actualContents = "";
-		try (Stream<String> stream = Files.lines(outputPath)) {
-            actualContents = stream.collect(Collectors.joining());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-		
-			
-		String expectedContents = "";
 		String resourceFileName = "simple_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
 		
 		
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
+		 String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
 		
-		try (Stream<String> stream = Files.lines(expectedFile)) {
-			
-			expectedContents = stream.collect(Collectors.joining());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}	
-	
-				
-		//assertThat(actualContents, is(expectedContents));
 		assertEquals(expectedContents, actualContents);
-		
-
 	}
 	
 	@Test
@@ -146,51 +124,29 @@ class TemplateGenerateTest {
 		Works works = new Works();
 		works.setTitle("The Works of Plato");
 		works.setAuthor("Plato");
-		try {
-			works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_%28Plato%29")));
-			works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_%28Plato%29")));
-			works.addReference(new Reference("The Republic", new URL("https://en.wikisource.org/wiki/The_Republic_of_Plato")));
-		} catch (MalformedURLException e) {
-			fail(e.getMessage());
-		}
 
-			
+		works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_%28Plato%29")));
+		works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_%28Plato%29")));
+		works.addReference(new Reference("The Republic", new URL("https://en.wikisource.org/wiki/The_Republic_of_Plato")));
+
 		Path outputPath = fileSystem.getPath("list_actual.md");
 		
-		try {
-			template.generate(works, outputPath);
-		}
-		catch (IOException e) {
-			fail(e.getMessage());
-		}
+		template.generate(works, outputPath);
 
 		assertTrue(Files.exists(outputPath));
 		
-		
-		String actualContents = "";
-		try (Stream<String> stream = Files.lines(outputPath)) {
-            actualContents = stream.collect(Collectors.joining());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-		
+	
+		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
 			
-		String expectedContents = "";
+		
 		String resourceFileName = "list_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
 		
 		
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
-		
-		try (Stream<String> stream = Files.lines(expectedFile)) {
-			
-			expectedContents = stream.collect(Collectors.joining());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}	
-	
-				
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+					
 		//assertThat(actualContents, is(expectedContents));
 		assertEquals(expectedContents, actualContents);
 	}
