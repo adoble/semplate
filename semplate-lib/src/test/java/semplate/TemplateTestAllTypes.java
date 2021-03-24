@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.jimfs.Configuration;
@@ -99,6 +100,8 @@ final static String templateFileName = "all_types_template.md";
 	 *   
 	 *   Uses the class AllTypes to test this. 
 	 */
+	
+	@Disabled
 	@Test
 	void testAllTypes() throws Exception {
 

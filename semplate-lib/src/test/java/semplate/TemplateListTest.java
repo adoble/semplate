@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,6 +57,7 @@ class TemplateListTest {
 	
 
 	
+	@Disabled
 	@Test
 	public void testReadList() throws Exception { 
 		templateFile = templatesPath.resolve(listTemplateFileName);
@@ -71,8 +73,8 @@ class TemplateListTest {
 		Works works = new Works();
 		works.setTitle("The Works of Plato");
 		works.setAuthor("Plato");
-		works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_(Plato)")));
-		works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_(Plato)")));
+		works.addReference(new Reference("Apology", new URL("https://en.wikisource.org/wiki/Apology_%28Plato%29")));
+		works.addReference(new Reference("Charmides", new URL("https://en.wikisource.org/wiki/Charmides_%28Plato%29")));
 		works.addReference(new Reference("The Republic", new URL("https://en.wikisource.org/wiki/The_Republic_of_Plato")));
 			
 		Path outputPath = fileSystem.getPath("list_actual.md");
@@ -80,6 +82,8 @@ class TemplateListTest {
 		template.generate(works, outputPath);
 		
 		assumeTrue(Files.exists(outputPath));
+		
+		Files.lines(outputPath, Charset.defaultCharset()).forEach(line -> System.out.print(line + "\n"));
 		
 		// Now read in the file and reconstruct the object 
 		Works rWorks = (Works) template.read(Works.class,  outputPath);
