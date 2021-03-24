@@ -122,6 +122,22 @@ class ValueMapTest {
 
 
 	}
+	
+	@Disabled 
+	@Test 
+	void testDotNotationManyPuts() {
+		System.out.println("---- START TEST -----------");
+		valueMap.put("emperors.0.praenomen", "Marcus");
+		valueMap.put("emperors.1.praenomen", "Claudius");
+		
+		assertEquals("Marcus", valueMap.getValue("emperors.0.praenomen").orElse(""));
+		assertEquals("Claudius", valueMap.getValue("emperors.1.praenomen").orElse(""));
+		
+		valueMap.put("emperors.2.praenomen", "Gaius");
+		assertEquals("Gaius", valueMap.getValue("emperors.2.praenomen").orElse(""));
+		System.out.println("---- END TEST -----------");
+			
+	}
 
 	@Test
 	void testDotNotationGetValue1() {
