@@ -48,7 +48,7 @@ class Block {    StringBuffer text = new StringBuffer();
 	static Block empty() { return new Block();}
 	
 	boolean isEmpty() {  
-		return fieldSpecs.isEmpty() && text.isEmpty();
+		return fieldSpecs.isEmpty() && (text.length() == 0);
 	}
 	
 	Block appendText(CharSequence textValueLine) {

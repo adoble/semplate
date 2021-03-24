@@ -719,7 +719,8 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		}
 		
 		// Now surround the semantic block in comments
-		if (!semanticBlock.isEmpty()) {
+		//if (!semanticBlock.isEmpty()) {
+		if (semanticBlock.length() > 0) {
 			semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
 			             .append(commentDelimiter.end().orElse(""));
 		}
