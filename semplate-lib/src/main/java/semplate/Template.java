@@ -1,10 +1,6 @@
 package semplate;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.time.LocalDate;
@@ -18,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.*;
 
 import com.google.common.base.*;
+
 import static com.google.common.base.Preconditions.*;
 
 import semplate.annotations.Templatable;
@@ -86,9 +83,8 @@ public class Template  {
 //		}
 		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
- 			commentDelimiter = stream.peek(System.out::println).filter(line -> line.contains(templateCommentField))
+ 			commentDelimiter = stream.filter(line -> line.contains(templateCommentField))
  									 .map(line -> extractCommentDelimiter(line))
- 									
  									 .findFirst()
  									 .orElseThrow(() -> new ReadException("No template.comment directive found in template."));
 		}
@@ -158,21 +154,20 @@ public class Template  {
 	public void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
 
 		ValueMap fieldValueMap = buildFieldValueMap(dataObject);
-        
+
 		// Expand the inline delimiters with the field delimiters so that only these are selected. 
 		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
-		
+
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
-            List<String> replacements = stream
-            		.flatMap(line -> templateExpand(line, fieldValueMap))                    // Expand any lists
-            		.map(line -> templateReplace(line, fieldValueMap, expandedDelimiters))   // Replace the fields and add semantic information
-            		.collect(Collectors.toList());
+			List<String> replacements = stream
+					.flatMap(line -> templateExpand(line, fieldValueMap))                    // Expand any lists
+					.map(line -> templateReplace(line, fieldValueMap, expandedDelimiters))   // Replace the fields and add semantic information
+					.collect(Collectors.toList());
 
-            Files.write(outputFilePath, replacements);
-	    }
+			Files.write(outputFilePath, replacements);
+		}
 
-
-
+		
 	}
 
 	/**
@@ -352,7 +347,7 @@ public class Template  {
 
 	private Object constructDataObject(Class<?> objectClass, ValueMap valueMap) throws ReadException {
 		Object dataObject;
-
+		
 		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
 		try {
 			dataObject = objectClass.getDeclaredConstructor().newInstance();  // Note: constructor can be private TODO check this
@@ -696,10 +691,9 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		Pattern delimiterPattern = delimiters.pattern();
 		Matcher delimiterMatcher  = delimiterPattern.matcher(inBlock);
 		semanticBlock = delimiterMatcher.results()
-				.peek(mr -> System.out.println("MR      " + mr.group()))
-		                .map(mr -> mr.group())   // Map to the string  s{{f}}e
-		                .map(s -> mapInlineFieldSpec(s))
-		                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
+				                        .map(mr -> mr.group())   // Map to the string  s{{f}}e
+						                .map(s -> mapInlineFieldSpec(s))
+						                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
 		
 		
 		boolean noInlineFieldsFound = (semanticBlock.length() == 0);
@@ -732,8 +726,11 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		
 		// Now replace every thing in the in block that is a valid field using the value map
 		String textValue =  fieldMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
-
-		return semanticBlock + textValue;
+		
+		
+		return semanticBlock + "\n" + textValue;
+		
+		
 	}
 	
 	/* Takes string of the form 
