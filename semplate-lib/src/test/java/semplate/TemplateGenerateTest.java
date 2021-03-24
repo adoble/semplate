@@ -136,7 +136,7 @@ class TemplateGenerateTest {
 		assertTrue(Files.exists(outputPath));
 		
 	
-		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
+		String actualContents = Files.lines(outputPath).collect(Collectors.joining("\n"));
 			
 		
 		String resourceFileName = "list_expected.md";
@@ -145,9 +145,8 @@ class TemplateGenerateTest {
 		
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
-		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining("\n"));
 					
-		//assertThat(actualContents, is(expectedContents));
 		assertEquals(expectedContents, actualContents);
 	}
 	
