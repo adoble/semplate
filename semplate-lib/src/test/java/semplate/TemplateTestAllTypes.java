@@ -101,7 +101,6 @@ final static String templateFileName = "all_types_template.md";
 	 *   Uses the class AllTypes to test this. 
 	 */
 	
-	@Disabled
 	@Test
 	void testAllTypes() throws Exception {
 
@@ -112,8 +111,9 @@ final static String templateFileName = "all_types_template.md";
 		//Path sourceFile = templatesPath.resolve("all_types_template.md");
 		
 		
-		// Generate a file from the using te data in the allTypes object
-		Path outputPath = templatesPath.resolve("all_types_test.md");
+		// Generate a file from the using the data in the allTypes object
+		//Path outputPath = templatesPath.resolve("all_types_test.md");
+		Path outputPath = rootPath.resolve("all_types_test.md");
 		template.generate(allTypes, outputPath);
 		
 		// Now read in the file and see if the object has the same values
