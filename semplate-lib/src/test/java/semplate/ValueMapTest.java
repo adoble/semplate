@@ -123,7 +123,6 @@ class ValueMapTest {
 
 	}
 	
-	@Disabled 
 	@Test 
 	void testDotNotationManyPuts() {
 		System.out.println("---- START TEST -----------");
