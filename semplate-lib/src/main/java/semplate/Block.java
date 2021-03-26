@@ -71,9 +71,7 @@ class Block {    StringBuffer text = new StringBuffer();
 	}
 	
 	ValueMap toValueMap() {
-
-		
-		ValueMap valueMap = new ValueMap();
+        ValueMap valueMap = new ValueMap();
 		
 		for (FieldSpec fieldSpec: fieldSpecs) {
 			// Assemble a regex with matcher to find the first element specified by the field specification
@@ -91,7 +89,6 @@ class Block {    StringBuffer text = new StringBuffer();
             }
 		}
 		
-		System.out.println(valueMap);
 		return valueMap;
 		
 	}
