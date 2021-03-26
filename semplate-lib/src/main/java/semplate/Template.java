@@ -746,7 +746,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 */
 	private StringBuffer mapInlineFieldSpec(String s) {
 		StringBuffer sb = new StringBuffer();
-		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults().splitToList(s);
+		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").splitToList(s);
 		
 		checkArgument(parts.size() == 3, "The string \"%s\" is malformed", s); 
 		
