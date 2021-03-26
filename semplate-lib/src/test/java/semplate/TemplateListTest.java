@@ -57,7 +57,6 @@ class TemplateListTest {
 	
 
 	
-	@Disabled
 	@Test
 	public void testReadList() throws Exception { 
 		templateFile = templatesPath.resolve(listTemplateFileName);
@@ -93,9 +92,9 @@ class TemplateListTest {
 		
 		assertEquals(3, rWorks.numberReferences());
 		assertEquals("Apology", rWorks.getReference(0).getTitle());
-		assertEquals("https://en.wikisource.org/wiki/Apology_(Plato)", rWorks.getReference(0).getLink().toString());
+		assertEquals("https://en.wikisource.org/wiki/Apology_%28Plato%29", rWorks.getReference(0).getLink().toString());
 		assertEquals("Charmides", rWorks.getReference(1).getTitle());
-		assertEquals("https://en.wikisource.org/wiki/Charmides_(Plato)", rWorks.getReference(1).getLink().toString());
+		assertEquals("https://en.wikisource.org/wiki/Charmides_%28Plato%29", rWorks.getReference(1).getLink().toString());
 		assertEquals("The Republic", rWorks.getReference(2).getTitle());
 		assertEquals("https://en.wikisource.org/wiki/The_Republic_of_Plato", rWorks.getReference(2).getLink().toString());
 		

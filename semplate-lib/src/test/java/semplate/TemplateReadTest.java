@@ -96,7 +96,6 @@ public class TemplateReadTest {
 		
 	}
 	
-	@Disabled
 	@Test
 	void testReadList() throws Exception {
 		
