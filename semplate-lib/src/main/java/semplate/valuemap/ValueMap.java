@@ -260,29 +260,34 @@ public class ValueMap {
 	 * using a dot notation, e.g. 
 	 *    emperor.name
 	 * 
-	 * Compound field names that reference ordinal lists of value maps are depicted so:
-	 *    emperors.4.name
-	 * i.e. the name of the 5th emperor added.
+	 * A compound field name can contain any number of field names, e.g. 
+	 *   emperor.5.consort.name
 	 * 
-	 *    
+	 * Numbers can be used for field names to represent an ordinal position  in a list. 
+	 * In the above this refers to the 6th (5 + 1) emperor in a a list. As far as this method
+	 * is concerned, this is only a convention. 
+	 * 
 	 * @param fieldName The simple or compound field name
 	 * @param dataObject  An object representing the value
 	 * @return This value map.
-	 * TODO check if the same return value is used for all like this. 
+	 * TODO Do we need the add function at all? 
 	 */
 	public ValueMap put(String fieldName, Object dataObject) {
 		
 		int index = fieldName.indexOf('.');
 		
-		if (index == -1) {
+		if (index == -1) {  // Simple field name so just replace the value 
 			valueMap.put(fieldName, dataObject);
 		} else {
-			ValueMap subValueMap = new ValueMap();
-			this.put(fieldName.substring(0, index), subValueMap);
-			subValueMap.put(fieldName.substring(index + 1), dataObject);
+			String fieldNameHead = fieldName.substring(0, index);
+			String fieldNameTail = fieldName.substring(index + 1); // The leading dot is not included
+			
+			if (!this.containsField(fieldNameHead)) {
+				valueMap.put(fieldNameHead, new ValueMap());
+			}
+			((ValueMap) valueMap.get(fieldNameHead)).put(fieldNameTail, dataObject);
 		}
 		
-		//return dataObject;
 		return this;
 	}
 	
