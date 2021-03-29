@@ -200,8 +200,46 @@ class TemplateGenerateTest {
 	
 	@Disabled
 	@Test
-	public void testGenerateComplex() {
-		//TODO test with linked classes
-		fail("Nor yet implemented");
+	public void testGenerateComplex() throws Exception {
+		String linkTemplateFileName = "link_template.md";
+
+		// Copy into the mock file system the template file we are using from the resources
+		Path linkTemplateFile = templatesPath.resolve(linkTemplateFileName);
+		TestUtilities.copyFromResource(linkTemplateFileName, linkTemplateFile);  
+		assertTrue(Files.exists(linkTemplateFile));
+
+		Template template = new Template();
+		assumeTrue(template != null);
+
+		template.config(linkTemplateFile);
+
+		// Set up the data objects
+		Link link = new Link();
+		link.setId(4711);
+
+		Linked linked = new Linked();
+		linked.setId(9999); 
+		link.setReference(linked);
+		
+		
+		Path outputPath = fileSystem.getPath("link_actual.md");
+		template.generate(link, linkTemplateFile);
+		assertTrue(Files.exists(outputPath));
+		
+		
+		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
+		
+		String expectedContents = "";
+		String resourceFileName = "list_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		
+		
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		
+		expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+					
+		assertEquals(expectedContents, actualContents);
+  
+
 	}
 }

@@ -153,15 +153,15 @@ public class Template  {
 	 */
 	public void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
 
-		ValueMap fieldValueMap = buildFieldValueMap(dataObject);
+		ValueMap valueMap = buildFieldValueMap(dataObject);
 
 		// Expand the inline delimiters with the field delimiters so that only these are selected. 
 		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
 
 		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
 			List<String> replacements = stream
-					.flatMap(line -> templateExpand(line, fieldValueMap))                    // Expand any lists
-					.map(line -> templateReplace(line, fieldValueMap, expandedDelimiters))   // Replace the fields and add semantic information
+					.flatMap(line -> templateExpand(line, valueMap))                    // Expand any lists
+					.map(line -> templateReplace(line, valueMap, expandedDelimiters))   // Replace the fields and add semantic information
 					.collect(Collectors.toList());
 
 			Files.write(outputFilePath, replacements);
