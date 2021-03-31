@@ -32,53 +32,71 @@ Alternatively a string can be used, for instance, a HTML tag
 
 ## Formal syntax
 
- The formal syntax of the semantic markdown is represented using [Augmented Backus-Naur Form](https://en.wikipedia.org/wiki/Augmented_Backus%E2%80%93Naur_form).
+ The formal syntax of the semantic markdown is represented using [Extended Backus-Naur Form](https://www.w3.org/TR/REC-xml/#sec-notation).
 
-    document = markdown-comment-start comment-directive [markdown-comment-end] *directive *block
+    template ::= markdown-comment-start comment-directive markdown-comment-end? directive* template-block*
 
-    comment-directive = "{@template.comment}}"
+    template-text ::= character-sequence? template-field-spec? template-text
 
-    block = semantic-block [*newline] text-value
+    template-block = template-text newline newline+
 
-    block-value =  text-value / *embedded-value
+    template-field-spec ::= "{{" field-name "}}"
 
-    embedded-value = [character-sequence] inline-delimiter-start inline-value inline-delimiter-end [character-sequence] ; Alternatively an embedded-value can corresponds to a regular expression that is determined by the value type, e.g. a URL
+    field-name ::= simple-field-name | complex-field-name
 
-    text-value = [character-sequence] 2*newline
+    simple-field-name ::= character-sequence
 
-    inline-value = [character-sequence]
+    complex-field-name ::= (complex-field-name ".")? simple-field-name  
 
-    semantic-block = comment-delimiter-start
-                     [outline-field-spec | *inline-field-spec]
+    document ::= markdown-comment-start comment-directive markdown-comment-end? directive* block*
+
+    comment-directive ::= "{@template.comment}}"
+
+    block ::= (semantic-block newline text-value) | (text-block)
+
+    block-value ::=  text-value | embedded-value*
+
+    embedded-value ::= character-sequence? inline-delimiter-start inline-value inline-delimiter-end character-sequence? /* Alternatively an embedded-value can corresponds to a regular expression that is determined by the value type, e.g. a URL */
+
+    text-value ::= character-sequence newline newline+
+
+    inline-value ::= character-sequence
+
+    semantic-block ::= comment-delimiter-start
+                     (outline-field-spec | inline-field-spec*)
                      comment-delimiter-end
                      newline
 
-    field-spec = inline-field-space / outline-field-spec
-    
-    outline-field-spec = "{{" field-name [":" *format-spec "]}}""
-    
-    inline-field-spec = "{{" fieldname pattern-spec "}}"
+    field-spec ::= inline-field-space | outline-field-spec
 
-    directive = "{@" directive-name ["=" directive-value] "}}"
+    outline-field-spec ::= "{{" field-name (":" *format-spec ")? "}}"
 
-    inline-delimiter-pair = inline-delimiter-start inline-delimiter-end ;for instance "()" or "[]"
+    inline-field-spec ::= "{{" field-name pattern-spec "}}"
 
-    inline-delimiter-pairs = 1*inline-delimiter-pair
+    directive ::= "{@" directive-name ("=" directive-value)? "}}"
 
-    inline-delimiter-start = character
+    inline-delimiter-pair ::= inline-delimiter-start inline-delimiter-end /* For instance "()" or "[]" +/
 
-    inline-delimiter-end = character
+    inline-delimiter-pairs ::= inline-delimiter-pair+
 
-    format-spec = string-format-spec | number-format-spec | date-format-spec | url-format-spec  ;These are specific to the class of the field and are used to specify, for instance, how the text is formatted.
+    inline-delimiter-start ::= character
 
-    string-format-spec = "format=" [character-sequence] "%s" [character-sequence]
+    inline-delimiter-end ::= character
 
-    comment-delimiter-start = *character ; defined in the first lines of the markdown.
+    pattern-spec ::= string-format-spec | date-format-spec | url-format-spec   /* These are specific to the class of the field and are used to specify, for instance, how the text is formatted. */
 
-    comment-delimiter-end = *character ; defined in the first lines of the markdown.
+    string-pattern-spec ::= "pattern=" character-sequence? "%s" character-sequence?
 
-    character-sequence = *character  ; a sequence of characters representing text or markdown.
+    date-format-spec ::= /* to be defined */
 
-    newline = CRLF
+    url-format-spec ::= /* to be defined */
 
-    character = VCHAR
+    comment-delimiter-start ::= character* /* Defined in the first lines of the markdown. */
+
+    comment-delimiter-end ::= character*  /* Defined in the first lines of the markdown.
+
+    character-sequence ::= character*  /* A sequence of characters representing text or markdown. */
+
+    newline ::= "CR" "LF"
+
+    character ::= /* Any visible character including whitespace */
