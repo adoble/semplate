@@ -45,14 +45,9 @@ public class Template  {
 	// Special fields are preceded with template
 	final private String templateCommentField = "{@template.comment}}"; //TODO make static
 	
-	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
-	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
-
-	//final private static Pattern directiveLine = Pattern.compile("[\\{@r[^}]*\\}{2}]*");
-	final private static Pattern directiveLine = Pattern.compile("\\{\\@[^}]*?\\}\\}");
+    final private static Pattern directiveLine = Pattern.compile("\\{\\@[^}]*?\\}\\}");
 	
 	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
-	//final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  //TODO  change code to use the group name
 	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
 
@@ -81,10 +76,6 @@ public class Template  {
 	public void config(Path templatePath) throws IOException, ReadException {
 		this.templatePath = templatePath;
 
-//		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
-//			determineCommentDelimiters(stream);
-//		}
-		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
  			commentDelimiter = stream.filter(line -> line.contains(templateCommentField))
  									 .map(line -> extractCommentDelimiter(line))
@@ -160,9 +151,6 @@ public class Template  {
 
 		// Expand the inline delimiters with the field delimiters so that only these are selected. 
 		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
-		
-//		Files.lines(templatePath).filter(directiveLine.asPredicate().negate()).forEach(System.out::println);
-//		System.out.println("-----------------------");
 		
 		try (Stream<String> lines= Files.lines(templatePath, Charset.defaultCharset())) {
 			List<String> replacements = Stream.concat(lines, Stream.of("\n"))          // Add a blank line to the stream of lines so that all blocks are correctly terminated
@@ -248,19 +236,14 @@ public class Template  {
 		
 		try (Stream<String> stream = Files.lines(tempFile, Charset.defaultCharset())) {
 			List<String> blocks = stream.peek(line -> extractCommentDelimiter(line))
-					                    .map(line -> extractBlock(line))   
-					                    .filter(block -> block.length() > 0)
-					                    .map(block -> updateBlock(block, updatedValueMap))
-					                    .peek(s-> System.out.print(s))
-					                    .collect(Collectors.toList());
-			
+					.map(line -> extractBlock(line))   
+					.filter(block -> block.length() > 0)
+					.map(block -> updateBlock(block, updatedValueMap))
+					.collect(Collectors.toList());
+
 		} catch (IOException e)  {
 			throw new UpdateException("TODO", e);
 		}
-		
-
-
-
 	}
     
 	
@@ -347,19 +330,12 @@ public class Template  {
 		ValueMap valueMap;
 		try (Stream<String> lines = Files.lines(markupFilePath, Charset.defaultCharset())) {
 
-			//			valueMap = stream.filter(fieldPattern.asPredicate())  // Only process lines that contain a field
-			//			      .flatMap(line -> extractKeyValuePair(line))      // Now extract the key value pairs as Strings
-			//			      .filter(s -> !s.contains("template.comment"))    // Filter out the template.comment directive TODO change
-			//			      .map(nameValuePair -> ValueMap.of(nameValuePair))
-			//			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
-			//		
-
 			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated 
-	                         .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
-	                         .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
-	                         .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
-                             .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
-		
+							  .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
+							  .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
+							  .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
+							  .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
+
 		} catch (IOException e) {
 			throw new ReadException(e);
 		}
@@ -388,7 +364,7 @@ public class Template  {
 			// Get the value
 			if (!valueMap.isValueMap(fieldName)) {
 				Optional<Object> fieldValue = valueMap.getValue(fieldName);
-				
+
 				Field field;
 				try {
 					field = dataObject.getClass().getDeclaredField(fieldName);
@@ -407,9 +383,8 @@ public class Template  {
 				}
 
 			} else {
-               //TODO --> value is a value map
 				Field field;
-				
+
 				try {
 					field = dataObject.getClass().getDeclaredField(fieldName);
 					if (field.getAnnotation(TemplateField.class) != null ) {
@@ -420,11 +395,11 @@ public class Template  {
 					    Options
 						1. target field is a list: determine list of what? (--> move all this code to setListField)
 					          1.1 Create a list of this type and add the elements
-					    2. target fieled is map: determine map of what? dot dot dot (--> move all of this code to setMapField)
+					    2. target field is map: determine map of what? dot dot dot (--> move all of this code to setMapField)
 					    3. target field is another type of object : 
 					       3.1 unpack value map needes
 					       3.2 fields of the object need to be filled. This should be recursive.
-					   */
+						 */
 
 					} else {
 						// If the field has not been annotated then silently ignore
@@ -433,12 +408,10 @@ public class Template  {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
+
+
 			}
 		}
-
-
 
 		return dataObject;
 	}
@@ -536,7 +509,7 @@ public class Template  {
  * @param dataObject
  * @param field
  * @param valueMap
- * @throws IllegalArgumentException if the specified filedis not of type #
+ * @throws IllegalArgumentException if the specified field is not of type #
  */
 private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	  checkArgument(field.getType() == List.class, "The specified field name %s is not of type %s", field.getName(), List.class.getName());
@@ -670,9 +643,8 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	 * @throws IllegalArgumentException if the block contains a directive
 	 */
 	private Stream<String> templateExpand(String block, ValueMap valueMap)  throws IllegalArgumentException {
-		//checkArgument(!block.contains("{@"), "Block should not contain a template directive: \n%s", block);  //TODO can we be stricter?
 
-		Stream.Builder<String> streamBuilder = Stream.builder();
+        Stream.Builder<String> streamBuilder = Stream.builder();
 
 		Matcher fieldMatcher = fieldPattern.matcher(block);
 
@@ -708,64 +680,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		return streamBuilder.build();
 	}
 	
-	
-	/* Expands any line that contains field references to an Iterable to a stream of template lines,
-	 * each one of which represents one entry of the list.
-	 * 
-	 * Precondition is that the lines do not contains directives.
-	 */
-	private Stream<String> templateExpandOLD(String line, ValueMap valueMap) {
-		String substitutedLine = line;
-		List<ValueMap> entries = null;;
 
-		Matcher fieldMatcher = fieldPattern.matcher(line);
-//		if (line.contains(templateCommentField)) {
-//			return Stream.of(line);
-//		}
-		
-		// TODO matching and extracting the field name using
-		//           \{{2}(?<fieldname>[^\}]*)\}{2}
-
-		while (fieldMatcher.find()) {
-			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-			String fieldNameParts[] = fieldName.split("[.]");
-			if (fieldNameParts.length > 1 && valueMap.isValueMap(fieldNameParts[0])) { // The field name has the form name.name and the value is a value map
-				entries = valueMap.getValueMaps(fieldNameParts[0]); // Looking at a list so find out how many entries
-				// Now replace  each list field in the line with an indicator showing that this is a list.
-				// For example:
-				//    {{references.id}}
-				// is replaced with:
-				//   {{references.[].id}}
-				// This makes it easier to substitute the index value later when this line is expanded.
-				substitutedLine = substitutedLine.replace("{{" + fieldNameParts[0] +  "." + fieldNameParts[1] + "}}",
-						"{{" +  fieldNameParts[0] + ".[]." + fieldNameParts[1] + "}}");
-			}
-		}
-
-		if (entries != null) {
-			// Now expand the substitutedLine. For instance, if the Iterable field references has three entries then:
-			//   * {{references.[].id}} -> {{references.[].name}}
-			// is transformed to:
-			//   * {{references.0.id}} -> {{references.0.name}}
-			//
-			//   * {{references.1.id}} -> {{references.1.name}}
-			//
-			//   * {{references.2.id}} -> {{references.2.name}}
-			//
-			List<String> expandedLines = new ArrayList<String>();
-			String expandedLine;
-			for (int i = 0; i < entries.size(); i++) {
-				expandedLine = substitutedLine.replace(".[].", "." + i + ".") + "\n";   // Terminated with a newline to make it a block
-				expandedLines.add(expandedLine);
-			}
-			return expandedLines.stream();
-		} else {
-			return Stream.of(line);
-		}
-
-
-	}
-	
 	private String templateReplace(String inBlock, ValueMap valueMap, Delimiters delimiters) {
 	   if (inBlock.contains("{@") && inBlock.contains("}}")) {
 		   // Directives are passed through without any further processing
@@ -814,7 +729,6 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		}
 		
 		// Now surround the semantic block in comments
-		//if (!semanticBlock.isEmpty()) {
 		if (semanticBlock.length() > 0) {
 			semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
 			             .append(commentDelimiter.end().orElse(""));
@@ -902,49 +816,6 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		}
 
 		
-		return valueString;
-	}
-
-	private String getFieldValueAsStringOLD(String fieldName, ValueMap fieldValueMap) {
-		String valueString;
-		Optional<Object> valueObject;
-		String listFieldName ;
-		String subFieldName;
-		int index;
-
-		if (!fieldName.contains(".")) {
-			if (fieldValueMap.containsField(fieldName)) {
-				valueObject =  fieldValueMap.getValue(fieldName);
-				valueString = valueObject.orElse("ERROR").toString();
-			} else {
-				valueString ="UNKNOWN";
-			}
-
-		} else {
-			// Field name is a compound (i.e. with a dot separator) and, by this time, should have been appended
-			// with the list notation [].
-
-			Scanner scanner = new Scanner(fieldName);
-			scanner.useDelimiter("\\.|\\[|\\]");
-			listFieldName = scanner.next();
-			index = Integer.parseInt(scanner.next());
-			subFieldName = scanner.next();
-			scanner.close();
-
-
-			// Get the List
-			List<ValueMap> list = fieldValueMap.getValueMaps(listFieldName);
-			//Now get the value map for the list entry
-			ValueMap listEntryMap = list.get(index);
-
-			// Now get the list entry attribute
-			valueObject = listEntryMap.getValue(subFieldName);
-			if (valueObject != null) {
-				valueString = ((Optional<Object>)valueObject).get().toString();
-			} else {
-				valueString = "UNKNOWN";
-			}
-		}
 		return valueString;
 	}
 
