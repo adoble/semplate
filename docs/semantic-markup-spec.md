@@ -32,7 +32,7 @@ Alternatively a string can be used, for instance, a HTML tag
 
 ## Formal syntax
 
- The formal syntax of the semantic markdown is represented using [Extended Backus-Naur Form](https://www.w3.org/TR/REC-xml/#sec-notation).
+ The formal syntax of the semantic markdown (as well as that used in the templates) is represented using [Extended Backus-Naur Form](https://www.w3.org/TR/REC-xml/#sec-notation).
 
     template ::= markdown-comment-start comment-directive markdown-comment-end? directive* template-block*
 
@@ -100,3 +100,31 @@ Alternatively a string can be used, for instance, a HTML tag
     newline ::= "CR" "LF"
 
     character ::= /* Any visible character including whitespace */
+
+
+## Extended Backus-Naur Format
+
+    (expression)
+
+expression is treated as a unit and may be combined as described in this list.
+
+    A?
+matches A or nothing; optional A.
+
+    A B
+matches A followed by B. This operator has higher precedence than alternation; thus A B | C D is identical to (A B) | (C D).
+    A | B
+
+matches A or B.
+
+    A - B
+
+matches any string that matches A but does not match B.
+
+    A+
+
+matches one or more occurrences of A. Concatenation has higher precedence than alternation; thus A+ | B+ is identical to (A+) | (B+).
+
+    A*
+
+matches zero or more occurrences of A. Concatenation has higher precedence than alternation; thus A* | B* is identical to (A*) | (B*).

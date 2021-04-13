@@ -17,6 +17,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.*;
 
@@ -198,7 +199,53 @@ class TemplateGenerateTest {
 	
 	}
 	
+	/**  Test disabled as it is for a future feature */
 	@Disabled
+	@Test
+	public void testTopLevelList() throws Exception {
+		 
+        String simpleListTemplateFileName = "top_level_list_template.md";
+		
+		// Copy into the mock file system the template file we are using from the resources
+		Path simpleListTemplateFile = templatesPath.resolve(simpleListTemplateFileName);
+		TestUtilities.copyFromResource(simpleListTemplateFileName, simpleListTemplateFile);  
+		
+		assertTrue(Files.exists(simpleListTemplateFile));
+		Template template = new Template();
+		assumeTrue(template != null);
+				
+		template.config(simpleListTemplateFile);
+				
+		// Set up a list 
+		ArrayList<String> simpleList = new ArrayList<String>();
+		simpleList.add("Number One");
+		simpleList.add("Number Two");
+		simpleList.add("Number Three");
+		
+			
+		Path outputPath = fileSystem.getPath("top_level_list_actual.md");
+				
+		template.generate(simpleList, outputPath);
+		
+		assertTrue(Files.exists(outputPath));
+		
+		String actualContents = "";
+		
+		actualContents = Files.lines(outputPath).collect(Collectors.joining());
+		
+		String expectedContents = "";
+		String resourceFileName = "top_level_list_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		
+		
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		
+		expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+					
+		assertEquals(expectedContents, actualContents);
+		
+	}
+	
 	@Test
 	public void testGenerateComplex() throws Exception {
 		String linkTemplateFileName = "link_template.md";
@@ -224,13 +271,13 @@ class TemplateGenerateTest {
 		
 		Path outputPath = fileSystem.getPath("link_actual.md");
 		template.generate(link, linkTemplateFile);
-		assertTrue(Files.exists(outputPath));
+		assertTrue(Files.exists(linkTemplateFile));
 		
 		
-		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
+		String actualContents = Files.lines(linkTemplateFile).collect(Collectors.joining());
 		
 		String expectedContents = "";
-		String resourceFileName = "list_expected.md";
+		String resourceFileName = "link_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
 		
 		

@@ -1,7 +1,15 @@
 package semplate;
 
+import semplate.annotations.Templatable;
+import semplate.annotations.TemplateField;
+
+@Templatable
 public class Link {
+	
+	@TemplateField
 	int id;
+	
+	@TemplateField
 	Linked reference;
 	
 	public int getId() {

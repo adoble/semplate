@@ -450,9 +450,30 @@ public class ValueMap {
 
 	/**
 	 * Test if the specified field name maps has a mapping to an value.
-	 * @return True iif the specified field name maps has a mapping to an value.
+	 * @return True if the specified field name maps has a mapping to an value.
 	 */
 	public boolean containsField(String fieldName) {
+		int index = fieldName.indexOf('.');
+
+		if (index == -1) {  // Simple field name so just replace the value 
+			return (valueMap.containsKey(fieldName));
+		} else {  // Compound field name
+			String fieldNameHead = fieldName.substring(0, index);
+			String fieldNameTail = fieldName.substring(index + 1); // The leading dot is not included
+			ValueMap subValueMap = getValueMap(fieldNameHead).orElse(ValueMap.empty());
+			if (!subValueMap.isEmpty()) {
+				return subValueMap.containsField(fieldNameTail);
+			} else {
+				return false;
+			}
+		}    	
+	}
+	
+	/**
+	 * Test if the specified field name maps has a mapping to an value.
+	 * @return True if the specified field name maps has a mapping to an value.
+	 */
+	public boolean containsFieldOLD(String fieldName) {  //TODO remove this code 
 		return (valueMap.containsKey(fieldName));
 	}
 	

@@ -16,5 +16,5 @@ Undisputed works of Plato
 <!--{{references.2.title:pattern="[%s]"}}{{references.2.link:pattern="(%s)"}}-->
 * [The Republic](https://en.wikisource.org/wiki/The_Republic_of_Plato)
 
-
 The above can be changed at any time.
+

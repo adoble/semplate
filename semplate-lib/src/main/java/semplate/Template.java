@@ -16,6 +16,7 @@ import java.util.stream.*;
 import com.google.common.base.*;
 
 import static com.google.common.base.Preconditions.*;
+import static com.google.common.primitives.Primitives.*;
 
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
@@ -47,10 +48,12 @@ public class Template  {
 	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
 	//final private static String delimiterDirectivePatternSpec = "\\{@template.delimiter[^}]*\\}{2}";  //TODO harmonise how patterns are initialised
 
-	final private static Pattern directiveLine = Pattern.compile("[\\{@r[^}]*\\}{2}]*");
+	//final private static Pattern directiveLine = Pattern.compile("[\\{@r[^}]*\\}{2}]*");
+	final private static Pattern directiveLine = Pattern.compile("\\{\\@[^}]*?\\}\\}");
 	
 	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
-	final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
+	//final private static Pattern fieldPattern = Pattern.compile("\\{{2}[^\\}]*\\}{2}");
+	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  //TODO  change code to use the group name
 	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
 
 	private Path templatePath;
@@ -157,18 +160,38 @@ public class Template  {
 
 		// Expand the inline delimiters with the field delimiters so that only these are selected. 
 		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
-
-		try (Stream<String> stream= Files.lines(templatePath, Charset.defaultCharset())) {
-			List<String> replacements = stream
-					.flatMap(line -> templateExpand(line, valueMap))                    // Expand any lists
-					.map(line -> templateReplace(line, valueMap, expandedDelimiters))   // Replace the fields and add semantic information
+		
+//		Files.lines(templatePath).filter(directiveLine.asPredicate().negate()).forEach(System.out::println);
+//		System.out.println("-----------------------");
+		
+		try (Stream<String> lines= Files.lines(templatePath, Charset.defaultCharset())) {
+			List<String> replacements = Stream.concat(lines, Stream.of("\n"))          // Add a blank line to the stream of lines so that all blocks are correctly terminated
+					.map(chunk())                                                      // Map to Optional<StringBuffer> elements that either contain markdown text blocks or are empty
+					.filter(optBlock -> optBlock.isPresent())                          // Filter out the empty blocks
+					.map(optBlock -> optBlock.orElse(""))                              // Convert each block to a string
+					.flatMap(block -> templateExpand(block, valueMap))                 // Expand any lists
+					.map(line -> templateReplace(line, valueMap, expandedDelimiters))  // Replace the fields and add semantic information
 					.collect(Collectors.toList());
 
 			Files.write(outputFilePath, replacements);
+			
+			// TODO Alternative - see https://stackoverflow.com/questions/32054180/java-8-stream-to-file
 		}
 
 		
 	}
+	
+    /* Using Optional as return type so that do not need to create empty strings in the lambda function as this is forbidden. */		
+	public static Function <String, Optional<String>> chunk(){
+		StringBuffer sb = new StringBuffer(80);  // This contains the state and is available for every element in the stream
+		return s -> { if (s.isBlank()) { Optional<String> r = Optional.of(sb.toString()); sb.setLength(0); return r;}
+		              else {sb.append(s).append('\n'); return  Optional.empty();
+		            }  
+		              
+		};
+	}
+	
+	
 
 	/**
 	 * Reads the specified markdown file and creates a new  object of class objectClass that contains the
@@ -331,7 +354,7 @@ public class Template  {
 			//			      .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);
 			//		
 
-			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terinates 
+			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated 
 	                         .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
 	                         .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
 	                         .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
@@ -619,17 +642,89 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		return commentDelimiter.end();
 	}
 
+	
+	/* Expands any markdown block that contains field names that refer to a list (i.e. have a '*' as part of their (compound) name
+	 * to a stream of template blocks  each one of which represents one entry of the list.
+	 * 
+	 * For instance: the following template block:
+	 * <code>
+	 *    * Article number {{order.*.articleNumber}}
+	 * </code>   
+	 * will be expanded to a stream of the following blocks:
+	 * <code>
+	 *   * Article number {{order.0.articleNumber}}
+	 *   
+	 *   * Article number {{order.1.articleNumber}}
+	 *   
+	 *   * Article number {{order.2.articleNumber}}
+	 *   
+	 * </code>
+	 * where the number of block is that contained in the value map.
+	 * 
+	 * If the block does not contain field names that contain a '*' then the block will be passed on without any changes. 
+	 * 
+	 * ---Precondition is that the blocks do not contains directives.
+	 * 
+	 * @param block A blank line delimited block of markdown text.
+	 * @param valueMap The value map  
+	 * @throws IllegalArgumentException if the block contains a directive
+	 */
+	private Stream<String> templateExpand(String block, ValueMap valueMap)  throws IllegalArgumentException {
+		//checkArgument(!block.contains("{@"), "Block should not contain a template directive: \n%s", block);  //TODO can we be stricter?
+
+		Stream.Builder<String> streamBuilder = Stream.builder();
+
+		Matcher fieldMatcher = fieldPattern.matcher(block);
+
+		String newBlock;	
+		if (fieldMatcher.find()) {
+			String fieldName = fieldMatcher.group("fieldname");
+			if (fieldName.contains("*")) {
+				// Extract the first part of the field name before the '*' character. 
+				// Only indexed field names with the same first part before the '*' 
+				// are allowed in one block.
+				String firstPartFieldName = Splitter.on('*').trimResults(CharMatcher.is('.')).splitToList(fieldName).get(0);  //Included the periods, but that's ok. 
+
+				ValueMap iteratedValueMap = valueMap.getValueMap(firstPartFieldName).orElse(ValueMap.empty());
+				Set<String> fieldNameSet =  iteratedValueMap.fieldNames();
+				for (String fieldNameEntry: fieldNameSet) {
+					//newBlock = new String(block);
+					String regex = "\\{\\{" + firstPartFieldName + "\\.\\*";
+					String replacement = "{{" + firstPartFieldName + "." + fieldNameEntry;
+					newBlock = block.replaceAll(regex, replacement);
+					streamBuilder.add(newBlock);
+				}                       
+
+			} else {
+				// Block does not contain any filed that represent a list, Just pass it on. 
+				streamBuilder.add(block);  
+			}
+		} else {
+			// Text block contains no fields or a directive. Just pass it on.
+			streamBuilder.add(block);
+		}
+
+
+		return streamBuilder.build();
+	}
+	
+	
 	/* Expands any line that contains field references to an Iterable to a stream of template lines,
 	 * each one of which represents one entry of the list.
+	 * 
+	 * Precondition is that the lines do not contains directives.
 	 */
-	private Stream<String> templateExpand(String line, ValueMap valueMap) {
+	private Stream<String> templateExpandOLD(String line, ValueMap valueMap) {
 		String substitutedLine = line;
 		List<ValueMap> entries = null;;
 
 		Matcher fieldMatcher = fieldPattern.matcher(line);
-		if (line.contains(templateCommentField)) {
-			return Stream.of(line);
-		}
+//		if (line.contains(templateCommentField)) {
+//			return Stream.of(line);
+//		}
+		
+		// TODO matching and extracting the field name using
+		//           \{{2}(?<fieldname>[^\}]*)\}{2}
 
 		while (fieldMatcher.find()) {
 			String fieldName = fieldMatcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
@@ -687,7 +782,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		Matcher fieldMatcher = fieldPattern.matcher(inBlock);
 				
 		// Assemble the semantic block 
-		// First assemble any inline field specs and add them to the semantic block 
+		// First assemble any inline field-specs and add them to the semantic block 
 		Pattern delimiterPattern = delimiters.pattern();
 		Matcher delimiterMatcher  = delimiterPattern.matcher(inBlock);
 		semanticBlock = delimiterMatcher.results()
@@ -704,7 +799,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 			// Need to map this to the outline field spec:
 			//   {{f:pattern="a%s%b"}}
 			if (fieldMatcher.find()) {
-				List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").splitToList(inBlock);
+				List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults(CharMatcher.is('\n')).splitToList(inBlock);
 				
 				semanticBlock.append("{{").append(parts.get(1));
 				String preamble = parts.get(0);
@@ -730,7 +825,6 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 		
 		
 		return semanticBlock + "\n" + textValue;
-		
 		
 	}
 	
@@ -795,8 +889,23 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 	    return "{{" + fieldName + "=\"" + valueString + "\"}}";
 
 	}
-
+	
 	private String getFieldValueAsString(String fieldName, ValueMap fieldValueMap) {
+		String valueString;
+		Optional<Object> valueObject;
+				
+ 		if (fieldValueMap.containsField(fieldName)) {
+			valueObject =  fieldValueMap.getValue(fieldName);
+			valueString = valueObject.orElse("ERROR").toString();
+		} else {
+			valueString ="UNKNOWN";
+		}
+
+		
+		return valueString;
+	}
+
+	private String getFieldValueAsStringOLD(String fieldName, ValueMap fieldValueMap) {
 		String valueString;
 		Optional<Object> valueObject;
 		String listFieldName ;
@@ -879,8 +988,17 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 						fieldValue = field.get(dataObject);
 
 						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
+					        Class<?> type = field.getType();
 							// Scalar value
-							fieldValueMap.put(field.getName(), fieldValue);
+					        // TODO find a better way to do this. @See setField(...)
+							if (type.isPrimitive() || isWrapperType(type) || type == String.class
+									|| type == LocalDate.class || type == LocalDateTime.class || type == ZonedDateTime.class
+									|| type == URL.class) {
+								fieldValueMap.put(field.getName(), fieldValue);
+							} else {
+								ValueMap subValueMap = buildFieldValueMap(fieldValue);
+								fieldValueMap.put(field.getName(), subValueMap);
+							}
 						} else {
 							if (field.getType().isArray()) {
 
@@ -898,12 +1016,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 								// The field value is of type Iterable
 								fieldIterable = (Iterable<Object>) fieldValue;
 							}
-							// Vector/Iterable value
-							//fieldIterable = (Iterable<Object>) fieldValue;
-
-							// Create a list of maps with the values in them
-							//List<ValueMap> listValues = new ArrayList<ValueMap>();
-
+							
 							ValueMap fieldIterationMap;
 							for (Object listEntry: fieldIterable) {
 								fieldIterationMap = buildFieldValueMap(listEntry);
@@ -911,18 +1024,13 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
 								fieldValueMap.add(field.getName(), fieldIterationMap);
 
 							}
-							//fieldValueMap.putListValue(field.getName(), listValues);
-
-
 						}
-
-
 					} catch (IllegalArgumentException | IllegalAccessException e) {
 						fieldValue = null; //"ERROR";  //TODO make sure that null is represented as a string "ERROR" in the calling functions
 					}
 				}
 			}
-		}
+		} 
 
 		return fieldValueMap;
 
