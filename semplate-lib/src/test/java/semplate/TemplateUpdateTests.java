@@ -86,7 +86,6 @@ public class TemplateUpdateTests {
 	}
 	
 	// Test update with no lists
-	@Disabled
 	@Test
 	void testSimpleUpdate(@TempDir Path tempDir) throws Exception {
 		Template template = new Template();
@@ -94,9 +93,9 @@ public class TemplateUpdateTests {
 		
 		template.config(templateFile);
 		
-		Path sourceFile = tempDir.resolve("simple_expected_2.md");
+		Path sourceFile = tempDir.resolve("simple_expected.md");
 		
-		TestUtilities.copyFromResource("simple_expected_2.md", sourceFile);
+		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
 		
           
         // Updated data in the data object 
