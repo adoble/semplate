@@ -157,22 +157,21 @@ public class Template  {
 
 		// Expand the inline delimiters with the field delimiters so that only these are selected. 
 		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
-		
+
 		try (Stream<String> lines= Files.lines(templatePath, Charset.defaultCharset())) {
-			List<String> replacements = Stream.concat(lines, Stream.of("\n"))          // Add a blank line to the stream of lines so that all blocks are correctly terminated
+			List<String> replacements =  
+					Stream.concat(lines, Stream.of("\n"))          // Add a blank line to the stream of lines so that all blocks are correctly terminated
 					.map(chunk())                                                      // Map to Optional<StringBuffer> elements that either contain markdown text blocks or are empty
 					.filter(optBlock -> optBlock.isPresent())                          // Filter out the empty blocks
 					.map(optBlock -> optBlock.orElse(""))                              // Convert each block to a string
 					.flatMap(block -> templateExpand(block, valueMap))                 // Expand any lists
 					.map(line -> templateReplace(line, valueMap, expandedDelimiters))  // Replace the fields and add semantic information
+					//::iterator;
 					.collect(Collectors.toList());
 
 			Files.write(outputFilePath, replacements);
-			
-			// TODO Alternative - see https://stackoverflow.com/questions/32054180/java-8-stream-to-file
 		}
 
-		
 	}
 	
     /* Using Optional as return type so that do not need to create empty strings in the lambda function as this is forbidden. */		
