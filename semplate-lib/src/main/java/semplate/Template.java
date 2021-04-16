@@ -47,7 +47,9 @@ public class Template  {
 	
     final private static Pattern directiveLine = Pattern.compile("\\{\\@[^}]*?\\}\\}");
 	
-	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
+	//final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
+	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter.(?<type>.*?):(?<delim>.*?)\\}\\}");;
+	
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  
 	//final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
 
@@ -109,34 +111,41 @@ public class Template  {
 	 * @param line The string contains  the specification
 	 * @return A List of Delimiters.Delimiter objects containing the delimiters 
 	 */
-	//private List<Delimiter> extractDelimiters(String line) {
 	private List<Delimiter> extractDelimiters(String line) {
 		ArrayList<Delimiter> extractedDelimiters = new ArrayList<Delimiter>();
 		Matcher matcher = delimiterDirectivePattern.matcher(line);
+		
+		Delimiter delimiter = new Delimiter();  
 		while(matcher.find()) {
-			Delimiter delimiter = new Delimiter();  //TODO right place? 
 			
-			
-			//Map<String, String> parts = Splitter.on(":").trimResults(CharMatcher.anyOf("{}@")).withKeyValueSeparator(":").split(matcher.group());
-			List<String> parts = Splitter.on(":").trimResults(CharMatcher.anyOf("{}@\"")).splitToList(matcher.group());
 			
 		    // What type of delimiter directive is this?
-		    String delimiterType = parts.get(0);
-		    String delimiterValue = parts.get(1);
-			if (delimiterType.contains("start")) {
-				delimiter.start(delimiterValue);
-			} else if (delimiterType.contains("end")) {
-				delimiter.end(delimiterValue);
-			} else if (delimiterType.contains("pair")) {
-				delimiter.pair(delimiterValue);
-			}
-			
-			extractedDelimiters.add(delimiter);
+		    String delimiterType = matcher.group("type");
+		    String delimiterValue = matcher.group("delim");
+		    if (delimiterValue.startsWith("\"")  && delimiterValue.endsWith("\"")) {
+		      // Remove the quotes
+		       delimiterValue = delimiterValue.substring(1, delimiterValue.length() - 1);
+		       if (delimiterType.equals("start")) {
+					delimiter.start(delimiterValue);
+				} else if (delimiterType.equals("end")) {
+					delimiter.end(delimiterValue);
+				} else if (delimiterType.equals("pair")) {
+					delimiter.pair(delimiterValue);
+				}
+				
+				extractedDelimiters.add(delimiter);
+		    } else {
+		    	// This is reserved for predefined values such  as URL or DATE
+		    	assert(false);
+		    }
+		    
 		}
 		
 		return extractedDelimiters;
 		
 	}
+	
+
 
 	/**
 	 * Generates a markdown file as specified by the template file using the information
