@@ -89,7 +89,7 @@ public class Template  {
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
 			delimiters  = stream.filter(line -> line.contains("{@template.delimiter"))    // TODO is this strict enough?
 					            .map(line -> extractDelimiters(line))
-					            .flatMap(delimiterList -> delimiterList.stream())    // Converts the list of delimiters to a stream of single delimiters
+					            //.flatMap(delimiterList -> delimiterList.stream())    // Converts the list of delimiters to a stream of single delimiters
 				                .collect(Delimiters::new, Delimiters::add, Delimiters::add);
 		}
 
@@ -109,15 +109,13 @@ public class Template  {
 	/** Parse a string containing delimiter specification and extract the delimiters. 
 	 * 
 	 * @param line The string contains  the specification
-	 * @return A List of Delimiters.Delimiter objects containing the delimiters 
+	 * @return A Delimiter object containing the delimiters 
 	 */
-	private List<Delimiter> extractDelimiters(String line) {
-		ArrayList<Delimiter> extractedDelimiters = new ArrayList<Delimiter>();
+	private Delimiter extractDelimiters(String line) {
 		Matcher matcher = delimiterDirectivePattern.matcher(line);
 		
 		Delimiter delimiter = new Delimiter();  
 		while(matcher.find()) {
-			
 			
 		    // What type of delimiter directive is this?
 		    String delimiterType = matcher.group("type");
@@ -133,15 +131,14 @@ public class Template  {
 					delimiter.pair(delimiterValue);
 				}
 				
-				extractedDelimiters.add(delimiter);
 		    } else {
-		    	// This is reserved for predefined values such  as URL or DATE
+		    	// This is reserved for special delimiters  such  as URL or DATE
 		    	assert(false);
 		    }
 		    
 		}
 		
-		return extractedDelimiters;
+		return delimiter;
 		
 	}
 	

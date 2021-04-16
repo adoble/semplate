@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -104,6 +105,36 @@ class TemplateGenerateTest {
 		
 		 String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
 		
+		assertEquals(expectedContents, actualContents);
+	}
+	
+	@Test
+	void testDelimiterDefinition(@TempDir Path tempDir) throws Exception {
+		Template t = new Template();
+		assumeTrue(t != null);
+
+		Path templateFileName = tempDir.resolve("delimiter_directives.md");
+		TestUtilities.copyFromResource("delimiter_directives.md", templateFileName);
+
+		t.config(templateFileName);		
+
+		Work work = new Work();
+		work.setAuthor("Dan Brown");
+		work.setTitle("Digital Fortress");
+
+		Path outputPath = templatesPath.resolve("delimiter_directives_actual.md");
+
+		t.generate(work, outputPath);		
+		assertTrue(Files.exists(outputPath));
+
+
+		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
+
+		String resourceFileName = "delimiter_directives_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+
 		assertEquals(expectedContents, actualContents);
 	}
 	
