@@ -5,5 +5,5 @@
 # Delimiter Directives
 
 
-<!--{{author:pattern="<span>%s<%span>"}}{{title:pattern"<span>%s</span>"}}-->
+<!--{{author:pattern="<span>%s</span>"}}{{title:pattern="<span>%s</span>"}}-->
 An early work from <span>Dan Brown</span> was <span>Digital Fortress</span>
