@@ -1,5 +1,6 @@
 <!--{@template.comment}}-->
-<!--{@template.delimiter.pair:"()"}}{@template.delimiter.pair:"[]"}}-->
+<!--{@template.delimiter.pair:"()"}}-->
+<!--{@template.delimiter.pair:"[]"}}-->
 
 # References
 
