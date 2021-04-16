@@ -88,10 +88,6 @@ public class TemplateUpdateTests {
 	// Test update with no lists
 	@Test
 	void testSimpleUpdate(@TempDir Path tempDir) throws Exception {
-		Template template = new Template();
-		assumeTrue(template != null);
-		
-		template.config(templateFile);
 		
 		Path sourceFile = tempDir.resolve("simple_expected.md");
 		
@@ -107,7 +103,7 @@ public class TemplateUpdateTests {
         updatedWork.setSourceLink(new URL("https://en.wikipedia.org/wiki/Academic_dishonesty"));
         updatedWork.setId(4713);
 		
-		template.update(updatedWork, sourceFile);
+		new Template().update(updatedWork, sourceFile);
 		
 		String expectedContents = "";
 		String resourceFileName = "simple_updated_expected.md";
@@ -125,6 +121,38 @@ public class TemplateUpdateTests {
 		
         }
         
+	@Test
+	void testListUpdate(@TempDir Path tempDir) throws Exception {
+		Path sourceFile = tempDir.resolve("list_expected.md");
+		TestUtilities.copyFromResource("list_expected.md", sourceFile);
+
+		// Updated data in the data object 
+		Works updatedWorks = new Works();
+		updatedWorks.setId(1960);
+		updatedWorks.setAuthor("Stan Lee");
+		updatedWorks.setTitle("The Comic Books of Stan Lee");
+			
+        updatedWorks.addReference(new Reference("The Amazing Spider-Man", 
+                new URL("https://en.wikipedia.org/wiki/The_Amazing_Spider-Man" )));
+        updatedWorks.addReference(new Reference("Journey into Mystery", 
+                new URL("https://en.wikipedia.org/wiki/Journey_into_Mystery" )));
+        updatedWorks.addReference(new Reference("Ravage 2099", 
+                new URL("https://en.wikipedia.org/wiki/Ravage_2099" )));
         
+        
+        new Template().update(updatedWorks, sourceFile);
+        
+        String resourceFileName = "list_updated_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  
+		
+        TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		assumeTrue(Files.exists(expectedFile));
+		
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+		
+	    String actualContents = Files.lines(sourceFile).collect(Collectors.joining());
+				
+		assertEquals(expectedContents, actualContents);
+	}
 		
 }
