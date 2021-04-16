@@ -71,8 +71,8 @@ public class TemplateUpdateTests {
 		Files.writeString(sourceFile, expectedContents);
 		
 		Template template = new Template();
-		// Invoke the private method createTempFile  --> Have to use reflection
-		Method method = Template.class.getDeclaredMethod("createTempFile", Path.class);
+		// Invoke the private method copyToTempFile  --> Have to use reflection
+		Method method = Template.class.getDeclaredMethod("copyToTempFile", Path.class);
 		method.setAccessible(true);
 		Path tempPath = (Path) method.invoke(template, sourceFile);
 		

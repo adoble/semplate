@@ -48,8 +48,8 @@ public class Template  {
     final private static Pattern directiveLine = Pattern.compile("\\{\\@[^}]*?\\}\\}");
 	
 	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
-	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  //TODO  change code to use the group name
-	final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
+	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  
+	//final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
 
 	private Path templatePath;
 
@@ -210,40 +210,41 @@ public class Template  {
 	 */
 	public void update(Object dataObject, Path markdownFilePath) throws UpdateException {
 		
+		// Determine delimiters in the markdown file to be updated. 
+		try {
+			config(markdownFilePath);
+		} catch (IOException | ReadException e) {
+			// TODO Auto-generated catch block
+			throw new UpdateException("Unable to read the file to be updated", e);
+		}
+		
 		ValueMap updatedValueMap = buildFieldValueMap(dataObject); 
 
 		// To be safe, copy the markdown file into a temp file in the same directory as the markdown files  before updating
-		Path tempFile = createTempFile(markdownFilePath);
+		Path tempFile = copyToTempFile(markdownFilePath);
 		
-		// TODO - split into blocks, where a block is text seperated by new lines or metadata. 
-		/*  Blocks ->
-		   # The Republic 
-		   <!--# {{title="The Republic"}}-->
-           .. empty block
-           By: Plato 
-           <!--By: {{author="Plato"}}-->
-
-           Translation by Benjamin Jowett 
-           <!--Translation by {{translator="Benjamin Jowett"}}-->
-           
-           some text
-           some more text
-           
-           Source [Wikisource](https://en.wikisource.org/wiki/The_Republic) 
-           <!--Source [{{source="Wikisource"}}]({{sourceLink="https://en.wikisource.org/wiki/The_Republic"}})-->
-		   
-		 */
-		
-		try (Stream<String> stream = Files.lines(tempFile, Charset.defaultCharset())) {
-			List<String> blocks = stream.peek(line -> extractCommentDelimiter(line))
-					.map(line -> extractBlock(line))   
-					.filter(block -> block.length() > 0)
-					.map(block -> updateBlock(block, updatedValueMap))
+		// Update the contents with the data in the value map 
+		List<String> blocks;
+		try (Stream<String> lines = Files.lines(tempFile, Charset.defaultCharset())) {
+			blocks = Stream.concat(lines, Stream.of("\n"))    // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated
+					.map(chunk())  
+					.map(o -> o.orElse(""))
+					.map(chunk -> updateBlock(chunk, updatedValueMap))
 					.collect(Collectors.toList());
-
+			
 		} catch (IOException e)  {
-			throw new UpdateException("TODO", e);
+			throw new UpdateException("Unable to update the file", e);
 		}
+		
+		// Overwrite the original file with the new contents.  
+		try {
+			Files.write(markdownFilePath, blocks);
+		} catch (IOException e) {
+			String msg = "Cannot update the markdown file. A copy of the orignal file is in " + tempFile.toString();
+			throw new UpdateException(msg, e);
+		}
+		
+		
 	}
     
 	
@@ -293,16 +294,45 @@ public class Template  {
 	 *
 	 */
 	
-	private String updateBlock(String blockText, ValueMap valueMap) {
-		checkArgument(blockText.lines().count() <= 2, "The block of text contains %s lines. Only a max. of 2 lines are allowed", blockText.lines().count());
+	private String updateBlock(String chunk, ValueMap valueMap) {
+		ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
 		
-		List<String> blockTextLines = Splitter.on("\n").splitToList(blockText);
+		// Extract the field specs 
+        fieldSpecs.clear();
 		
-		for (String line: blockTextLines) {
-			// TODO extractKeyValuePair(line).collect()
+		Pattern fieldPattern = FieldSpec.pattern();
+		Matcher fieldMatcher = fieldPattern.matcher(chunk);  
+
+		while (fieldMatcher.find()) {
+			FieldSpec field = FieldSpec.of(fieldMatcher.group());
+			fieldSpecs.add(field); 
 		}
 		
-		return "";
+		// Separate the chunk into the first line containing the semantics and
+		// the rest containing the text.
+		String semanticBlock = "";
+		StringBuffer text  = new StringBuffer();
+		if (!chunk.isEmpty()) {
+		  List<String> parts = Splitter.on('\n').splitToList(chunk);
+		  semanticBlock = parts.get(0);
+		  parts.subList(1, parts.size() - 1).forEach(s -> text.append(s));;
+		}
+		String replacementChunk= text.toString();  
+		
+		for (FieldSpec fieldSpec : fieldSpecs) {
+			Object value = valueMap.getValue(fieldSpec.fieldName()).orElse("");
+			
+			Optional<String> startDelimiter = fieldSpec.delimiter().start();
+			Optional<String> endDelimiter = fieldSpec.delimiter().end();
+			
+			String regex = startDelimiter.map(d -> Pattern.quote(d)).orElse("^");
+			regex += ".*?";
+			regex += endDelimiter.map(d -> Pattern.quote(d)).orElse("$");
+			replacementChunk = replacementChunk.replaceFirst(regex, startDelimiter.orElse("") + value.toString() + endDelimiter.orElse(""));
+		}
+		
+		
+		return semanticBlock + '\n' +  replacementChunk;
 		
 	}
 
@@ -311,10 +341,10 @@ public class Template  {
 	 * @param markdownFilePath The path of the markdown file
 	 * @throws ReadException 
 	 */
-	private Path createTempFile(Path markdownFilePath) throws UpdateException {  //TODO is a ReadException the correct way to do this? 
+	private Path copyToTempFile(Path markdownFilePath) throws UpdateException {  //TODO is a ReadException the correct way to do this? 
 		Optional<Path> tempPath = Optional.empty();
 		try  {
-			tempPath = Optional.of(Files.createTempFile(markdownFilePath.getParent(), "semplate", "tmp"));
+			tempPath = Optional.of(Files.createTempFile(markdownFilePath.getParent(), "semplate", ".tmp"));
 			Files.copy(markdownFilePath, tempPath.orElseThrow(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new UpdateException("Unable to create temporary files whilst updating " +  markdownFilePath.getFileName(), e);
@@ -331,7 +361,9 @@ public class Template  {
 		try (Stream<String> lines = Files.lines(markupFilePath, Charset.defaultCharset())) {
 
 			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated 
+							  .peek(l -> System.out.println("Line: " + l))
 							  .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
+							  .peek(b -> System.out.println("Block: " + b))
 							  .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
 							  .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
 							  .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
