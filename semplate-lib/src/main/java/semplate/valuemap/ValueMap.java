@@ -1,11 +1,22 @@
 package semplate.valuemap;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+
+import semplate.annotations.Templatable;
+import semplate.annotations.TemplateField;
+
 import static com.google.common.base.Preconditions.*;
+import static com.google.common.primitives.Primitives.isWrapperType;
 
 /**
  * Maps values to field names. 
@@ -469,13 +480,7 @@ public class ValueMap {
 		}    	
 	}
 	
-	/**
-	 * Test if the specified field name maps has a mapping to an value.
-	 * @return True if the specified field name maps has a mapping to an value.
-	 */
-	public boolean containsFieldOLD(String fieldName) {  //TODO remove this code 
-		return (valueMap.containsKey(fieldName));
-	}
+
 	
 	/**
 	 * Returns a non-empty string representation of this ValueMaP suitable for debugging.
@@ -572,9 +577,92 @@ public class ValueMap {
 		return vm;
 	}
 
+    public static ValueMap from(Object dataObject) {
+		Object fieldValue;
+		Iterable<Object> fieldIterable;
 
-	 
-	
+		ValueMap fieldValueMap = new ValueMap();
 
+		Class<?> c = dataObject.getClass();
+
+		if (c.isAnnotationPresent(Templatable.class)) {
+
+			for(Field field: c.getDeclaredFields()) {
+				if (field.isAnnotationPresent(TemplateField.class)) {
+					field.setAccessible(true);
+
+					try {
+						fieldValue = field.get(dataObject);
+
+						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
+					        Class<?> type = field.getType();
+							// Scalar value
+					        // TODO find a better way to do this. @See setField(...)
+							if (type.isPrimitive() || isWrapperType(type) || type == String.class
+									|| type == LocalDate.class || type == LocalDateTime.class || type == ZonedDateTime.class
+									|| type == URL.class) {
+								fieldValueMap.put(field.getName(), fieldValue);
+							} else {
+								ValueMap subValueMap = ValueMap.from(fieldValue);
+								fieldValueMap.put(field.getName(), subValueMap);
+							}
+						} else {
+							if (field.getType().isArray()) {
+
+								// Unpack the array. Need to do this as:
+								// a) the array needs to Iterable and for some reason they are not.
+								// b) Just using simple casting does not seem to work for arrays
+								// See https://stackoverflow.com/questions/8095016/unpacking-an-array-using-reflection
+								List<Object> l = new ArrayList<Object>(Array.getLength(fieldValue));
+								for (int i= 0; i < Array.getLength(fieldValue); i++) {
+									l.add(Array.get(fieldValue,i));
+								}
+								fieldIterable = (Iterable<Object>) l;
+
+							} else {
+								// The field value is of type Iterable
+								fieldIterable = (Iterable<Object>) fieldValue;
+							}
+							
+							ValueMap fieldIterationMap;
+							for (Object listEntry: fieldIterable) {
+								fieldIterationMap = ValueMap.from(listEntry);
+								//listValues.add(fieldIterationMap);
+								fieldValueMap.add(field.getName(), fieldIterationMap);
+
+							}
+						}
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						fieldValue = null; //"ERROR"
+					}
+				}
+			}
+		} 
+
+		return fieldValueMap;
+    }
+    
+    public static ValueMap from(Iterator<?> iterator) {
+    	ValueMap valueMap = new ValueMap();   
+    	int index = 0;
+    	while (iterator.hasNext()) {
+    		Object value = iterator.next();
+    		Class<?> type = value.getClass();
+    		// TODO find a better way to do this. @See Template.setField(...)
+    		if (type.isPrimitive() || isWrapperType(type) || type == String.class
+    				|| type == LocalDate.class || type == LocalDateTime.class || type == ZonedDateTime.class
+    				|| type == URL.class) {
+    			valueMap.put(String.valueOf(index++), value);
+    		} else {
+    			ValueMap subValueMap = ValueMap.from(value);
+    			valueMap.put(String.valueOf(index++), subValueMap);
+    		}
+
+    	}
+
+    	return valueMap;
+
+    }
+ 
 
 }

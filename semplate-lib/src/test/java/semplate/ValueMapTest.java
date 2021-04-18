@@ -1,5 +1,6 @@
 package semplate;
 
+import java.net.URL;
 //import java.util.Calendar;
 import java.time.*;
 import java.util.ArrayList;
@@ -692,7 +693,96 @@ class ValueMapTest {
 				
 	}
 	
+	@Test
+	void testCreationWithSimpleDataObject() throws Exception {
+		String author = "Edward Gibbon";
+		String title = "The History of the Decline and Fall of the Roman Empire";
+		String source = "Wikipedia";
+		URL sourceLink = new URL("https://en.wikipedia.org/wiki/The_History_of_the_Decline_and_Fall_of_the_Roman_Empire");
+		int id = 2021;
+		
+		Work work = new Work();
+		work.setAuthor(author);
+		work.setTitle(title);
+		work.setSource(source);
+		work.setSourceLink(sourceLink);
+		work.setId(id);
+		
+		ValueMap valueMap = ValueMap.from(work);
+		
+		assertNotNull(valueMap);
+		assertEquals(author, valueMap.getValue("author").orElse(""));
+		assertEquals(title, valueMap.getValue("title").orElse(""));
+		assertEquals(source, valueMap.getValue("source").orElse(""));
+		assertEquals(sourceLink, valueMap.getValue("sourceLink").orElse(""));
+		assertEquals(id, valueMap.getValue("id").orElse(""));
+		
+		
+	}
 	
+	@Test
+	void testCreationWithNestedDataObject() throws Exception {
+		String author = "Dan Brown";
+		String title = "The Novels of Dan Brown";
+        int id = 8;		
+        
+        Reference[] references = {
+        		new Reference("Digital Fortress", new URL("https://www.worldcat.org/title/digital-fortress/oclc/55045760")),
+        		new Reference("Angels & Demons", new URL("https://www.worldcat.org/title/angels-demons/oclc/52990309")),
+        		new Reference("Deception Point", new URL("https://www.worldcat.org/title/deception-point/oclc/47625287"))
+        };
+		
+		Works works = new Works();
+		works.setAuthor(author);
+		works.setTitle(title);
+		works.setId(id);
+		
+		works.addReference(references[0]);
+		works.addReference(references[1]);
+		works.addReference(references[2]);
+		
+		ValueMap valueMap = ValueMap.from(works);
+		
+		assertNotNull(valueMap);
+		assertEquals(author, valueMap.getValue("author").orElse(""));
+		assertEquals(title, valueMap.getValue("title").orElse(""));
+		
+		assertEquals(3, valueMap.getValueMaps("references").size());
+		assertEquals(references[0].getTitle(), valueMap.getValue("references.0.title").orElse(""));
+		assertEquals(references[0].getLink(), valueMap.getValue("references.0.link").orElse(""));
+		assertEquals(references[1].getTitle(), valueMap.getValue("references.1.title").orElse(""));
+		assertEquals(references[1].getLink(), valueMap.getValue("references.1.link").orElse(""));
+		assertEquals(references[2].getTitle(), valueMap.getValue("references.2.title").orElse(""));
+		assertEquals(references[2].getLink(), valueMap.getValue("references.2.link").orElse(""));
+		
+	}
+	
+		
+	@Test
+	void testCreationWithSimpleObjectIterator() {
+		List<String> list = Arrays.asList(new String[]{"Asimov", "Clark", "Pohl"});
+		
+		ValueMap valueMap = ValueMap.from(list.iterator());
+		
+		assertEquals("Asimov", valueMap.getValue("0").orElse(""));
+		assertEquals("Clark", valueMap.getValue("1").orElse(""));
+		assertEquals("Pohl", valueMap.getValue("2").orElse(""));
+		
+	}
+	
+	@Test 
+	void testCreationWithComplexObjectIterator() {
+//		ArrayList<String>		new Work().setTitle("I Robot"), 
+//				new Works().setTitle("Foundation"),
+//				new Works().setTitle("Foundation and Empire"),
+//				new Works().setTitle("Second Foundation ")
+//				};
+        assert(false); //TODO           
+		
+		
+		
+		
+	}
 
 
 }
