@@ -596,7 +596,7 @@ public class ValueMap {
 
 						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
 					        Class<?> type = field.getType();
-							// Scalar value
+							// Simple  value
 					        // TODO find a better way to do this. @See setField(...)
 							if (type.isPrimitive() || isWrapperType(type) || type == String.class
 									|| type == LocalDate.class || type == LocalDateTime.class || type == ZonedDateTime.class
@@ -643,7 +643,7 @@ public class ValueMap {
     }
     
     public static ValueMap from(Iterator<?> iterator) {
-    	ValueMap valueMap = new ValueMap();   
+    	ValueMap fieldValueMap = new ValueMap();   
     	int index = 0;
     	while (iterator.hasNext()) {
     		Object value = iterator.next();
@@ -652,15 +652,15 @@ public class ValueMap {
     		if (type.isPrimitive() || isWrapperType(type) || type == String.class
     				|| type == LocalDate.class || type == LocalDateTime.class || type == ZonedDateTime.class
     				|| type == URL.class) {
-    			valueMap.put(String.valueOf(index++), value);
+    			fieldValueMap.put(String.valueOf(index++), value);
     		} else {
     			ValueMap subValueMap = ValueMap.from(value);
-    			valueMap.put(String.valueOf(index++), subValueMap);
+    			fieldValueMap.put(String.valueOf(index++), subValueMap);
     		}
 
     	}
 
-    	return valueMap;
+    	return fieldValueMap;
 
     }
  
