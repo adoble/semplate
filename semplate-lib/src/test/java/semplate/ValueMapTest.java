@@ -772,16 +772,24 @@ class ValueMapTest {
 	
 	@Test 
 	void testCreationWithComplexObjectIterator() {
-//		ArrayList<String>		new Work().setTitle("I Robot"), 
-//				new Works().setTitle("Foundation"),
-//				new Works().setTitle("Foundation and Empire"),
-//				new Works().setTitle("Second Foundation ")
-//				};
-        assert(false); //TODO           
-		
-		
-		
-		
+		Work work0 = new Work(); 
+	    work0.setTitle("I Robot");
+	    Work work1 = new Work(); 
+	    work1.setTitle("Foundation");
+	    Work work2 = new Work(); 
+	    work2.setTitle("Foundation and Empire");
+	    Work work3 = new Work(); 
+	    work3.setTitle("Second Foundation");
+	    
+	    List<Work> list = Arrays.asList(new Work[]{work0, work1, work2, work3});
+	    
+	    ValueMap valueMap = ValueMap.from(list.iterator());
+	    
+	    assertEquals("I Robot", valueMap.getValue("0.title").orElse(""));
+	    assertEquals("Foundation", valueMap.getValue("1.title").orElse(""));
+	    assertEquals("Foundation and Empire", valueMap.getValue("2.title").orElse(""));
+	    assertEquals("Second Foundation", valueMap.getValue("3.title").orElse(""));
+		      
 	}
 
 
