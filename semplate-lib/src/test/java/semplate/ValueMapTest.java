@@ -791,6 +791,40 @@ class ValueMapTest {
 	    assertEquals("Second Foundation", valueMap.getValue("3.title").orElse(""));
 		      
 	}
+	
+	@Test 
+	void testToObjectSimple() throws Exception {
+		String author = "Edward Gibbon";
+		String title = "The History of the Decline and Fall of the Roman Empire";
+		String source = "Wikipedia";
+		URL sourceLink = new URL("https://en.wikipedia.org/wiki/The_History_of_the_Decline_and_Fall_of_the_Roman_Empire");
+		int id = 2021;
+		
+		ValueMap vm = new ValueMap();
+		vm.put("author", author);
+		vm.put("title", title);
+		vm.put("source", source);
+		vm.put("sourceLink", sourceLink);
+		vm.put("id", id);
+		
+		Work work = (Work) vm.toObject(Work.class);
+		
+		assertEquals(author, work.getAuthor());
+		assertEquals(title, work.getTitle());
+		assertEquals(source, work.getSource());
+		assertEquals(sourceLink, work.getSourceLink());
+		assertEquals(id, work.getId());
+		
+	}
+	
+	@Test 
+	void testToObjectError() {
+		ValueMap vm = new ValueMap();
+		vm.put("unkownTestField", "Unknown test field value");
+		
+		assertThrows(ConversionException.class, () -> vm.toObject(Work.class));
+		
+	}
 
 
 }

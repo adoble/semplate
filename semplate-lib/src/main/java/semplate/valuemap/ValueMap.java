@@ -2,6 +2,9 @@ package semplate.valuemap;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +15,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
+import semplate.ReadException;
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
 
@@ -663,6 +667,205 @@ public class ValueMap {
     	return fieldValueMap;
 
     }
+    
+    public Object toObject(Class<?> objectClass) throws ConversionException {
+		Object dataObject;
+		
+		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
+		try {
+			dataObject = objectClass.getDeclaredConstructor().newInstance();  // Note: constructor can be private TODO check this
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			String msg = "Unable to instantiate an object of class" + objectClass.getName();
+			throw new ConversionException(msg, e);
+		}
+
+		// Using the entries in the value map find the corresponding fields and set them.
+		// TODO simple case first
+		Set<String> fieldNames = this.fieldNames();
+
+		for (String fieldName : fieldNames) {
+			// Get the value
+			if (!this.isValueMap(fieldName)) {
+				Optional<Object> fieldValue = this.getValue(fieldName);
+
+				Field field;
+				try {
+					field = dataObject.getClass().getDeclaredField(fieldName);
+					if (field.getAnnotation(TemplateField.class) != null ) {
+						setField(dataObject, field, fieldValue);
+
+					} else {
+						// If the field has not been annotated then silently ignore
+					}
+
+					//TODO check annotation
+				} catch (NoSuchFieldException | SecurityException e) {
+					String msg = "Field name " +  fieldName + " is unknown in class " + objectClass.getName();
+					throw new ConversionException(msg, e);
+
+				}
+
+			} else {
+				Field field;
+
+				try {
+					field = dataObject.getClass().getDeclaredField(fieldName);
+					if (field.getAnnotation(TemplateField.class) != null ) {
+						if (field.getType() == List.class) {
+							setListField(dataObject, field, this.getValueMap(fieldName).orElse(ValueMap.empty()));
+						}
+
+					} else {
+						// If the field has not been annotated then silently ignore
+					}
+				} catch (NoSuchFieldException | SecurityException e) {
+					String msg = "Field name " +  fieldName + " is unknown in class " + objectClass.getName();
+					throw new ConversionException(msg, e);
+				}
+
+			}
+		}
+
+		return dataObject;
+    }
  
+    private void setField(Object dataObject, Field field, Optional<Object> fieldValue) throws ConversionException {
+
+		if (fieldValue.isEmpty()) return;  // TODO replace with checkArgument?
+		String valStr = fieldValue.orElseThrow().toString();
+
+		Class<?> fieldType = field.getType();
+
+		field.setAccessible(true);
+
+		try {
+
+			if (fieldType.equals(String.class)) {
+				field.set(dataObject, valStr);
+			} else if (fieldType.equals(Integer.TYPE)) {
+				int val = Integer.parseInt(valStr);
+				field.setInt(dataObject, val);
+			} else if (fieldType.equals(Integer.class)) {
+				Integer val = Integer.parseInt(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Short.TYPE)) {
+				short val = Short.parseShort(valStr);
+				field.setShort(dataObject, val);
+			} else if (fieldType.equals(Short.class)) {
+				Short val = Short.parseShort(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Byte.TYPE)) {
+				byte val = Byte.parseByte(valStr);
+				field.setByte(dataObject, val);
+			} else if (fieldType.equals(Byte.class)) {
+				Byte val = Byte.parseByte(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Long.TYPE)) {
+				long val = Long.parseLong(valStr);
+				field.setLong(dataObject, val);
+			} else if (fieldType.equals(Long.class)) {
+				Long val = Long.parseLong(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Double.TYPE)) {
+				double val = Double.parseDouble(valStr);
+				field.setDouble(dataObject, val);
+			} else if (fieldType.equals(Double.class)) {
+				Double val = Double.parseDouble(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Float.TYPE)) {
+				float val = Float.parseFloat(valStr);
+				field.setFloat(dataObject, val);
+			} else if (fieldType.equals(Float.class)) {
+				Float val = Float.parseFloat(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Boolean.TYPE)) {
+				boolean val = Boolean.parseBoolean(valStr);
+				field.setBoolean(dataObject, val);
+			} else if (fieldType.equals(Boolean.class)) {
+				Boolean val = Boolean.parseBoolean(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(Character.TYPE) ) {
+				char val = valStr.charAt(0);
+				field.setChar(dataObject, val);
+			} else if (fieldType.equals(Character.class)) {
+				Character val = Character.valueOf(valStr.charAt(0));
+				field.set(dataObject, val);
+			}
+			// Dates are formatted according to ISO_LOCAL_DATE or ISO_LOCAL_DATE_TIME.
+			  else if (fieldType.equals(LocalDate.class)) {
+				LocalDate val = LocalDate.parse(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(LocalDateTime.class)) {
+				LocalDateTime val = LocalDateTime.parse(valStr);
+				field.set(dataObject, val);
+			} else if (fieldType.equals(ZonedDateTime.class)) {
+				ZonedDateTime val = ZonedDateTime.parse(valStr);
+				field.set(dataObject, val);
+			}
+			// Use standard string representation of URLs
+			else if (fieldType.equals(URL.class)) {
+				URL val = new URL(valStr);
+				field.set(dataObject, val);
+			} else {
+				System.err.println("Type of " + field.getName() + " is unknown");
+			}
+		} catch (IllegalArgumentException | IllegalAccessException | MalformedURLException e) {
+			String msg = "Unable to set field " + field.getName();
+			throw new ConversionException(msg, e);
+		}
+
+	}
+
+    /**
+     * @param dataObject
+     * @param field
+     * @param valueMap
+     * @throws IllegalArgumentException if the specified field is not of type #
+     */
+    private void setListField (Object dataObject, Field field, ValueMap valueMap) throws ConversionException {
+    	  checkArgument(field.getType() == List.class, "The specified field name %s is not of type %s", field.getName(), List.class.getName());
+    	  
+    	 
+    	  //Class<?> fieldType = field.getType();
+          field.setAccessible(true);
+
+    	  // Determine the type of list object in the data object ?
+    	  Type genericType = field.getGenericType();
+    	 
+    	  // Extract the parameterised type name
+    	  String paraTypeName = Splitter.on('<')
+    			  .trimResults(CharMatcher.is('>'))
+    			  .omitEmptyStrings()
+    			  .splitToList(genericType.getTypeName()).get(1);
+    	  	 
+    	 // Now construct data objects for that type and fill them out with the data in the value map entries.  
+    	 List<ValueMap> vmList = valueMap.getValueMaps();
+    	 for (ValueMap vmEntry : vmList) {
+    		try {
+    			Class<?> paramClass = Class.forName(paraTypeName); //TODO move outside try block
+    			
+    			// Now construct a data object of paramClass from the value map 
+    			Object listEntryDataObject = this.toObject(paramClass);
+    			
+    			@SuppressWarnings("unchecked")
+    			List<Object> dataObjectList = (List<Object>)field.get(dataObject);
+    			
+    		    dataObjectList.add(listEntryDataObject)	;	
+    	
+    		
+    		} catch (ConversionException e) {
+    			//Pass this exception up the calling stack 
+    			throw e;
+    		} catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException  e) {
+    			String msg = "Unable to set field " + field.getName();
+    			throw new ConversionException(msg, e);
+    		} 
+    		
+    	}
+    	
+
+    	  
+      }
 
 }
