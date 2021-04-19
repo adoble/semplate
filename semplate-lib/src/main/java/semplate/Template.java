@@ -46,25 +46,15 @@ public class Template  {
 	// Special fields are preceded with template
 	final private String templateCommentField = "{@template.comment}}"; //TODO make static
 	
-    final private static Pattern directiveLine = Pattern.compile("\\{\\@[^}]*?\\}\\}");
-	
-	//final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter[^}]*\\}{2}");
-	final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter.(?<type>.*?):(?<delim>.*?)\\}\\}");;
+    final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter.(?<type>.*?):(?<delim>.*?)\\}\\}");;
 	
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  
-	//final private static Pattern listPattern = Pattern.compile("\\{{3}[^\\}]*\\}{3}");   //TODO check this - is it used?
-
+	
 	private Path templatePath;
 
-	
-	private StringBuffer block = new StringBuffer();
-	
 	private Delimiter commentDelimiter;
 
 	private  Delimiters delimiters = new Delimiters();
-
-	
-    
 
 	public Template() {
 		
@@ -283,7 +273,6 @@ public class Template  {
 	 * See formal grammer  TODO
 	 *
 	 */
-	
 	private String updateBlock(String chunk, ValueMap valueMap) {
 		ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
 		
