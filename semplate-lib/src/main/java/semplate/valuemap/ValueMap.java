@@ -188,19 +188,6 @@ public class ValueMap {
 	 * @return A list of value maps 
 	 */
 	public List<ValueMap> getValueMaps(String fieldName) {
-//		List<ValueMap> list = new ArrayList<>();
-//
-//		Optional<ValueMap> entry = this.getValueMap(fieldName);
-//
-//		Set<String> fieldNameSet = entry.orElse(ValueMap.empty()).fieldNames();
-//		
-//
-//		ValueMap ordinalEntry;
-//		for(String ordinalFieldName : fieldNameSet) {
-//			ordinalEntry = entry.orElse(ValueMap.empty());
-//			ordinalEntry.getValueMap(ordinalFieldName).ifPresent(vm -> list.add(vm));
-//		}
-		
 		checkArgument(this.isValueMap(fieldName), "Fieldname %s does not contain a value map", fieldName);
 		
 		ValueMap fieldVM = this.getValueMap(fieldName).orElse(ValueMap.empty());
@@ -846,7 +833,7 @@ public class ValueMap {
     			Class<?> paramClass = Class.forName(paraTypeName); //TODO move outside try block
     			
     			// Now construct a data object of paramClass from the value map 
-    			Object listEntryDataObject = this.toObject(paramClass);
+    			Object listEntryDataObject = vmEntry.toObject(paramClass);
     			
     			@SuppressWarnings("unchecked")
     			List<Object> dataObjectList = (List<Object>)field.get(dataObject);

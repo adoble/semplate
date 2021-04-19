@@ -20,6 +20,7 @@ import static com.google.common.primitives.Primitives.*;
 
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
+import semplate.valuemap.ConversionException;
 import semplate.valuemap.ValueMap;
 
 import java.lang.reflect.*;
@@ -153,7 +154,7 @@ public class Template  {
 	 */
 	public void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
 
-		ValueMap valueMap = buildFieldValueMap(dataObject);
+		ValueMap valueMap = ValueMap.from(dataObject);
 
 		// Expand the inline delimiters with the field delimiters so that only these are selected. 
 		Delimiters expandedDelimiters = delimiters.clone().insertAll("{{", "}}"); 
@@ -197,11 +198,15 @@ public class Template  {
 	 * @return
 	 */
 	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
-		Object dataObject;
+		Object dataObject = null;
 	
 		ValueMap valueMap = readValueMap(markupFilePath);
 	
-		dataObject = constructDataObject(objectClass, valueMap);
+		try {
+			dataObject = valueMap.toObject(objectClass);
+		} catch (ConversionException e) {
+			throw new ReadException(e.getMessage(), e);
+		}
 	
 		return dataObject;
 	}
@@ -225,7 +230,7 @@ public class Template  {
 			throw new UpdateException("Unable to read the file to be updated", e);
 		}
 		
-		ValueMap updatedValueMap = buildFieldValueMap(dataObject); 
+		ValueMap updatedValueMap = ValueMap.from(dataObject); 
 
 		// To be safe, copy the markdown file into a temp file in the same directory as the markdown files  before updating
 		Path tempFile = copyToTempFile(markdownFilePath);
@@ -382,216 +387,6 @@ public class Template  {
 
 		return valueMap;
 	}
-
-	private Object constructDataObject(Class<?> objectClass, ValueMap valueMap) throws ReadException {
-		Object dataObject;
-		
-		//TODO what happens if the specified objectClass does not have a constructor with no parameters?
-		try {
-			dataObject = objectClass.getDeclaredConstructor().newInstance();  // Note: constructor can be private TODO check this
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			// TODO Auto-generated catch block
-			throw new ReadException();
-		}
-
-		// Using the entries in the value map find the corresponding fields and set them.
-		// TODO simple case first
-		Set<String> fieldNames = valueMap.fieldNames();
-
-		for (String fieldName : fieldNames) {
-			// Get the value
-			if (!valueMap.isValueMap(fieldName)) {
-				Optional<Object> fieldValue = valueMap.getValue(fieldName);
-
-				Field field;
-				try {
-					field = dataObject.getClass().getDeclaredField(fieldName);
-					if (field.getAnnotation(TemplateField.class) != null ) {
-						setField(dataObject, field, fieldValue);
-
-					} else {
-						// If the field has not been annotated then silently ignore
-					}
-
-					//TODO check annotation
-				} catch (NoSuchFieldException | SecurityException e) {
-					// TODO Auto-generated catch block
-					System.err.println("FIELD: fieldname " +  fieldName + " is unknown. " + e);
-
-				}
-
-			} else {
-				Field field;
-
-				try {
-					field = dataObject.getClass().getDeclaredField(fieldName);
-					if (field.getAnnotation(TemplateField.class) != null ) {
-						if (field.getType() == List.class) {
-							setListField(dataObject, field, valueMap.getValueMap(fieldName).orElse(ValueMap.empty()));
-						}
-						/*
-					    Options
-						1. target field is a list: determine list of what? (--> move all this code to setListField)
-					          1.1 Create a list of this type and add the elements
-					    2. target field is map: determine map of what? dot dot dot (--> move all of this code to setMapField)
-					    3. target field is another type of object : 
-					       3.1 unpack value map needes
-					       3.2 fields of the object need to be filled. This should be recursive.
-						 */
-
-					} else {
-						// If the field has not been annotated then silently ignore
-					}
-				} catch (NoSuchFieldException | SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-
-			}
-		}
-
-		return dataObject;
-	}
-
-
-	private void setField(Object dataObject, Field field, Optional<Object> fieldValue) {
-
-		if (fieldValue.isEmpty()) return;  // TODO replace with checkArgument?
-		String valStr = fieldValue.orElseThrow().toString();
-
-		Class<?> fieldType = field.getType();
-
-		field.setAccessible(true);
-
-		try {
-
-			if (fieldType.equals(String.class)) {
-				field.set(dataObject, valStr);
-			} else if (fieldType.equals(Integer.TYPE)) {
-				int val = Integer.parseInt(valStr);
-				field.setInt(dataObject, val);
-			} else if (fieldType.equals(Integer.class)) {
-				Integer val = Integer.parseInt(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Short.TYPE)) {
-				short val = Short.parseShort(valStr);
-				field.setShort(dataObject, val);
-			} else if (fieldType.equals(Short.class)) {
-				Short val = Short.parseShort(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Byte.TYPE)) {
-				byte val = Byte.parseByte(valStr);
-				field.setByte(dataObject, val);
-			} else if (fieldType.equals(Byte.class)) {
-				Byte val = Byte.parseByte(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Long.TYPE)) {
-				long val = Long.parseLong(valStr);
-				field.setLong(dataObject, val);
-			} else if (fieldType.equals(Long.class)) {
-				Long val = Long.parseLong(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Double.TYPE)) {
-				double val = Double.parseDouble(valStr);
-				field.setDouble(dataObject, val);
-			} else if (fieldType.equals(Double.class)) {
-				Double val = Double.parseDouble(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Float.TYPE)) {
-				float val = Float.parseFloat(valStr);
-				field.setFloat(dataObject, val);
-			} else if (fieldType.equals(Float.class)) {
-				Float val = Float.parseFloat(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Boolean.TYPE)) {
-				boolean val = Boolean.parseBoolean(valStr);
-				field.setBoolean(dataObject, val);
-			} else if (fieldType.equals(Boolean.class)) {
-				Boolean val = Boolean.parseBoolean(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(Character.TYPE) ) {
-				char val = valStr.charAt(0);
-				field.setChar(dataObject, val);
-			} else if (fieldType.equals(Character.class)) {
-				Character val = Character.valueOf(valStr.charAt(0));
-				field.set(dataObject, val);
-			}
-			// Dates are formatted according to ISO_LOCAL_DATE or ISO_LOCAL_DATE_TIME.
-			  else if (fieldType.equals(LocalDate.class)) {
-				LocalDate val = LocalDate.parse(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(LocalDateTime.class)) {
-				LocalDateTime val = LocalDateTime.parse(valStr);
-				field.set(dataObject, val);
-			} else if (fieldType.equals(ZonedDateTime.class)) {
-				ZonedDateTime val = ZonedDateTime.parse(valStr);
-				field.set(dataObject, val);
-			}
-			// Use standard string representation of URLs
-			else if (fieldType.equals(URL.class)) {
-				URL val = new URL(valStr);
-				field.set(dataObject, val);
-			} else {
-				System.err.println("Type of " + field.getName() + " is unknown");
-			}
-		} catch (IllegalArgumentException | IllegalAccessException | MalformedURLException e) {
-			System.err.println("ERROR: Cannot set field " + field.getName());
-			System.err.println(e.getMessage());
-		}
-
-	}
-
-    
-  /**
- * @param dataObject
- * @param field
- * @param valueMap
- * @throws IllegalArgumentException if the specified field is not of type #
- */
-private void setListField (Object dataObject, Field field, ValueMap valueMap) {
-	  checkArgument(field.getType() == List.class, "The specified field name %s is not of type %s", field.getName(), List.class.getName());
-	  
-	 
-	  //Class<?> fieldType = field.getType();
-      field.setAccessible(true);
-
-	  // Determine the type of list object in the data object ?
-	  Type genericType = field.getGenericType();
-	 
-	  // Extract the parameterised type name
-	  String paraTypeName = Splitter.on('<')
-			  .trimResults(CharMatcher.is('>'))
-			  .omitEmptyStrings()
-			  .splitToList(genericType.getTypeName()).get(1);
-	  	 
-	 // Now construct data objects for that type and fill them out with the data in the value map entries.  
-	 List<ValueMap> vmList = valueMap.getValueMaps();
-	 for (ValueMap vmEntry : vmList) {
-		try {
-			Class<?> paramClass = Class.forName(paraTypeName); //TODO move outside try block
-			
-			// Now construct a data object of paramClass from the value map 
-			Object listEntryDataObject = constructDataObject(paramClass,vmEntry);
-			
-			@SuppressWarnings("unchecked")
-			List<Object> dataObjectList = (List<Object>)field.get(dataObject);
-			
-		    dataObjectList.add(listEntryDataObject)	;	
-	
-		
-		} catch (ReadException | ClassNotFoundException | IllegalArgumentException | IllegalAccessException  e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-	}
-	
-
-	  
-  }
-
 
 
 	private void accumulateList(ArrayList<String> r, String s) {
@@ -877,75 +672,7 @@ private void setListField (Object dataObject, Field field, ValueMap valueMap) {
     }
 
 
-	@SuppressWarnings("unchecked")  // Suppress warning when casting type Object to type Iterable.
-	                                // During runtime the code checks that is is a valid operation.
-	private ValueMap buildFieldValueMap(Object dataObject) {
-		Object fieldValue;
-		Iterable<Object> fieldIterable;
 
-		ValueMap fieldValueMap = new ValueMap();
-
-		Class<?> c = dataObject.getClass();
-
-		if (c.isAnnotationPresent(Templatable.class)) {
-
-			for(Field field: c.getDeclaredFields()) {
-				if (field.isAnnotationPresent(TemplateField.class)) {
-					field.setAccessible(true);
-
-
-					try {
-						fieldValue = field.get(dataObject);
-
-						if (!(fieldValue instanceof Iterable) && !field.getType().isArray()) {
-					        Class<?> type = field.getType();
-							// Scalar value
-					        // TODO find a better way to do this. @See setField(...)
-							if (type.isPrimitive() || isWrapperType(type) || type == String.class
-									|| type == LocalDate.class || type == LocalDateTime.class || type == ZonedDateTime.class
-									|| type == URL.class) {
-								fieldValueMap.put(field.getName(), fieldValue);
-							} else {
-								ValueMap subValueMap = buildFieldValueMap(fieldValue);
-								fieldValueMap.put(field.getName(), subValueMap);
-							}
-						} else {
-							if (field.getType().isArray()) {
-
-								// Unpack the array. Need to do this as:
-								// a) the array needs to Iterable and for some reason they are not.
-								// b) Just using simple casting does not seem to work for arrays
-								// See https://stackoverflow.com/questions/8095016/unpacking-an-array-using-reflection
-								List<Object> l = new ArrayList<Object>(Array.getLength(fieldValue));
-								for (int i= 0; i < Array.getLength(fieldValue); i++) {
-									l.add(Array.get(fieldValue,i));
-								}
-								fieldIterable = (Iterable<Object>) l;
-
-							} else {
-								// The field value is of type Iterable
-								fieldIterable = (Iterable<Object>) fieldValue;
-							}
-							
-							ValueMap fieldIterationMap;
-							for (Object listEntry: fieldIterable) {
-								fieldIterationMap = buildFieldValueMap(listEntry);
-								//listValues.add(fieldIterationMap);
-								fieldValueMap.add(field.getName(), fieldIterationMap);
-
-							}
-						}
-					} catch (IllegalArgumentException | IllegalAccessException e) {
-						fieldValue = null; //"ERROR";  //TODO make sure that null is represented as a string "ERROR" in the calling functions
-					}
-				}
-			}
-		} 
-
-		return fieldValueMap;
-
-
-	}
 
 
 

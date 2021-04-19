@@ -818,6 +818,42 @@ class ValueMapTest {
 	}
 	
 	@Test 
+	void testToObjectWithList() throws Exception {
+		ValueMap sourceValueMap = new ValueMap();
+		sourceValueMap.put("id", 2021);
+		sourceValueMap.put("title", "Dieter Bohlen - Seine größten Hits");
+		sourceValueMap.put("author", "Dieter Bohlen");
+				
+		sourceValueMap.put("references.0.title", "You're My Heart, You're My Soul");
+		sourceValueMap.put("references.0.link", new URL("https://en.wikipedia.org/wiki/You%27re_My_Heart,_You%27re_My_Soul"));
+			
+		sourceValueMap.put("references.1.title", "You Can Win If You Want");
+		sourceValueMap.put("references.1.link", new URL("https://en.wikipedia.org/wiki/You_Can_Win_If_You_Want"));
+		
+		sourceValueMap.put("references.2.title", "Cheri, Cheri Lady");
+		sourceValueMap.put("references.2.link", new URL("https://en.wikipedia.org/wiki/Cheri,_Cheri_Lady"));
+	
+		
+		Works works = (Works) sourceValueMap.toObject(Works.class);
+		
+		assertEquals(2021, works.getId());
+		assertEquals("Dieter Bohlen - Seine größten Hits", works.getTitle());
+		assertEquals("Dieter Bohlen", works.getAuthor());
+		
+		assertEquals("You're My Heart, You're My Soul", works.getReference(0).getTitle());
+		assertEquals("https://en.wikipedia.org/wiki/You%27re_My_Heart,_You%27re_My_Soul", works.getReference(0).getLink().toString());
+		
+		assertEquals("You Can Win If You Want", works.getReference(1).getTitle());
+		assertEquals("https://en.wikipedia.org/wiki/You_Can_Win_If_You_Want", works.getReference(1).getLink().toString());
+		
+		assertEquals("Cheri, Cheri Lady", works.getReference(2).getTitle());
+		assertEquals("https://en.wikipedia.org/wiki/Cheri,_Cheri_Lady", works.getReference(2).getLink().toString());
+		
+		
+		
+	}
+	
+	@Test 
 	void testToObjectError() {
 		ValueMap vm = new ValueMap();
 		vm.put("unkownTestField", "Unknown test field value");
