@@ -277,29 +277,7 @@ public class Template  {
 	}
 
 	
-	/** Extract blocks of text from the markdown
-	 *
-	 * The blocks of text extracted are either 
-	 * <p> a) the markdown text blocks that are separated by a new line. </p>
-	 * <p> b) Same as (a), but appended with the semantic data that applies to it. The appended 
-	 *        data can preceded by a new line. </p>
-	 *    
-	 * @param line The line being read from the markdown file
-	 * @return A block of text with any semantic information appended. 
-	 */
-	private String extractBlock(String line) {
-		String pipedBlock;
-
-		if (line.trim().length() > 0 ) {  // Not an empty line
-			block.append(line + "\n");
-			pipedBlock = "";
-		} else {
-			pipedBlock = (block.toString());
-			block.delete(0, block.length() - 1);
-		}
-
-		return pipedBlock;
-	}
+	
 	
 	/**
 	 * See formal grammer  TODO
@@ -387,32 +365,6 @@ public class Template  {
 
 		return valueMap;
 	}
-
-
-	private void accumulateList(ArrayList<String> r, String s) {
-		r.add(s);
-	}
-
-	private void combineList(ArrayList<String> r1, ArrayList<String> r2) {
-		r1.addAll(r2);
-	}
-
-
-	private Stream<String> extractKeyValuePair(String line) {
-		List<String> keyValuePairs = new ArrayList<String>();
-		String keyValuePair = "";
-
-		Matcher matcher = fieldPattern.matcher(line);
-		while(matcher.find()) {
-			// Remove the delimiters
-			keyValuePair = matcher.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-			keyValuePairs.add(keyValuePair);
-		}
-
-		return keyValuePairs.stream();
-
-	}
-
 
 
 	/** Returns the path to the markdown file that has been configured. 
@@ -620,23 +572,6 @@ public class Template  {
 
 	}
 
-
-	private String metaDataSubstitution(MatchResult mr, ValueMap valueMap) {
-	     String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
-
-		// Field names starting with "template." are ignored. Note that these are always alone on a line.
-	    if (fieldName.startsWith("template.")) {
-	    	if (fieldName.substring("template.".length()).equals("comment")) {
-	          return "{{template.comment}}";
-	    	}
-	    }
-
-	    //return "{{" + fieldName + "=\"" + valueMap.getOrDefault(fieldName, "UNKNOWN") + "\"}}";
-	    String valueString = getFieldValueAsString(fieldName, valueMap);
-
-	    return "{{" + fieldName + "=\"" + valueString + "\"}}";
-
-	}
 	
 	private String getFieldValueAsString(String fieldName, ValueMap fieldValueMap) {
 		String valueString;
@@ -652,28 +587,5 @@ public class Template  {
 		
 		return valueString;
 	}
-
-	/**
-     * Parser the stream of template lines and extracts the start and end delimiters of comments,
-     * @param stream Stream of template lines.
-     */
-	private void determineCommentDelimiters(Stream<String> stream) {
-
-    	String templateComment = stream.filter(line -> line.contains(templateCommentField)).findAny().orElse("");
-    
-		if (!templateComment.isEmpty()) {
-			commentDelimiter.start(templateComment.substring(0,templateComment.indexOf(templateCommentField)));
-			commentDelimiter.end(templateComment.substring(commentDelimiter.start().get().length() + templateCommentField.length(), templateComment.length()));
-
-		} else {
-			commentDelimiter.start("");
-			commentDelimiter.end("");
-		}
-    }
-
-
-
-
-
 
 }
