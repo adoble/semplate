@@ -87,7 +87,7 @@ public class TemplateUpdateTests {
 	
 	// Test update with no lists
 	@Test
-	void testSimpleUpdate(@TempDir Path tempDir) throws Exception {
+	void testSimpleUpdate(@TempDir Path tempDir) throws Exception { 
 		
 		Path sourceFile = tempDir.resolve("simple_expected.md");
 		

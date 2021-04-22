@@ -223,6 +223,7 @@ public class Template  {
 		ValueMap updatedValueMap = ValueMap.from(dataObject); 
 
 		// To be safe, copy the markdown file into a temp file in the same directory as the markdown files  before updating
+		//TODO don't handle the temporary file, use an explicit input and out file. This way any files handling can be left to the client 
 		Path tempFile = copyToTempFile(markdownFilePath);
 		
 		// Update the contents with the data in the value map 
