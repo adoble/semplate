@@ -203,18 +203,19 @@ public class Template  {
 
 
 	/**
-	 * Updates a markdown file using the annotated fields in the {@code object}
-	 * 
+	 * Read a smarkdown file, updates it with the information in annotated {@code dataObject} and then outputs the 
+	 * results to a the specified output markdown file. 
 	 *
 	 * @param dataObject The object containing the new data
-	 * @param markdownFilePath A path to the markdown file to be updated
+	 * @param inputFile A path to the markdown file to be updated. 
+	 * @param outputFile A path to the markdown file to be updated
 	 * @throws ReadException 
 	 */
-	public void update(Object dataObject, Path markdownFilePath) throws UpdateException {
+	public void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
 		
 		// Determine delimiters in the markdown file to be updated. 
 		try {
-			config(markdownFilePath);
+			config(inputFile);
 		} catch (IOException | ReadException e) {
 			// TODO Auto-generated catch block
 			throw new UpdateException("Unable to read the file to be updated", e);
@@ -224,11 +225,11 @@ public class Template  {
 
 		// To be safe, copy the markdown file into a temp file in the same directory as the markdown files  before updating
 		//TODO don't handle the temporary file, use an explicit input and out file. This way any files handling can be left to the client 
-		Path tempFile = copyToTempFile(markdownFilePath);
+		//Path tempFile = copyToTempFile(outputFile);
 		
 		// Update the contents with the data in the value map 
 		List<String> blocks;
-		try (Stream<String> lines = Files.lines(tempFile, Charset.defaultCharset())) {
+		try (Stream<String> lines = Files.lines(inputFile, Charset.defaultCharset())) {
 			blocks = Stream.concat(lines, Stream.of("\n"))    // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated
 					.map(chunk())  
 					.map(o -> o.orElse(""))
@@ -239,11 +240,11 @@ public class Template  {
 			throw new UpdateException("Unable to update the file", e);
 		}
 		
-		// Overwrite the original file with the new contents.  
+		// Create the output file with the new contents.  
 		try {
-			Files.write(markdownFilePath, blocks);
+			Files.write(outputFile, blocks);
 		} catch (IOException e) {
-			String msg = "Cannot update the markdown file. A copy of the orignal file is in " + tempFile.toString();
+			String msg = "Cannot update the markdown file";
 			throw new UpdateException(msg, e);
 		}
 		
