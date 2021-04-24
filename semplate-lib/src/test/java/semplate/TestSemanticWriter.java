@@ -119,5 +119,81 @@ class TestSemanticWriter {
 					
 		assertEquals(expectedContents, actualContents);
 	}
+	
+	@Test
+	void testUpdateChainWithSimpleMardown() throws Exception {
+        Path sourceFile = rootPath.resolve("simple_expected.md");
+		
+		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
+		
+		Path outputFile = rootPath.resolve("simple_updated.md");
+		
+          
+        // Updated data in the data object 
+        Work updatedWork = new Work();
+        updatedWork.setAuthor("Plato The Fraudulant");
+        updatedWork.setTitle("The Dictatorship");
+        updatedWork.setTranslator("Old Ben");
+        updatedWork.setSource("Wikipedia");
+        updatedWork.setSourceLink(new URL("https://en.wikipedia.org/wiki/Academic_dishonesty"));
+        updatedWork.setId(4713);
+		
+		//new Template().update(updatedWork, sourceFile, outputFile);
+        SemanticWriter.with(updatedWork)                 
+                         .usingFile(sourceFile)     
+                         .write(outputFile);
+        
+        
+		String expectedContents = "";
+		String resourceFileName = "simple_updated_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+				
+		TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		
+		assumeTrue(Files.exists(expectedFile));
+		expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+		
+	    String actualContents = Files.lines(outputFile).collect(Collectors.joining());
+				
+		assertEquals(expectedContents, actualContents);
+		
+	}
+	
+	@Test 
+	void testUpdateChainWithListMarkdown () throws Exception {
+		Path sourceFile = rootPath.resolve("list_expected.md");
+		TestUtilities.copyFromResource("list_expected.md", sourceFile);
+		
+		Path outputFile = rootPath.resolve("list_output_file.md");
+
+		// Updated data in the data object 
+		Works updatedWorks = new Works();
+		updatedWorks.setId(1960);
+		updatedWorks.setAuthor("Stan Lee");
+		updatedWorks.setTitle("The Comic Books of Stan Lee");
+			
+        updatedWorks.addReference(new Reference("The Amazing Spider-Man", 
+                new URL("https://en.wikipedia.org/wiki/The_Amazing_Spider-Man" )));
+        updatedWorks.addReference(new Reference("Journey into Mystery", 
+                new URL("https://en.wikipedia.org/wiki/Journey_into_Mystery" )));
+        updatedWorks.addReference(new Reference("Ravage 2099", 
+                new URL("https://en.wikipedia.org/wiki/Ravage_2099" )));
+        
+        
+        SemanticWriter.with(updatedWorks).usingFile(sourceFile).write(outputFile);
+        
+        String resourceFileName = "list_updated_expected.md";
+		Path expectedFile = fileSystem.getPath(resourceFileName);  
+		
+        TestUtilities.copyFromResource(resourceFileName, expectedFile);
+		assumeTrue(Files.exists(expectedFile));
+		
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+		
+	    String actualContents = Files.lines(outputFile).collect(Collectors.joining());
+				
+		assertEquals(expectedContents, actualContents);
+	}
+	
 
 }

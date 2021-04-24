@@ -59,6 +59,7 @@ public class TemplateUpdateTests {
 	}
 	
 	@Test
+	@Deprecated
 	public void testCreationOfTempFile(@TempDir Path tempDir) throws Exception {
 		String expectedContents = "Thou gazest on the stars, my star!\n"
 		                   		+ "Ah! would that I might be\n"
@@ -87,11 +88,13 @@ public class TemplateUpdateTests {
 	
 	// Test update with no lists
 	@Test
-	void testSimpleUpdate(@TempDir Path tempDir) throws Exception { 
+	void testSimpleUpdate() throws Exception { 
 		
-		Path sourceFile = tempDir.resolve("simple_expected.md");
+		Path sourceFile = rootPath.resolve("simple_expected.md");
 		
 		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
+		
+		Path outputFile = rootPath.resolve("simple_updated.md");
 		
           
         // Updated data in the data object 
@@ -103,7 +106,7 @@ public class TemplateUpdateTests {
         updatedWork.setSourceLink(new URL("https://en.wikipedia.org/wiki/Academic_dishonesty"));
         updatedWork.setId(4713);
 		
-		new Template().update(updatedWork, sourceFile);
+		new Template().update(updatedWork, sourceFile, outputFile);
 		
 		String expectedContents = "";
 		String resourceFileName = "simple_updated_expected.md";
@@ -114,7 +117,7 @@ public class TemplateUpdateTests {
 		assumeTrue(Files.exists(expectedFile));
 		expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
 		
-	    String actualContents = Files.lines(sourceFile).collect(Collectors.joining());
+	    String actualContents = Files.lines(outputFile).collect(Collectors.joining());
 				
 		assertEquals(expectedContents, actualContents);
 		
@@ -122,9 +125,11 @@ public class TemplateUpdateTests {
         }
         
 	@Test
-	void testListUpdate(@TempDir Path tempDir) throws Exception {
-		Path sourceFile = tempDir.resolve("list_expected.md");
+	void testListUpdate() throws Exception {
+		Path sourceFile = rootPath.resolve("list_expected.md");
 		TestUtilities.copyFromResource("list_expected.md", sourceFile);
+		
+		Path outputFile = rootPath.resolve("list_output_file.md");
 
 		// Updated data in the data object 
 		Works updatedWorks = new Works();
@@ -140,7 +145,7 @@ public class TemplateUpdateTests {
                 new URL("https://en.wikipedia.org/wiki/Ravage_2099" )));
         
         
-        new Template().update(updatedWorks, sourceFile);
+        new Template().update(updatedWorks, sourceFile, outputFile);
         
         String resourceFileName = "list_updated_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);  
@@ -150,7 +155,7 @@ public class TemplateUpdateTests {
 		
 		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
 		
-	    String actualContents = Files.lines(sourceFile).collect(Collectors.joining());
+	    String actualContents = Files.lines(outputFile).collect(Collectors.joining());
 				
 		assertEquals(expectedContents, actualContents);
 	}

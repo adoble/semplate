@@ -12,6 +12,7 @@ import java.nio.file.Path;
  */
 public class SemanticWriter {
 	private Object dataObject;
+	private Path inputFile;
 
 	public static SemanticWriter with(Object dataObject) {
 		SemanticWriter semanticWriter = new SemanticWriter();
@@ -36,6 +37,17 @@ public class SemanticWriter {
 		SemanticTemplateWriter writer = new SemanticTemplateWriter(dataObject, template);
 		
 		return writer;
+	}
+
+	public SemanticWriter usingFile(Path inputFile) {
+		this.inputFile = inputFile;
+		return this;
+	}
+
+	public void write(Path outputFile) throws UpdateException {
+		Template t = new Template();
+		
+		t.update(dataObject, inputFile, outputFile);
 	}
 
 }
