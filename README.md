@@ -7,7 +7,8 @@
 * adding  semantic information
 * using user defined templates
 
-It works with both [Markdown](https://www.markdownguide.org/getting-started/) and [Asciidoc](http://asciidoc.org/).
+It works with both [Markdown](https://www.markdownguide.org/getting-started/) and [Asciidoc](http://asciidoc.org/)
+and may work with other markdown flavors.
 
 # Usage
 
@@ -21,13 +22,16 @@ It works with both [Markdown](https://www.markdownguide.org/getting-started/) an
      import semplate.annotations.*;
 
        @Templatable
-       public class Work {
+       public class ADR {
 
        @TemplateField
-       private String title;
+       private Integer id;
 
        @TemplateField
-       private String author;
+       private String name;
+
+       @TemplateField
+       private final String status;
 
        /* Setters and getters */
    }
@@ -38,38 +42,54 @@ It works with both [Markdown](https://www.markdownguide.org/getting-started/) an
 ```
   <!--{{template.comment}}-->
 
-  # {{title}}
+  # {{id}}. {{name}}
 
-  By: {{author}}
+  ## Status
 
-  I went down yesterday to the Piraeus with Glaucon, the son of Ariston, that I might offer
-  up my prayers to the goddess and also because I wanted to see in what manner they would celebrate the festival, which was a new thing.
-```
+  {{status}}
 
-2.  Create a template object and associate it with a template file
+  ## Context
 
-```
-    Template template = new Template();
+  *Record the architectural decisions made on this project.*
 
-    template.config(FileSystem.getPath("/templates/myTemplate.md"));
-```
+  ## Decision
 
-3. Generate a markdown file using the data in an object.
+  **We will use Architecture Decision Records, as described by Michael Nygard in [this article: ](http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions)**
+
 
 ```
-    Work work = new Work();
-    work.setAuthor("Plato");
-    work.setTitle("The Republic");
 
-    template.generate(work, FileSystem.getPath("/docs/output.md"));
-```
-
-4. Generate a data object by reading in the generated markdown file.
+2. Generate a markdown file using the data in an object. The markdown file will be semantically annotated.
 
 ```
-    Work aWork = (Work) template.read(Work.class, sourceFile);
+    ADR adr = new ADR();
+    adr.setId(12);
+    adr.setName("Use a graph database");
+    adr.setStatus("Proposed");
 
-    assertEquals(aWork.getAuthor(), "Plato");
-    assertEquals(aWork.getTitle(), "The Republic");
+    SemanticWriter.with(adr)
+                  .usingTemplate(path_to_template_file)
+                  .write(path_to_markdown_file);
+```
+4. Generate a data object by reading in the generated (semantically annotated) markdown file.
 
 ```
+    ADR adr = (ADR) SemanticReader.with(ArchitectureDecisionRecord.class)
+                                  .usingFile(path_to_markdown_file)
+                                  .read();   
+
+    assertEquals(12, adr.getId());
+    assertEquals("Use a graph database", adr.getName());
+
+```
+
+5. Update an existing (semantically annotated) markdown file
+
+```
+   ADR updatedADR = adr.clone();
+   updatedADR.setStatus("Agreed");
+
+   SemanticWriter.with(updatedADR)                 
+                .usingFile(Path input_semantic_file)
+                .write(Path updated_semantic_file);       
+  ```

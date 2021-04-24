@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
-
+* Fluent interface added (SemanticWriter, SemanticReader).
 * Markdown files that contain  semantic information can now be updated using the <code>update</code> function.
 * A formal specification of the semantically marked up files added
 

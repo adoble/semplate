@@ -1,30 +1,32 @@
 ## Overview
 
-
-
-This uses the markdown text directly as the value, instead of duplicating it in the semantic block, e.g;
+Markdown files produced by Semplate use the markdown languages comments to embed the semantic annotation. For instance in **GFM - **[GitHub Flavored Markdown](https://github.github.com/gfm/):
 
     <!--{{title:format="# %s"}}-->
     # The Republic
 
-The value of title is "The Republic"
+The value of the field title is "The Republic".
+
+The means of commenting is specified by having the following directive in the first line of the markdown file:
+
+<!--{{template.comment}}-->
 
 Values can be embedded, for instance:
 
-    <!--{{referenceTitle}}{{referenceLink}}-->
+    <!--{{reference.title}}{{reference.link}}-->
     * See [Plato's Republic](http://www.wikipedia.com/The_Republic)
 
 This uses the markdowns specific inline delimiters and is defined early in the markdown file
-using *(Note: the start and end delimiter need to be defined on the same line, only one delimiter pair can be defined per line)*:
+using the delimiter directives  *(Note: the start and end delimiter need to be defined on the same line, only one delimiter pair can be defined per line)*:
 
     <!-{@template.delimiter.start:"("}}{@template.delimiter.end:")"}}-->
     <!-{@template.delimiter.start:"["}}{@template.delimiter.end:"]"}}-->
 
 or less verbose as:
 
-    <!--{@template.delimiter.pair:"()"}}{@template.delimiter.pair:"[]"}}-->
+    <!--{@template.delimiter.pair:"()"}}-->
+    <!--{@template.delimiter.pair:"[]"}}-->
 
-*(Note: more than one pair can be defined on a line)*
 Alternatively a string can be used, for instance, a HTML tag
 
     <!--{@template.delimiter.start:"<span>"}}{@template.delimiter.end:"</span>"}}
@@ -32,7 +34,9 @@ Alternatively a string can be used, for instance, a HTML tag
 
 ## Formal syntax
 
- The formal syntax of the semantic markdown (as well as that used in the templates) is represented using [Extended Backus-Naur Form](https://www.w3.org/TR/REC-xml/#sec-notation).
+### Templates
+
+ The formal syntax of the semantic markdown in templates is represented using [Extended Backus-Naur Form](https://www.w3.org/TR/REC-xml/#sec-notation).
 
     template ::= markdown-comment-start comment-directive markdown-comment-end? directive* template-block*
 
@@ -47,6 +51,10 @@ Alternatively a string can be used, for instance, a HTML tag
     simple-field-name ::= character-sequence
 
     complex-field-name ::= (complex-field-name ".")? simple-field-name  
+
+### Generated Markdown Files
+
+The formal syntax of the semantic markdown is represented using [Extended Backus-Naur Form](https://www.w3.org/TR/REC-xml/#sec-notation).
 
     document ::= markdown-comment-start comment-directive markdown-comment-end? directive* block*
 

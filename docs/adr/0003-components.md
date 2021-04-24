@@ -1,7 +1,8 @@
 # Components
 
-* Status: Accepted
-* Date: 2021-02-18
+* Status: Rejected
+* Date: 2021-04-24
+* Superceded by ADR #0009
 
 ## Context and Problem Statement
 
