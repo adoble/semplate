@@ -2,7 +2,7 @@
 
 * Status: Rejected
 * Date: 2021-04-24
-* Superceded by ADR #0009
+* **Superceded** by ADR #0009
 
 ## Context and Problem Statement
 
