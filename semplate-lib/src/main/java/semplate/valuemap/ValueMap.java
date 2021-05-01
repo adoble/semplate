@@ -12,10 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-import semplate.ReadException;
 import semplate.annotations.Templatable;
 import semplate.annotations.TemplateField;
 
@@ -568,8 +566,10 @@ public class ValueMap {
 		return vm;
 	}
 
-    public static ValueMap from(Object dataObject) {
+    @SuppressWarnings("unchecked")
+	public static ValueMap from(Object dataObject) {
 		Object fieldValue;
+		
 		Iterable<Object> fieldIterable;
 
 		ValueMap fieldValueMap = new ValueMap();
