@@ -37,7 +37,7 @@ import java.net.URL;
  * 
  *<br> - {@linkplain #read(Class, Path) read} - Read a previously generated markdown file and, using the semantic information in it, reconstruct a POJO. 
  * 
- *<br> - {@linkplain #update(Object, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
+ *<br> - {@linkplain #update(Object, Path, Path) update} - Read a previously generated markdown file and update it using data in a POJO. 
  * 
  * @author Andrew Doble
  *
@@ -203,13 +203,13 @@ public class Template  {
 
 
 	/**
-	 * Read a smarkdown file, updates it with the information in annotated {@code dataObject} and then outputs the 
+	 * Read a markdown file, updates it with the information in annotated {@code dataObject} and then outputs the 
 	 * results to a the specified output markdown file. 
 	 *
 	 * @param dataObject The object containing the new data
 	 * @param inputFile A path to the markdown file to be updated. 
 	 * @param outputFile A path to the markdown file to be updated
-	 * @throws ReadException 
+	 * @throws UpdateException 
 	 */
 	public void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
 		
@@ -223,10 +223,6 @@ public class Template  {
 		
 		ValueMap updatedValueMap = ValueMap.from(dataObject); 
 
-		// To be safe, copy the markdown file into a temp file in the same directory as the markdown files  before updating
-		//TODO don't handle the temporary file, use an explicit input and out file. This way any files handling can be left to the client 
-		//Path tempFile = copyToTempFile(outputFile);
-		
 		// Update the contents with the data in the value map 
 		List<String> blocks;
 		try (Stream<String> lines = Files.lines(inputFile, Charset.defaultCharset())) {
