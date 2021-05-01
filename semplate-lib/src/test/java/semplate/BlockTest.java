@@ -76,8 +76,6 @@ class BlockTest {
 		
 		ValueMap valueMap = block.toValueMap();
 		
-		System.out.println(valueMap);
-		
 		assertEquals("first", valueMap.getValue("field1").orElse(""));
 		assertEquals("third line", valueMap.getValue("field2").orElse(""));
 		

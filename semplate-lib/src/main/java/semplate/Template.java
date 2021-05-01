@@ -342,9 +342,7 @@ public class Template  {
 		try (Stream<String> lines = Files.lines(markupFilePath, Charset.defaultCharset())) {
 
 			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated 
-							  .peek(l -> System.out.println("Line: " + l))
 							  .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
-							  .peek(b -> System.out.println("Block: " + b))
 							  .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
 							  .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
 							  .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  

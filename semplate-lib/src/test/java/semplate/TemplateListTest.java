@@ -82,7 +82,6 @@ class TemplateListTest {
 		
 		assumeTrue(Files.exists(outputPath));
 		
-		Files.lines(outputPath, Charset.defaultCharset()).forEach(line -> System.out.print(line + "\n"));
 		
 		// Now read in the file and reconstruct the object 
 		Works rWorks = (Works) template.read(Works.class,  outputPath);

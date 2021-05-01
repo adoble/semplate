@@ -75,9 +75,7 @@ class DelimiterTest {
 		Pattern pattern = delimiter.pattern();
 		
 		Matcher matcher = pattern.matcher(text);
-		System.out.println(matcher);
-		// \([^\)]*\)
-		
+				
 		assertTrue(matcher.find(0));
 		String result = matcher.group();
 		assertEquals("(some text)", result);
@@ -93,8 +91,7 @@ class DelimiterTest {
         Pattern pattern = delimiter.pattern();
 		
 		Matcher matcher = pattern.matcher(text);
-		System.out.println(matcher);
-		
+				
 		assertTrue(matcher.find(0));
 		String result = matcher.group();
 		assertEquals("<span>{{year}}</span>", result);
