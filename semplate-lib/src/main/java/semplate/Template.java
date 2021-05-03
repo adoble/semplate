@@ -42,7 +42,7 @@ import java.net.URL;
  * @author Andrew Doble
  *
  */
-public class Template  {
+class Template  {
 	// Special fields are preceded with template
 	final private String templateCommentField = "{@template.comment}}"; //TODO make static
 	
@@ -55,10 +55,6 @@ public class Template  {
 	private Delimiter commentDelimiter;
 
 	private  Delimiters delimiters = new Delimiters();
-
-	public Template() {
-		
-	}
 
 
 	/**
@@ -142,7 +138,7 @@ public class Template  {
 	 * @param dataObject An object annotated with template field information
 	 * @param outputFilePath Path specifying the markdown file to be generated
 	 */
-	public void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
+	 void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
 
 		ValueMap valueMap = ValueMap.from(dataObject);
 
@@ -168,7 +164,7 @@ public class Template  {
 	
     /** TODO Document!
      *  Using Optional as return type so that do not need to create empty strings in the lambda function as this is forbidden. */		
-	public static Function <String, Optional<String>> chunk(){
+	static Function <String, Optional<String>> chunk(){
 		StringBuffer sb = new StringBuffer(80);  // This contains the state and is available for every element in the stream
 		return s -> { if (s.isBlank()) { Optional<String> r = Optional.of(sb.toString()); sb.setLength(0); return r;}
 		              else {sb.append(s).append('\n'); return  Optional.empty();
@@ -356,7 +352,7 @@ public class Template  {
 	 * 
 	 * @return The path to the markdown file operated on. 
 	 */
-	public Path getTemplatePath() {
+	Path getTemplatePath() {
 
 		return templatePath;
 	}
@@ -369,7 +365,7 @@ public class Template  {
 	 * 
 	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
 	 */
-	public Optional<String> getCommentStartDelimiter() {
+	Optional<String> getCommentStartDelimiter() {
 		//return delimiters.commentStartDelimiter();
 		return commentDelimiter.start();
 	}
@@ -382,7 +378,7 @@ public class Template  {
 	 * 
 	 * @return An <code>Optional</code> to the string used for ending comments in the markdown. 
 	 */
-	public Optional<String> getCommentEndDelimiter() {
+	Optional<String> getCommentEndDelimiter() {
 		return commentDelimiter.end();
 	}
 
