@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * @author Andrew Doble
  *
  */
-public class Delimiter {
+class Delimiter {
     private Optional<String> start = Optional.empty();
 	private Optional<String> end = Optional.empty();
 

@@ -16,7 +16,7 @@ import com.google.common.base.Joiner;
  * @author Andrew Doble
  *
  */
-public class Delimiters implements Iterable<Delimiter>, Cloneable {
+class Delimiters implements Iterable<Delimiter>, Cloneable {
 		
 	private ArrayList<Delimiter> delimiters = new ArrayList<>();
 	
