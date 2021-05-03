@@ -658,7 +658,7 @@ public class ValueMap {
      * 
      * <pre>
      * {@code List<String> list = Arrays.asList(new String[]{"Asimov", "Clark", "Pohl"});
-	 *  ValueMap valueMap = ValueMap.from(list.iterator());
+	 * ValueMap valueMap = ValueMap.from(list.iterator());
 	 * }
 	 * </pre>  
      *... will create a value map with the following entries:

@@ -3,7 +3,7 @@ package semplate;
 import java.io.IOException;
 import java.nio.file.Path;
 
-/** Writes semantically annotated markdown files using a data object containing the data and a template file.
+/** Writes a semantically annotated markdown file using a data object containing the data and a template file.
  * <p>
  * This class is never directly instantiated by clients. Instead the factory methods in {@link SemanticWriter} are used:
  * 
@@ -33,7 +33,7 @@ public class SemanticTemplateWriter {
 		this.template = template;
 	}
 
-	/** Generates a semantically annotated markdown file from a template
+	/** Generates a semantically annotated markdown file from a template.
 	 * 
 	 * 
 	 * @param outputFile Path specifying the markdown file to be generated

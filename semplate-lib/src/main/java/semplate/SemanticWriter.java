@@ -6,30 +6,27 @@ package semplate;
 import java.io.IOException;
 import java.nio.file.Path;
 
-/** Writes semantically annotated markdown files using a template or 
- * updates existing semantically annotated markdown files using new data.
+/** Updates existing semantically annotated markdown files using new data.
  * <p>
  * For instance, this statement:
  * <p>
- * <code>
- *     SemanticWriter.with(dataObject).usingTemplate(templateFilePath).write(outputFilePath);
- * </code>
- * <p>
- * ... writes a semantically annotated markdown file at <code>outputFilePath</code> using the 
- * data in <code>dataObject</code> and the template file at <code>templateFilePath</code>
- * 
- * 
- * Where as this statement: 
- * <p>
- * For instance, this statement:
- * <p>
- * <code>
+ * {@code
  *     SemanticWriter.with(dataObject).usingFile(markdownFilePath).write(outputFilePath);
- * </code>
+ * }
  * <p>
- * 
  * ... updates the semantically annotated markdown file at <code>markdownFilePath</code> using the 
  * data in <code>dataObject</code> and writes the updated file to <code>outputFilePath</code>
+ * 
+ * <p>
+ * Whereas this statement: 
+ * <p>
+ * {@code
+ *     SemanticWriter.with(dataObject).usingTemplate(templateFilePath).write(outputFilePath);
+ * }
+ * <p>
+ * ... writes a semantically annotated markdown file at <code>outputFilePath</code> using the 
+ * data in <code>dataObject</code> and the template file at <code>templateFilePath</code>.
+ * 
  * 
  * @author Andrew Doble
  *

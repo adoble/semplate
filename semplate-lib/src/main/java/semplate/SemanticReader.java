@@ -5,18 +5,18 @@ package semplate;
 
 import java.nio.file.Path;
 
-/** Reads semantically annotated markdown files and constructs data objects from then.
+/** Reads semantically annotated markdown files and constructs data objects from them.
  * <p>
  * For example, this expression:
- * <p>
- * <code>
- * DataObjectType dataObject = (DataObjectType ) SemanticReader.with(DataObjectType.class)
-				                                 .usingFile(sourceFilePath)
-				                                 .read();   
- * </code>
- * <p>
+ * <pre>
+ * {@code
+ * DataObjectType dataObject = (DataObjectType) SemanticReader.with(DataObjectType.class)
+				               .usingFile(sourceFilePath)
+				               .read();   
+ *}
+ * </pre>
  * ... reads the semantically annotated markdown file at <code>sourceFilePath</code> and creates the
- * data object <code>dataObject</code> using the data in the maarkdown file. 
+ * data object <code>dataObject</code> using the data in the markdown file. 
  * 
  * @author Andrew Doble
  *
@@ -24,6 +24,11 @@ import java.nio.file.Path;
 public class SemanticReader {
 	Class<?> dataObjectClass;
 	Path inputFile;
+	
+	/** Private constructor as object are created with the factory method 
+	 *  {@link #with(Class)}
+	 */
+	private SemanticReader() {}
 
 	
 	/** Specifies the class of the data object that is created when the semantically annotated markdown file is read. 
