@@ -5,7 +5,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-/** TODO
+/** Handles, in uniform way, field delimiters in semantically annotated markkdown files.
+ * 
  * @author Andrew Doble
  *
  */
@@ -52,7 +53,7 @@ public class Delimiter {
 		
 	}
 	
-	/* Returns a Pattern object that matches text between the two delimiters. The delimiters are included in the result. 
+	/** Returns a Pattern object that matches text between the two delimiters. The delimiters are included in the result. 
 	 *
 	 * The pattern object matches the following - simplified - regex (s is the start delimiter, 
 	 * e is the end delimiter )
@@ -67,7 +68,7 @@ public class Delimiter {
 	 * @returns A Pattern object 
 	 * 
 	 */
-	public Pattern pattern() {
+	 Pattern pattern() {
 		
 		String spec =  this.start().map(s -> Pattern.quote(s)).orElse("^") 
 				+ ".*?" 

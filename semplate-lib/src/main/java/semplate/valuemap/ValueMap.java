@@ -35,22 +35,23 @@ public class ValueMap {
 	 * Returns an optional value mapped to the specified field name. 
 	 * 
 	 * The field name  can be a simple field name, e.g.
+	 * <p>
 	 *   <code>
 	 *   assertEquals("Plato", (String) valueMap.getValue("author");
 	 *   </code>
-	 *   
-	 * or can be a compound field name such as:
+	 * <p> ...or can be a compound field name such as:
+	 * <p>
 	 *   <code>
 	 *   assertEquals("Plato", (String) getValue("works.2.author");
 	 *   </code> 
-	 * i.e. the author of the second element* in "works" list. 
-	 * * Strictly speaking this is the element that is mapped to 2 in the "works" list. 
-	 *
+	 * <p>i.e. the author of the second element* in "works" list. 
+	 *  Strictly speaking this is the element that is mapped to 2 in the "works" list. 
+	 * <p>
 	 * If the fieldname has not been specified for the value map or the value is of type ValueMap then 
 	 * an empty Optional is returned. 
 	 * 
 	 * @param fieldName The field name, either simple or compound. 
-	 * @return An Optional containing the value. 
+	 * @return An Optional containing the value referenced by the field name or empty if the value could not be found
 	 */
 	public Optional<Object> getValue(String fieldName) {
 		
@@ -78,19 +79,20 @@ public class ValueMap {
 	
 	/**  
 	 * Returns an optional value map that is mapped to the specified field name. 
-	 * 
+	 * <p>
 	 * The field name  can be a simple field name, e.g.
-	 * 
+	 * <p>
 	 *   <code>
 	 *   assertEquals(referenceValueMap, (String) valueMap.getValue("reference");
 	 *   </code>
-	 *   
-	 * or can be a compound field name such as:
+	 * <p>  
+	 * ...or can be a compound field name such as:
+	 * <p>
 	 *   <code>
 	 *   assertEquals(referenceValueMap, (String) getValue("works.2.reference");
 	 *   </code> 
-	 * i.e. the value map of the second element* in "works" list. 
-	 * 
+	 * <p>i.e. the value map of the second element* in "works" list. 
+	 * <p>
 	 * If the fieldname has not been specified for the value map or the value is <b>not of</b>  
 	 * type ValueMap then an empty Optional is returned. 
 	 * 
@@ -121,8 +123,7 @@ public class ValueMap {
 
 	/** 
 	 * Returns a list of ValueMaps that are subordinate to the specified fieldname.
-	 * 
-	 * 
+	 * <p>
 	 * For instance:
 	 * 
 	 * <blockquote>
@@ -137,11 +138,11 @@ public class ValueMap {
 	 * </pre>
 	 * </blockquote> 
 	 * 
-	 * will return the value maps emperors[0], emperors[1] and emperors[2].
-	 *    
+	 * will return the value maps <code>emperors[0]</code>, <code>emperors[1]</code> and <code>emperors[2]</code>.
+	 * <p>   
 	 * As such the method can be viewed as returning a list of the value maps that have been added to 
 	 * a field. 
-	 * 
+	 * <p>
 	 * Graphically, with <i>VM</i> being a value map, <i>v</i> being a simple value and <i>f</i> a field name, an example 
 	 * value map structure can be represented as:
 	 * 
@@ -196,7 +197,7 @@ public class ValueMap {
 	}
 	
 	/**  Returns a list of all value maps contained in the fields of this value map
-	 * 
+	 * <p>
      * Graphically, with VM being a value map, v being a simple value and f a field name, an example 
 	 * value map structure can be represented as:
 	 * 
@@ -292,25 +293,29 @@ public class ValueMap {
 	}
 	
 	/**  Add a value map to a list of value maps associated with a field.
-	 * 		
-	 * 
+	 * 	<p>	
 	 * For instance:
-	 * <code>
+	 * 
+	 * <pre>
 	 *   ValueMap vm = new ValueMap();
 	 *   vm.add("emperors", "0", emperorValueMap[0]);
 	 *   vm.add("emperors", "1", emperorValueMap[1]);
-	 * </code>  
+	 * </pre>
+	 *   
 	 * will:
-	 * a) create a new value map and map it to the field name "emperors"
-	 * b) in the new value map will create a field "0" and map the value map emperorValueMap[0] to it. 
-	 * c) in the new value map will create a field "1" and map the value map emperorValueMap[1] to it. 
-	 * 
+	 * <ol>
+	 * <li>create a new value map and map it to the field name "emperors"
+	 * <li>in the new value map will create a field "0" and map the value map emperorValueMap[0] to it. 
+	 * <li>in the new value map will create a field "1" and map the value map emperorValueMap[1] to it. 
+	 * </ol>
 	 * If the following line is then executed: 
+	 * <p>
 	 * <code>
 	 *   vm.add("emperors", "0", emperorValueMap[3]);
 	 * </code>  
+	 * <p>
 	 * then the field emperors.0 will be <strong>replaced</strong> by emperorValueMap[3]
-	 * 
+	 * <p>
 	 * Note: Although the parameter is called ordinalFieldName, the values do not need to be string 
 	 * representations of integers.
 	 * 
@@ -331,22 +336,24 @@ public class ValueMap {
 	}
 
 	/** Add a value map to a field by automatically giving an ordinal number as field name.
-	 * 
+	 * <p>
 	 * For instance:
-	 * <code>
+	 * <pre>
+	 * 
 	 *   ValueMap vm = new ValueMap();
 	 *   vm.add("emperors", emperorValueMap[0]);
 	 *   vm.add("emperors", emperorValueMap[1]);
-	 * </code>  
+	 * </pre>  
 	 * will:
-	 * a) will create a new value map and map it to the field name "emperors"
-	 * b) in the new value map will create a field "0" and map the value map emperorValueMap[0] to it. 
-	 * c) in the new value map will create a field "1" and map the value map emperorValueMap[1] to it. 
+	 * <ol>
+	 * <li>will create a new value map and map it to the field name "emperors"
+	 * <li>in the new value map will create a field "0" and map the value map emperorValueMap[0] to it. 
+	 * <li>in the new value map will create a field "1" and map the value map emperorValueMap[1] to it. 
+	 * </ol>
+	 * Subsequent calls to <code>add("emperors", ...)</code> will create new mappings with the field name acting as 
+	 * an incrementing ordinal number.<p>
 	 * 
-	 * Subsequent calls to add("emperors", ...) will create new mappings with the field name acting as 
-	 * an incrementing ordinal number.
-	 * 
-	 * @param fieldName The name of field to contain the ordinal mappings to the value maps.
+	 * @param fieldName The name of field to contain the ordinal mappings to the value maps
 	 * @param map The value map to be added 
 	 * @param startingOrdinal The ordinal number to start from if no mappings exist
 	 * @return This value map
@@ -365,6 +372,13 @@ public class ValueMap {
 		return this;
 	}
 	
+	/** Add a value map to the specified filed name at the ordinal index 0.
+	 * 
+	 * @see #add(String, ValueMap, int)
+	 * @param fieldName The name of field to contain the ordinal mappings to the value maps
+	 * @param map The value map to be added 
+	 * @return This value map
+	 */
 	public ValueMap add(String fieldName, ValueMap map) {
 		this.add(fieldName, map, 0); // Start a zero
 		
@@ -372,59 +386,50 @@ public class ValueMap {
 		
 	}
 	
-	/**
-	 * Merges a value map with this one. 
+	/** Merges a value map with this one.
+	 *  
 	 * @param other The value map to be merged with this. 
 	 * @return This value map (containing the merge)
 	 */
 	public ValueMap merge(ValueMap other) {
-		
+
 		for (String fieldName: other.fieldNames()) {
-			
+
 			// Overwrite or add the entries that do not have a value map
 			other.getValue(fieldName).ifPresent(obj -> this.put(fieldName, obj));
-			
-		    //other.getValueMap(fieldName).ifPresent(obj -> this.merge(obj));
-		    
-		    
-		    if (other.isValueMap(fieldName)) {
-		    	ValueMap otherFieldVM = other.getValueMap(fieldName).get();
-		    	
-		    	if (this.isValueMap((fieldName))) {
-		    		ValueMap thisFieldVM = this.getValueMap(fieldName).get();
-		    		thisFieldVM.merge(otherFieldVM);
-		    	} else {
-		    		//No field present
-		    		this.put(fieldName, otherFieldVM);
-		    	}
-		    	
-		    }
-				
-			
-			
-			// Add the ordinal value maps from the source to the target
-			//other.getValueMap(fieldName).ifPresent(vm -> this.add(fieldName, vm));
-			
-//			ValueMap ordinalValueMap = other.getValueMap(fieldName).orElse(ValueMap.empty());
-//			for (String ordinalFieldName : ordinalValueMap.fieldNames()) {
-//				ordinalValueMap.getValueMap(ordinalFieldName).ifPresent(vm -> this.add(fieldName, vm));
-//			}
+
+			//other.getValueMap(fieldName).ifPresent(obj -> this.merge(obj));
+
+
+			if (other.isValueMap(fieldName)) {
+				ValueMap otherFieldVM = other.getValueMap(fieldName).get();
+
+				if (this.isValueMap((fieldName))) {
+					ValueMap thisFieldVM = this.getValueMap(fieldName).get();
+					thisFieldVM.merge(otherFieldVM);
+				} else {
+					//No field present
+					this.put(fieldName, otherFieldVM);
+				}
+
+			}
+
 		}
-		
+
 		return this;
-			
+
 	}
 	
-	/**
-	 * Creates a mutable empty value map.
+	/** Creates a mutable empty value map.
+	 * 
 	 * @return  A mutable empty value map.
 	 */
 	public static ValueMap empty() {
 		return new ValueMap();
 	}
 	
-	/**
-	 * Generates a set with the field names on this value map 
+	/** Generates a set with the field names on this value map 
+	 * 
 	 * @return A set with the field names 
 	 */
 	public Set<String> fieldNames() {
@@ -432,24 +437,26 @@ public class ValueMap {
 	}
 	
 
-	/**
-	 * Test if this value map is empty.
+	/** Test if this value map is empty.
+	 * 
 	 * @return True if this value map is empty.
 	 */
 	public boolean isEmpty() {
 		return (valueMap.size() == 0);
 	}
 	
-	/**
-	 * Test if the specified field name maps to a value map.
+	/** Test if the specified field name maps to a value map.
+	 * 
+	 * @param fieldName The field name
 	 * @return True if the specified field name maps to a value map.
 	 */
 	public boolean isValueMap(String fieldName) {
 		return getValueMap(fieldName).isPresent();
 	}
 
-	/**
-	 * Test if the specified field name maps has a mapping to an value.
+	/** Test if the specified field name maps has a mapping to an value.
+	 * 
+	 * @param fieldName The field name
 	 * @return True if the specified field name maps has a mapping to an value.
 	 */
 	public boolean containsField(String fieldName) {
@@ -473,6 +480,8 @@ public class ValueMap {
 	
 	/**
 	 * Returns a non-empty string representation of this ValueMaP suitable for debugging.
+	 * 
+	 * @return A string representation
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
@@ -488,17 +497,17 @@ public class ValueMap {
    
 	/** 
 	 * Returns a value map containing one value. 
-	 * 
+	 * <p>
 	 * If the compound field name list contains a single element (e.g "nomen"), and the value is "Augustus", 
 	 * then a value map is created with one field with one value, i.e. 
-	 *      (nomen="Augustus")
+	 * <pre>     (nomen="Augustus")  </pre>
      *
      * If the compound field name list contains a more then one element then a set of nested value maps 
      * are created, with the last field name in the list being the field name of the specified value,#
-     * e.g. with a field name list of elements (emperors, 3, nomen) and the value of "Augustus", the 
+     * e.g. with a field name list of elements <code>(emperors, 3, nomen)</code> and the value of "Augustus", the 
      * following nested value ap structure is created: 
      * 
-     *      (emperors=(3=(nomen="Augustus")))
+     * <pre>     (emperors=(3=(nomen="Augustus"))) </pre>
 	 * 
 	 * @param compoundFieldName An ordered list of fieldnames. 
 	 * @param value The value of the specified field
@@ -527,23 +536,28 @@ public class ValueMap {
 
 	/** 
 	 * Returns a value map containing one value constructed from the specified nameValuePair string. 
-	 * 
+	 * <p>
 	 * Examples: 
+	 * <p>
 	 * If the name value pair parameter contains a single element (e.g "nomen"), and the value is "Augustus", then the name value pair 
 	 * is specified using the following string:
+	 * <pre>
 	 *     "nomen=Augustus"
+	 * </pre>
 	 * This created a value map with one name value pair: 
+	 * <pre>
 	 *     (nomen="Augustus")
+	 * </pre>
      *
      * If the name value pair parameter contains a list of fieldnames seperated with dot characters, then a set of nested value maps 
      * are created, with the last field name being the field name of the specified value, e.g. the string:
-     * 
-     *      "emperors.3.nomen=Augustus"
-     *   
+     * <pre>
+     *   "emperors.3.nomen=Augustus"
+     * </pre>  
      * results in a nested value map being created, i.e. 
-     * 
+     * <pre>
      *      (emperors=(3=(nomen="Augustus")))
-	 * 
+	 * </pre>
 	 * @param nameValuePair A name value pair consisting of a dot separated list of bested field names, an equals sign and 
 	 * then the value in quotes.
 	 * @return A ValueMap containing the specified element
@@ -566,6 +580,11 @@ public class ValueMap {
 		return vm;
 	}
 
+    /** Creates a value map from the specified data object.
+     * 
+     * @param dataObject An object whose fields are annotated with @{@link TemplateField}
+     * @return The created value map
+     */
     @SuppressWarnings("unchecked")
 	public static ValueMap from(Object dataObject) {
 		Object fieldValue;
@@ -633,6 +652,27 @@ public class ValueMap {
 		return fieldValueMap;
     }
     
+    /**  Creates a value map from the specified iterator.
+     * <p>
+     * For instance:
+     * 
+     * <pre>
+     * {@code List<String> list = Arrays.asList(new String[]{"Asimov", "Clark", "Pohl"});
+	 *  ValueMap valueMap = ValueMap.from(list.iterator());
+	 * }
+	 * </pre>  
+     *... will create a value map with the following entries:
+     *<pre>
+     * field name       value
+     * ==========      =======
+     *     0           "Asimov"
+     *     1           "Clark"
+     *     2           "Pohl"
+     * </pre>
+     *  
+     * @param iterator An interator over objects
+     * @return This value map
+     */
     public static ValueMap from(Iterator<?> iterator) {
     	ValueMap fieldValueMap = new ValueMap();   
     	int index = 0;
@@ -655,6 +695,12 @@ public class ValueMap {
 
     }
     
+    /**Creates an object from the specified class using the data in this value map.
+     * 
+     * @param objectClass The class of the object to be created
+     * @return An object populated with the values in this value map
+     * @throws ConversionException If the value map cannot be converted to an object 
+     */
     public Object toObject(Class<?> objectClass) throws ConversionException {
 		Object dataObject;
 		
@@ -804,43 +850,37 @@ public class ValueMap {
 
 	}
 
-    /**
-     * @param dataObject
-     * @param field
-     * @param valueMap
-     * @throws IllegalArgumentException if the specified field is not of type #
-     */
     private void setListField (Object dataObject, Field field, ValueMap valueMap) throws ConversionException {
-    	  checkArgument(field.getType() == List.class, "The specified field name %s is not of type %s", field.getName(), List.class.getName());
-    	  
-    	 
-    	  //Class<?> fieldType = field.getType();
-          field.setAccessible(true);
+    	checkArgument(field.getType() == List.class, "The specified field name %s is not of type %s", field.getName(), List.class.getName());
 
-    	  // Determine the type of list object in the data object ?
-    	  Type genericType = field.getGenericType();
-    	 
-    	  // Extract the parameterised type name
-    	  String paraTypeName = Splitter.on('<')
-    			  .trimResults(CharMatcher.is('>'))
-    			  .omitEmptyStrings()
-    			  .splitToList(genericType.getTypeName()).get(1);
-    	  	 
-    	 // Now construct data objects for that type and fill them out with the data in the value map entries.  
-    	 List<ValueMap> vmList = valueMap.getValueMaps();
-    	 for (ValueMap vmEntry : vmList) {
+
+    	//Class<?> fieldType = field.getType();
+    	field.setAccessible(true);
+
+    	// Determine the type of list object in the data object ?
+    	Type genericType = field.getGenericType();
+
+    	// Extract the parameterised type name
+    	String paraTypeName = Splitter.on('<')
+    			.trimResults(CharMatcher.is('>'))
+    			.omitEmptyStrings()
+    			.splitToList(genericType.getTypeName()).get(1);
+
+    	// Now construct data objects for that type and fill them out with the data in the value map entries.  
+    	List<ValueMap> vmList = valueMap.getValueMaps();
+    	for (ValueMap vmEntry : vmList) {
     		try {
     			Class<?> paramClass = Class.forName(paraTypeName); //TODO move outside try block
-    			
+
     			// Now construct a data object of paramClass from the value map 
     			Object listEntryDataObject = vmEntry.toObject(paramClass);
-    			
+
     			@SuppressWarnings("unchecked")
     			List<Object> dataObjectList = (List<Object>)field.get(dataObject);
-    			
-    		    dataObjectList.add(listEntryDataObject)	;	
-    	
-    		
+
+    			dataObjectList.add(listEntryDataObject)	;	
+
+
     		} catch (ConversionException e) {
     			//Pass this exception up the calling stack 
     			throw e;
@@ -848,11 +888,8 @@ public class ValueMap {
     			String msg = "Unable to set field " + field.getName();
     			throw new ConversionException(msg, e);
     		} 
-    		
-    	}
-    	
 
-    	  
-      }
+    	}
+    }
 
 }

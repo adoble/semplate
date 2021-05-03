@@ -66,7 +66,7 @@ public class Template  {
 	 *
 	 * @param templatePath A path to the template file.
 	 */
-	public void config(Path templatePath) throws IOException, ReadException {
+	void config(Path templatePath) throws IOException, ReadException {
 		this.templatePath = templatePath;
 
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
@@ -92,7 +92,7 @@ public class Template  {
 	 * Specifies the name of a template file used for generating the markdown files.
      * @param templateFileName The name of the template file
 	 */
-	public void config(String templateFileName) throws IOException, ReadException {
+	void config(String templateFileName) throws IOException, ReadException {
 		this.config(Path.of(templateFileName));
 
 	}
@@ -185,9 +185,9 @@ public class Template  {
 	 *
 	 * @param objectClass  The class of the data object to be generated.
 	 * @param markupFilePath The path of the markdown file.
-	 * @return
+	 * @return  The object created from the data in the markdown file.
 	 */
-	public Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
+	 Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
 		Object dataObject = null;
 	
 		ValueMap valueMap = readValueMap(markupFilePath);
@@ -211,7 +211,7 @@ public class Template  {
 	 * @param outputFile A path to the markdown file to be updated
 	 * @throws UpdateException 
 	 */
-	public void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
+	void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
 		
 		// Determine delimiters in the markdown file to be updated. 
 		try {

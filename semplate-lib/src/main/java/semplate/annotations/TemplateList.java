@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RUNTIME)
 @Target(FIELD)
+@Deprecated
 public @interface TemplateList {
 
 }
