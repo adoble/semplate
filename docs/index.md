@@ -1,5 +1,4 @@
-# Semplate
 
-## Contents
+# Contents
 
-- [Architectural Decision Records](adr)
+- [Architectural Decision Records](./adr/toc.md)
