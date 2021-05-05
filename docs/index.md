@@ -2,4 +2,4 @@
 
 ## Contents
 
-- [Architectureal Decision Records](adr)
+- [Architectural Decision Records](adr)
