@@ -1,0 +1,23 @@
+template = comment-directive *directive *template-block
+
+comment-directive = markdown-comment-start "{@template.comment}}" [markdown-comment-end] newline
+
+template-block = template-text newline 1*newline
+
+template-text = [character-sequence] [template-field-spec] [template-text]
+
+template-field-spec = "{{" field-name "}}"
+
+field-name = simple-field-name / complex-field-name
+
+simple-field-name = character-sequence
+
+iterable-field-name = "*"
+
+complex-field-name = [(complex-field-name ".")] (simple-field-name / iterable-field-name)
+
+directive = markdown-comment-start "{@" directive-name [("=" directive-value)] "}}" [markdown-comment-end] newline
+
+character-sequence = 1*VCHAR
+
+newline = LF / CRLF ; OS dependent

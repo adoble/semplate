@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+
+ <head>
+  <style>
+      rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }
+      rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }
+      path { fill: transparent; }
+      text.literal { font-family: monospace; }
+      a { fill: blue; }
+      a:hover rect { fill: aliceblue; }
+      h2 { font-size: inherit; font-weight: inherit; }
+      line.ellipsis { stroke-dasharray: 1 3.5; }
+      tspan.hex { font-family: monospace; font-size: 90%; }
+      path.arrow { fill: black; }
+      svg { margin-left: 30px; }
+  </style>
+ </head>
+
+ <body>
+ <section>
+  <h2><a name='semantically-annotated-markdown'>semantically-annotated-markdown:</a></h2>
+  <svg height='65' width='510'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M500.5 14 v12 m 4 0 v-12' class='station'/>
+    <a href='#comment-directive'>
+    <rect x='30' y='10' height='20' width='150' rx='0' ry='0' class='rule'/>
+    <text x='105' y='25' text-anchor='middle' class='rule'>comment-directive</text>
+    </a>
+    <a href='#directive'>
+    <rect x='230' y='40' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='275' y='55' text-anchor='middle' class='rule'>directive</text>
+    </a>
+    <a href='#block'>
+    <rect x='400' y='40' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='425' y='55' text-anchor='middle' class='rule'>block</text>
+    </a>
+    <path d='M380 30 v10 q0 10 10 10 h10'/>
+    <path d='M450 50 h10 q10 0 10 -10'/>
+    <path d='M460 20 q10 0 10 10 v10'/>
+    <path d='M380 30 q0 -10 10 -10'/>
+    <path d='M210 30 v10 q0 10 10 10 h10'/>
+    <path d='M320 50 h10 q10 0 10 -10'/>
+    <path d='M330 20 q10 0 10 10 v10'/>
+    <path d='M210 30 q0 -10 10 -10'/>
+    <path d='M180 20 h320'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='comment-directive'>comment-directive:</a></h2>
+  <svg height='55' width='880'>
+    <path d='M5.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M870.5 34 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='30' height='20' width='210' rx='0' ry='0' class='rule'/>
+    <text x='135' y='45' text-anchor='middle' class='rule'>markdown-comment-start</text>
+    <rect x='260' y='30' height='20' width='230' rx='8' ry='8' class='literal'/>
+    <text x='375' y='45' text-anchor='middle' class='literal'>{@template.comment}}</text>
+    <text x='475' y='45' text-anchor='left' class='ci'>&#x29f8;i</text>
+    <path d='M637 10 l-4 3 v-6 z' class='arrow'/>
+    <rect x='540' y='30' height='20' width='190' rx='0' ry='0' class='rule'/>
+    <text x='635' y='45' text-anchor='middle' class='rule'>markdown-comment-end</text>
+    <a href='#newline'>
+    <rect x='780' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='815' y='45' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <path d='M520 20 v10'/>
+    <path d='M750 30 q0 10 10 10'/>
+    <path d='M730 40 h50'/>
+    <path d='M510 40 q10 0 10 -10'/>
+    <path d='M520 20 q0 -10 10 -10 h210 q10 0 10 10 v10'/>
+    <path d='M490 40 h50'/>
+    <path d='M240 40 h20'/>
+    <path d='M850 40 h20'/>
+    <path d='M10 40 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='directive'>directive:</a></h2>
+  <svg height='55' width='1130'>
+    <path d='M5.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M1120.5 34 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='30' height='20' width='210' rx='0' ry='0' class='rule'/>
+    <text x='135' y='45' text-anchor='middle' class='rule'>markdown-comment-start</text>
+    <rect x='260' y='30' height='20' width='30' rx='8' ry='8' class='literal'/>
+    <text x='275' y='45' text-anchor='middle' class='literal'>{@</text>
+    <rect x='310' y='30' height='20' width='130' rx='0' ry='0' class='rule'/>
+    <text x='375' y='45' text-anchor='middle' class='rule'>directive-name</text>
+    <path d='M577 10 l-4 3 v-6 z' class='arrow'/>
+    <rect x='490' y='30' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='500' y='45' text-anchor='middle' class='literal'>=</text>
+    <rect x='530' y='30' height='20' width='130' rx='0' ry='0' class='rule'/>
+    <text x='595' y='45' text-anchor='middle' class='rule'>directive-value</text>
+    <rect x='710' y='30' height='20' width='30' rx='8' ry='8' class='literal'/>
+    <text x='725' y='45' text-anchor='middle' class='literal'>}}</text>
+    <path d='M887 10 l-4 3 v-6 z' class='arrow'/>
+    <rect x='790' y='30' height='20' width='190' rx='0' ry='0' class='rule'/>
+    <text x='885' y='45' text-anchor='middle' class='rule'>markdown-comment-end</text>
+    <a href='#newline'>
+    <rect x='1030' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='1065' y='45' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <path d='M770 20 v10'/>
+    <path d='M1000 30 q0 10 10 10'/>
+    <path d='M980 40 h50'/>
+    <path d='M760 40 q10 0 10 -10'/>
+    <path d='M770 20 q0 -10 10 -10 h210 q10 0 10 10 v10'/>
+    <path d='M740 40 h50'/>
+    <path d='M470 20 v10'/>
+    <path d='M680 30 q0 10 10 10'/>
+    <path d='M660 40 h50'/>
+    <path d='M510 40 h20'/>
+    <path d='M460 40 q10 0 10 -10'/>
+    <path d='M470 20 q0 -10 10 -10 h190 q10 0 10 10 v10'/>
+    <path d='M440 40 h50'/>
+    <path d='M290 40 h20'/>
+    <path d='M240 40 h20'/>
+    <path d='M1100 40 h20'/>
+    <path d='M10 40 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='block'>block:</a></h2>
+  <svg height='65' width='450'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M440.5 14 v12 m 4 0 v-12' class='station'/>
+    <a href='#semantic-block'>
+    <rect x='60' y='10' height='20' width='130' rx='0' ry='0' class='rule'/>
+    <text x='125' y='25' text-anchor='middle' class='rule'>semantic-block</text>
+    </a>
+    <a href='#newline'>
+    <rect x='210' y='10' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='245' y='25' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <a href='#text-value'>
+    <rect x='300' y='10' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='345' y='25' text-anchor='middle' class='rule'>text-value</text>
+    </a>
+    <a href='#text-block'>
+    <rect x='180' y='40' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='225' y='55' text-anchor='middle' class='rule'>text-block</text>
+    </a>
+    <path d='M410 30 v10'/>
+    <path d='M270 50 h130 q10 0 10 -10'/>
+    <path d='M40 40 q0 10 10 10 h130'/>
+    <path d='M410 30 q0 -10 10 -10'/>
+    <path d='M390 20 h50'/>
+    <path d='M280 20 h20'/>
+    <path d='M190 20 h20'/>
+    <path d='M30 20 q10 0 10 10 v10'/>
+    <path d='M10 20 h50'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='semantic-block'>semantic-block:</a></h2>
+  <svg height='55' width='740'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M730.5 14 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='10' height='20' width='210' rx='0' ry='0' class='rule'/>
+    <text x='135' y='25' text-anchor='middle' class='rule'>markdown-comment-start</text>
+    <a href='#field-spec'>
+    <rect x='290' y='10' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='335' y='25' text-anchor='middle' class='rule'>field-spec</text>
+    </a>
+    <path d='M333 40 l4 3 v-6 z' class='arrow'/>
+    <rect x='430' y='10' height='20' width='190' rx='0' ry='0' class='rule'/>
+    <text x='525' y='25' text-anchor='middle' class='rule'>markdown-comment-end</text>
+    <a href='#newline'>
+    <rect x='640' y='10' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='675' y='25' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <path d='M620 20 h20'/>
+    <path d='M270 30 v0 q0 10 10 10 h110 q10 0 10 -10 v0'/>
+    <path d='M390 20 q10 0 10 10'/>
+    <path d='M380 20 h50'/>
+    <path d='M270 30 q0 -10 10 -10'/>
+    <path d='M240 20 h50'/>
+    <path d='M710 20 h20'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='field-spec'>field-spec:</a></h2>
+  <svg height='35' width='420'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M410.5 14 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='10' height='20' width='30' rx='8' ry='8' class='literal'/>
+    <text x='45' y='25' text-anchor='middle' class='literal'>{{</text>
+    <a href='#field-name'>
+    <rect x='80' y='10' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='125' y='25' text-anchor='middle' class='rule'>field-name</text>
+    </a>
+    <rect x='190' y='10' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='200' y='25' text-anchor='middle' class='literal'>:</text>
+    <a href='#pattern-spec'>
+    <rect x='230' y='10' height='20' width='110' rx='0' ry='0' class='rule'/>
+    <text x='285' y='25' text-anchor='middle' class='rule'>pattern-spec</text>
+    </a>
+    <rect x='360' y='10' height='20' width='30' rx='8' ry='8' class='literal'/>
+    <text x='375' y='25' text-anchor='middle' class='literal'>}}</text>
+    <path d='M340 20 h20'/>
+    <path d='M210 20 h20'/>
+    <path d='M170 20 h20'/>
+    <path d='M60 20 h20'/>
+    <path d='M390 20 h20'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='pattern-spec'>pattern-spec:</a></h2>
+  <svg height='95' width='270'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M260.5 14 v12 m 4 0 v-12' class='station'/>
+    <a href='#string-pattern-spec'>
+    <rect x='60' y='10' height='20' width='150' rx='0' ry='0' class='rule'/>
+    <text x='135' y='25' text-anchor='middle' class='rule'>string-pattern-spec</text>
+    </a>
+    <a href='#date-pattern-spec'>
+    <rect x='60' y='40' height='20' width='150' rx='0' ry='0' class='rule'/>
+    <text x='135' y='55' text-anchor='middle' class='rule'>date-pattern-spec</text>
+    </a>
+    <a href='#url-pattern-spec'>
+    <rect x='70' y='70' height='20' width='130' rx='0' ry='0' class='rule'/>
+    <text x='135' y='85' text-anchor='middle' class='rule'>url-pattern-spec</text>
+    </a>
+    <path d='M230 30 v40'/>
+    <path d='M200 80 h20 q10 0 10 -10'/>
+    <path d='M40 70 q0 10 10 10 h20'/>
+    <path d='M210 50 h10 q10 0 10 -10'/>
+    <path d='M40 40 q0 10 10 10 h10'/>
+    <path d='M230 30 q0 -10 10 -10'/>
+    <path d='M210 20 h50'/>
+    <path d='M30 20 q10 0 10 10 v40'/>
+    <path d='M10 20 h50'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='string-pattern-spec'>string-pattern-spec:</a></h2>
+  <svg height='55' width='800'>
+    <path d='M5.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M790.5 34 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='30' height='20' width='110' rx='8' ry='8' class='literal'/>
+    <text x='85' y='45' text-anchor='middle' class='literal'>pattern=</text>
+    <text x='125' y='45' text-anchor='left' class='ci'>&#x29f8;i</text>
+    <rect x='160' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='195' y='45' text-anchor='middle' class='rule'>DQUOTE</text>
+    <path d='M337 10 l-4 3 v-6 z' class='arrow'/>
+    <rect x='280' y='30' height='20' width='110' rx='0' ry='0' class='rule'/>
+    <text x='335' y='45' text-anchor='middle' class='rule'>pre-pattern</text>
+    <rect x='440' y='30' height='20' width='50' rx='8' ry='8' class='literal'/>
+    <text x='465' y='45' text-anchor='middle' class='literal'>%s</text>
+    <text x='475' y='45' text-anchor='left' class='ci'>&#x29f8;i</text>
+    <path d='M597 10 l-4 3 v-6 z' class='arrow'/>
+    <rect x='540' y='30' height='20' width='110' rx='0' ry='0' class='rule'/>
+    <text x='595' y='45' text-anchor='middle' class='rule'>post-pattern</text>
+    <rect x='700' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='735' y='45' text-anchor='middle' class='rule'>DQUOTE</text>
+    <path d='M520 20 v10'/>
+    <path d='M670 30 q0 10 10 10'/>
+    <path d='M650 40 h50'/>
+    <path d='M510 40 q10 0 10 -10'/>
+    <path d='M520 20 q0 -10 10 -10 h130 q10 0 10 10 v10'/>
+    <path d='M490 40 h50'/>
+    <path d='M260 20 v10'/>
+    <path d='M410 30 q0 10 10 10'/>
+    <path d='M390 40 h50'/>
+    <path d='M250 40 q10 0 10 -10'/>
+    <path d='M260 20 q0 -10 10 -10 h130 q10 0 10 10 v10'/>
+    <path d='M230 40 h50'/>
+    <path d='M140 40 h20'/>
+    <path d='M770 40 h20'/>
+    <path d='M10 40 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='url-pattern-spec'>url-pattern-spec:</a></h2>
+  <svg height='35' width='120'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M110.5 14 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='10' height='20' width='60' rx='8' ry='8' class='literal'/>
+    <text x='60' y='25' text-anchor='middle' class='literal'>url</text>
+    <text x='75' y='25' text-anchor='left' class='ci'>&#x29f8;i</text>
+    <path d='M90 20 h20'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='date-pattern-spec'>date-pattern-spec:</a></h2>
+  <svg height='35' width='270'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M260.5 14 v12 m 4 0 v-12' class='station'/>
+    <rect x='30' y='10' height='20' width='80' rx='8' ry='8' class='literal'/>
+    <text x='70' y='25' text-anchor='middle' class='literal'>date=</text>
+    <text x='95' y='25' text-anchor='left' class='ci'>&#x29f8;i</text>
+    <rect x='130' y='10' height='20' width='110' rx='0' ry='0' class='rule'/>
+    <text x='185' y='25' text-anchor='middle' class='rule'>date-pattern</text>
+    <path d='M110 20 h20'/>
+    <path d='M240 20 h20'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='text-value'>text-value:</a></h2>
+  <svg height='75' width='930'>
+    <path d='M5.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M920.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M177 10 l-4 3 v-6 z' class='arrow'/>
+    <a href='#character-sequence'>
+    <rect x='90' y='30' height='20' width='170' rx='0' ry='0' class='rule'/>
+    <text x='175' y='45' text-anchor='middle' class='rule'>character-sequence</text>
+    </a>
+    <a href='#embedded-value'>
+    <rect x='310' y='30' height='20' width='130' rx='0' ry='0' class='rule'/>
+    <text x='375' y='45' text-anchor='middle' class='rule'>embedded-value</text>
+    </a>
+    <path d='M577 10 l-4 3 v-6 z' class='arrow'/>
+    <a href='#character-sequence'>
+    <rect x='490' y='30' height='20' width='170' rx='0' ry='0' class='rule'/>
+    <text x='575' y='45' text-anchor='middle' class='rule'>character-sequence</text>
+    </a>
+    <path d='M373 60 l4 3 v-6 z' class='arrow'/>
+    <a href='#newline'>
+    <rect x='740' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='775' y='45' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <a href='#newline'>
+    <rect x='830' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='865' y='45' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <path d='M810 40 h20'/>
+    <path d='M40 50 v0 q0 10 10 10 h650 q10 0 10 -10 v0'/>
+    <path d='M700 40 q10 0 10 10'/>
+    <path d='M470 20 v10'/>
+    <path d='M680 30 q0 10 10 10'/>
+    <path d='M660 40 h80'/>
+    <path d='M460 40 q10 0 10 -10'/>
+    <path d='M470 20 q0 -10 10 -10 h190 q10 0 10 10 v10'/>
+    <path d='M440 40 h50'/>
+    <path d='M70 20 v10'/>
+    <path d='M280 30 q0 10 10 10'/>
+    <path d='M260 40 h50'/>
+    <path d='M60 40 q10 0 10 -10'/>
+    <path d='M70 20 q0 -10 10 -10 h190 q10 0 10 10 v10'/>
+    <path d='M40 50 q0 -10 10 -10'/>
+    <path d='M900 40 h20'/>
+    <path d='M10 40 h80'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='text-block'>text-block:</a></h2>
+  <svg height='35' width='410'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M400.5 14 v12 m 4 0 v-12' class='station'/>
+    <a href='#character-sequence'>
+    <rect x='30' y='10' height='20' width='170' rx='0' ry='0' class='rule'/>
+    <text x='115' y='25' text-anchor='middle' class='rule'>character-sequence</text>
+    </a>
+    <a href='#newline'>
+    <rect x='220' y='10' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='255' y='25' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <a href='#newline'>
+    <rect x='310' y='10' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='345' y='25' text-anchor='middle' class='rule'>newline</text>
+    </a>
+    <path d='M290 20 h20'/>
+    <path d='M200 20 h20'/>
+    <path d='M380 20 h20'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='embedded-value'>embedded-value:</a></h2>
+  <svg height='95' width='510'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M500.5 14 v12 m 4 0 v-12' class='station'/>
+    <rect x='60' y='10' height='20' width='110' rx='0' ry='0' class='rule'/>
+    <text x='115' y='25' text-anchor='middle' class='rule'>pre-pattern</text>
+    <rect x='190' y='10' height='20' width='130' rx='0' ry='0' class='rule'/>
+    <text x='255' y='25' text-anchor='middle' class='rule'>semantic-value</text>
+    <rect x='340' y='10' height='20' width='110' rx='0' ry='0' class='rule'/>
+    <text x='395' y='25' text-anchor='middle' class='rule'>post-pattern</text>
+    <rect x='210' y='40' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='255' y='55' text-anchor='middle' class='rule'>url-value</text>
+    <rect x='210' y='70' height='20' width='90' rx='0' ry='0' class='rule'/>
+    <text x='255' y='85' text-anchor='middle' class='rule'>date-value</text>
+    <path d='M470 30 v40'/>
+    <path d='M300 80 h160 q10 0 10 -10'/>
+    <path d='M40 70 q0 10 10 10 h160'/>
+    <path d='M300 50 h160 q10 0 10 -10'/>
+    <path d='M40 40 q0 10 10 10 h160'/>
+    <path d='M470 30 q0 -10 10 -10'/>
+    <path d='M450 20 h50'/>
+    <path d='M320 20 h20'/>
+    <path d='M170 20 h20'/>
+    <path d='M30 20 q10 0 10 10 v40'/>
+    <path d='M10 20 h50'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='field-name'>field-name:</a></h2>
+  <svg height='65' width='290'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M280.5 14 v12 m 4 0 v-12' class='station'/>
+    <a href='#simple-field-name'>
+    <rect x='70' y='10' height='20' width='150' rx='0' ry='0' class='rule'/>
+    <text x='145' y='25' text-anchor='middle' class='rule'>simple-field-name</text>
+    </a>
+    <a href='#complex-field-name'>
+    <rect x='60' y='40' height='20' width='170' rx='0' ry='0' class='rule'/>
+    <text x='145' y='55' text-anchor='middle' class='rule'>complex-field-name</text>
+    </a>
+    <path d='M250 30 v10'/>
+    <path d='M230 50 h10 q10 0 10 -10'/>
+    <path d='M40 40 q0 10 10 10 h10'/>
+    <path d='M250 30 q0 -10 10 -10'/>
+    <path d='M220 20 h60'/>
+    <path d='M30 20 q10 0 10 10 v10'/>
+    <path d='M10 20 h60'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='simple-field-name'>simple-field-name:</a></h2>
+  <svg height='35' width='230'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M220.5 14 v12 m 4 0 v-12' class='station'/>
+    <a href='#character-sequence'>
+    <rect x='30' y='10' height='20' width='170' rx='0' ry='0' class='rule'/>
+    <text x='115' y='25' text-anchor='middle' class='rule'>character-sequence</text>
+    </a>
+    <path d='M200 20 h20'/>
+    <path d='M10 20 h20'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='complex-field-name'>complex-field-name:</a></h2>
+  <svg height='55' width='500'>
+    <path d='M5.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M490.5 34 v12 m 4 0 v-12' class='station'/>
+    <path d='M167 10 l-4 3 v-6 z' class='arrow'/>
+    <a href='#complex-field-name'>
+    <rect x='60' y='30' height='20' width='170' rx='0' ry='0' class='rule'/>
+    <text x='145' y='45' text-anchor='middle' class='rule'>complex-field-name</text>
+    </a>
+    <rect x='250' y='30' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='260' y='45' text-anchor='middle' class='literal'>.</text>
+    <a href='#simple-field-name'>
+    <rect x='320' y='30' height='20' width='150' rx='0' ry='0' class='rule'/>
+    <text x='395' y='45' text-anchor='middle' class='rule'>simple-field-name</text>
+    </a>
+    <path d='M40 20 v10'/>
+    <path d='M290 30 q0 10 10 10'/>
+    <path d='M270 40 h50'/>
+    <path d='M230 40 h20'/>
+    <path d='M30 40 q10 0 10 -10'/>
+    <path d='M40 20 q0 -10 10 -10 h230 q10 0 10 10 v10'/>
+    <path d='M470 40 h20'/>
+    <path d='M10 40 h50'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='character-sequence'>character-sequence:</a></h2>
+  <svg height='55' width='190'>
+    <path d='M5.5 4 v12 m 4 0 v-12' class='station'/>
+    <path d='M180.5 4 v12 m 4 0 v-12' class='station'/>
+    <rect x='60' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='95' y='45' text-anchor='middle' class='rule'>VCHAR</text>
+    <path d='M40 20 v10 q0 10 10 10 h10'/>
+    <path d='M130 40 h10 q10 0 10 -10'/>
+    <path d='M140 10 q10 0 10 10 v10'/>
+    <path d='M40 20 q0 -10 10 -10'/>
+    <path d='M10 10 h170'/>
+  </svg>
+ </section>
+
+ <section>
+  <h2><a name='newline'>newline:</a></h2>
+  <svg height='65' width='170'>
+    <path d='M5.5 14 v12 m 4 0 v-12' class='station'/>
+    <path d='M160.5 14 v12 m 4 0 v-12' class='station'/>
+    <rect x='70' y='10' height='20' width='30' rx='0' ry='0' class='rule'/>
+    <text x='85' y='25' text-anchor='middle' class='rule'>LF</text>
+    <rect x='60' y='40' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='85' y='55' text-anchor='middle' class='rule'>CRLF</text>
+    <path d='M130 30 v10'/>
+    <path d='M110 50 h10 q10 0 10 -10'/>
+    <path d='M40 40 q0 10 10 10 h10'/>
+    <path d='M130 30 q0 -10 10 -10'/>
+    <path d='M100 20 h60'/>
+    <path d='M30 20 q10 0 10 10 v10'/>
+    <path d='M10 20 h60'/>
+  </svg>
+ </section>
+
+ </body>
+</html>

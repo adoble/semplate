@@ -1,0 +1,36 @@
+
+semantically-annotated-markdown = comment-directive  *directive  *block
+
+comment-directive = markdown-comment-start "{@template.comment}}" [markdown-comment-end] newline
+
+directive = markdown-comment-start "{@" directive-name [("=" directive-value)] "}}" [markdown-comment-end] newline
+
+block = (semantic-block newline text-value) / (text-block)
+
+semantic-block =  markdown-comment-start 1*field-spec markdown-comment-end newline
+
+field-spec = "{{" field-name  (":" pattern-spec)  "}}"
+
+pattern-spec = string-pattern-spec / date-pattern-spec / url-pattern-spec
+
+string-pattern-spec = "pattern=" DQUOTE [pre-pattern] "%s" [post-pattern] DQUOTE
+
+url-pattern-spec = "URL"
+
+date-pattern-spec = "date=" date-pattern
+
+text-value = 1*([character-sequence] embedded-value [character-sequence]) newline newline
+
+text-block = character-sequence newline newline
+
+embedded-value = pre-pattern semantic-value post-pattern / url-value / date-value
+
+field-name = simple-field-name / complex-field-name
+
+simple-field-name = character-sequence
+
+complex-field-name = [(complex-field-name ".")] simple-field-name
+
+character-sequence = *VCHAR
+
+newline = LF / CRLF ; OS dependent
