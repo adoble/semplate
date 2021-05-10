@@ -4,7 +4,7 @@
 
 A simple template using GFM could look like:
 
-
+<code>
     <!--{@template.comment}}-->
 
     # {{title}}
@@ -12,6 +12,7 @@ A simple template using GFM could look like:
     By: {{author}}
 
     Some boilerplate text
+</code>
 
 
 The first line specifies how comments are written in the markdown you are using.
