@@ -134,9 +134,9 @@ As fields can be embedded in text, some means of identifying where it is in the 
 <!-- {% raw %} -->
 ```markdown
   <!--{{template.comment}}-->
-  <!--{{template.delimiter.pair:"[]"}}
-  <!--{{template.delimiter.pair:"()"}}
-  <!--{{template.delimiter.start:": Notes "}}
+  <!--{{template.delimiter.pair:"[]"}}-->
+  <!--{{template.delimiter.pair:"()"}}-->
+  <!--{{template.delimiter.start:": Notes "}}-->
 
   # Sources
   - [{{sources.*.title}}]({{sources.*.link}}) ; Notes {{sources.*.comment}}
