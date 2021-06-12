@@ -62,5 +62,15 @@ public int getId() {
 	public int numberReferences() {
 		return references.size();
 	}
+	
+	public void removeReference(int index) {
+		references.remove(index);
+	}
+
+
+	@Override
+	public String toString() {
+		return "Works [id=" + id + ", title=" + title + ", author=" + author + ", references=" + references + "]";
+	}
 
 }
