@@ -114,8 +114,9 @@ class TestSemanticWriter {
 		SemanticWriter.with(works).usingTemplate(templateFile).write(outputFile);
 		
 		
-		String actualContents = Files.lines(outputFile).collect(Collectors.joining("\n"));
-		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining("\n"));
+		String actualContents = Files.lines(outputFile).collect(Collectors.joining());
+		
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
 					
 		assertEquals(expectedContents, actualContents);
 	}

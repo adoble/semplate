@@ -177,7 +177,7 @@ class TemplateGenerateTest {
 		
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);
 		
-		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining("\n"));
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining("\n")) + "\n";
 					
 		assertEquals(expectedContents, actualContents);
 	}

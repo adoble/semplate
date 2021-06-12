@@ -10,3 +10,5 @@ Test where the top level object is a list of strings
 
 <!--{{*:pattern="* %s"}}-->
 * Number Three
+
+<!--{{*:template="* {{*}}"}}-->

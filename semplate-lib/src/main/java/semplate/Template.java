@@ -50,13 +50,14 @@ class Template  {
 	
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  
 	
+	final private static Pattern iteratedFieldPattern = Pattern.compile("\\{\\{(?<fieldname>.*?\\*.*?)\\}\\}");
+	
 	private Path templatePath;
 
 	private Delimiter commentDelimiter;
 
 	private  Delimiters delimiters = new Delimiters();
-
-
+	
 	/**
 	 * Specifies the template to be used in generating the markdown files.
 	 *
@@ -79,11 +80,18 @@ class Template  {
 					            //.flatMap(delimiterList -> delimiterList.stream())    // Converts the list of delimiters to a stream of single delimiters
 				                .collect(Delimiters::new, Delimiters::add, Delimiters::add);
 		}
-
-
+		
+		// TODO remove this unused code
+		// Extract the fields that are iterated (identified with a "*" in the field name)
+//		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
+//			iteratedFields = stream
+//					.filter(iteratedFieldPattern.asPredicate())    // TODO is this strict enough?
+//					.flatMap(line -> extractIteratedFieldNames(line))   
+//					.collect(Collectors.toList());
+//		}
+	
 	}
-
-
+	
 	/**
 	 * Specifies the name of a template file used for generating the markdown files.
      * @param templateFileName The name of the template file
@@ -131,6 +139,24 @@ class Template  {
 	
 
 
+	private Stream<String> extractIteratedFieldNames(String line) {
+		 boolean  lineContainsIteratedField = false;
+		
+		 Stream.Builder<String> streamBuilder = Stream.builder();
+		 
+		 Matcher matcher = iteratedFieldPattern.matcher(line);  
+		 while (matcher.find()) {
+			 streamBuilder.add(matcher.group("fieldname"));
+			
+			 lineContainsIteratedField = true;
+		 }
+		 
+		 checkState(lineContainsIteratedField, "The line passed does not contain an iterated field name.", line);
+		 
+		 return streamBuilder.build();
+		 
+	}
+
 	/**
 	 * Generates a markdown file as specified by the template file using the information
 	 * in the data object.
@@ -153,9 +179,8 @@ class Template  {
 					.map(optBlock -> optBlock.orElse(""))                              // Convert each block to a string
 					.flatMap(block -> templateExpand(block, valueMap))                 // Expand any lists
 					.map(line -> templateReplace(line, valueMap, expandedDelimiters))  // Replace the fields and add semantic information
-					//::iterator;
 					.collect(Collectors.toList());
-
+			
 			Files.write(outputFilePath, replacements);
 		}
 
@@ -213,7 +238,6 @@ class Template  {
 		try {
 			config(inputFile);
 		} catch (IOException | ReadException e) {
-			// TODO Auto-generated catch block
 			throw new UpdateException("Unable to read the file to be updated", e);
 		}
 		
@@ -224,7 +248,9 @@ class Template  {
 		try (Stream<String> lines = Files.lines(inputFile, Charset.defaultCharset())) {
 			blocks = Stream.concat(lines, Stream.of("\n"))    // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated
 					.map(chunk())  
-					.map(o -> o.orElse(""))
+					.map(o -> removeListElement(o))  // Remove any blocks that have list elements in them
+					.map(o -> o.orElse(""))  // Remove any empty blocks
+					.flatMap(chunk -> updateList(chunk, updatedValueMap))  
 					.map(chunk -> updateBlock(chunk, updatedValueMap))
 					.collect(Collectors.toList());
 			
@@ -243,7 +269,32 @@ class Template  {
 		
 	}
     
-	
+	// TODO don't use optional use a stream builder and flatmap()
+	private Optional<String> removeListElement(Optional<String> optBlock) {
+		String block = optBlock.orElse("");
+		
+		// Regular expression to find field names that are part of a iteration. i.e field names of the form 
+		//  a.D.b  
+		//  D.b
+		//  a.D
+		//  D
+		// Where a and b are field names made of non-numeric characters
+		// and D is a number. 
+		String regex = "\\{{2}"
+				+ "(?<fieldname>.*?\\.\\d+\\..*?|"
+				+ ".*?\\.\\d+|"
+				+ "\\d+\\..+?|"
+				+ "\\d+?)"
+				+ "\\:.*?\\}{2}";
+		
+		Matcher iteratedFieldNameMatcher = Pattern.compile(regex).matcher(block);
+		
+		if (iteratedFieldNameMatcher.find()) {
+			return Optional.empty();
+		}
+		return optBlock;
+		
+	}
 
 	private Delimiter extractCommentDelimiter(String line) {
         checkArgument(line.contains(templateCommentField), "The line \"%s\" does not contain a template comment field", line);
@@ -307,6 +358,58 @@ class Template  {
 		
 		return semanticBlock + '\n' +  replacementChunk;
 		
+	}
+	
+	/** If the chunk is a list directive then expends this into a list and stream each list entry
+	 * 
+	 * @param chunk  Contains some text 
+	 * @param valueMap The updated value map
+	 * @return A stream of either text blocks or added list entries
+	 */
+	private Stream<String> updateList(String chunk, ValueMap valueMap) {
+		Stream.Builder<String> streamBuilder = Stream.builder();
+
+		Pattern listDirectivePattern  = Pattern.compile("\\{@list.*:template=\\\"(?<template>.*?)\\\"\\}\\}"); 
+		Matcher listDirectiveMatcher = listDirectivePattern.matcher(chunk);
+
+		if (listDirectiveMatcher.find()) {
+			String template = listDirectiveMatcher.group("template");
+
+			streamBuilder.add(chunk);  // Add the list directive
+
+			// Get the fields specified in the template
+			Matcher templateFieldMatcher = fieldPattern.matcher(template);
+			if (templateFieldMatcher.find()) {
+				String fieldName = templateFieldMatcher.group("fieldname");
+				if (fieldName.contains("*")) {
+					// Extract the first part of the field name before the '*' character. 
+					// Only indexed field names with the same first part before the '*' 
+					// are allowed in one block.
+					String firstPartFieldName = Splitter.on('*').trimResults(CharMatcher.is('.')).splitToList(fieldName).get(0);  
+					// Expand the list fields
+					ValueMap iteratedValueMap = valueMap.getValueMap(firstPartFieldName).orElse(ValueMap.empty());
+					Set<String> fieldNameSet =  iteratedValueMap.fieldNames();
+					for (String fieldNameEntry: fieldNameSet) {
+						String regex = "\\{\\{" + firstPartFieldName + "\\.\\*";
+						String replacement = "{{" + firstPartFieldName + "." + fieldNameEntry;
+						String listTextValue = template.replaceAll(regex, replacement);
+						
+						// Create the semantic block
+						StringBuilder semanticBlock = assembleSemanticBlock(listTextValue);
+						
+						String block = semanticBlock + "\n" + listTextValue + "\n\n";
+						
+						streamBuilder.add(block);
+					}
+				}
+			}
+
+
+		} else {
+			streamBuilder.add(chunk);
+		}
+
+		return streamBuilder.build();
 	}
 
 	/** Copies a markdown file into a temp file in the same directory as the markdown file
@@ -424,18 +527,45 @@ class Template  {
 				// are allowed in one block.
 				String firstPartFieldName = Splitter.on('*').trimResults(CharMatcher.is('.')).splitToList(fieldName).get(0);  //Included the periods, but that's ok. 
 
+				// Add the list directive  
+				//TODO add list directive to BNF
+				String listDirective = commentDelimiter.start().orElse("") 
+						+ "{@list:template=\"" + block.replace("\n", "") 
+						+ "\"}}"
+						+ commentDelimiter.end().orElse("")
+				        + "\n";
+				streamBuilder.add(listDirective);
+				
+				// Expand the list fields
 				ValueMap iteratedValueMap = valueMap.getValueMap(firstPartFieldName).orElse(ValueMap.empty());
 				Set<String> fieldNameSet =  iteratedValueMap.fieldNames();
 				for (String fieldNameEntry: fieldNameSet) {
-					//newBlock = new String(block);
 					String regex = "\\{\\{" + firstPartFieldName + "\\.\\*";
 					String replacement = "{{" + firstPartFieldName + "." + fieldNameEntry;
 					newBlock = block.replaceAll(regex, replacement);
-					streamBuilder.add(newBlock);
+					// TODO ===> need to add the semantic block here
+//					StringBuilder semanticBlock = new StringBuilder();
+//					semanticBlock.append("{{")
+//							.append(fieldNameEntry) 
+//							.append(":iterated:")
+//							.append("pattern=\"") 
+//							.append("woobeewoobee")
+//							.append("}}");
+//
+//					
+//					// Now surround the semantic block in comments
+//					if (semanticBlock.length() > 0) {
+//						semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
+//						             .append(commentDelimiter.end().orElse(""));
+//					}
+//							
+//					newBlock = semanticBlock.toString() + "\n" +newBlock;		               
+					
+					streamBuilder.add(newBlock);   
 				}                       
 
 			} else {
-				// Block does not contain any filed that represent a list, Just pass it on. 
+				// Block does not contain any field that represents a list, Just pass it on. 
 				streamBuilder.add(block);  
 			}
 		} else {
@@ -460,9 +590,21 @@ class Template  {
 		   return inBlock;
 	   }
 		
-		StringBuilder semanticBlock = new StringBuilder();
 		Matcher fieldMatcher = fieldPattern.matcher(inBlock);
-				
+		
+		StringBuilder semanticBlock = assembleSemanticBlock(inBlock);
+		
+		// Now replace every thing in the in block that is a valid field using the value map
+		String textValue =  fieldMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
+		
+		
+		return semanticBlock + "\n" + textValue;
+		
+	}
+
+	private StringBuilder assembleSemanticBlock(String inBlock) {
+		StringBuilder semanticBlock = new StringBuilder();
+						
 		// Assemble the semantic block 
 		// First assemble any inline field-specs and add them to the semantic block 
 		Pattern delimiterPattern = delimiters.pattern();
@@ -474,10 +616,12 @@ class Template  {
 		
 		
 		boolean noInlineFieldsFound = (semanticBlock.length() == 0);
+		
+		Matcher fieldMatcher = fieldPattern.matcher(inBlock);
 	    
 		if (noInlineFieldsFound) {
 			// A text block has the form
-			//   a{{f}}b  where a, b are string with 0 or more characters, f is the field name
+			//   a{{f}}b  where a, b are strings with 0 or more characters, f is the field name
 			// Need to map this to the outline field spec:
 			//   {{f:pattern="a%s%b"}}
 			if (fieldMatcher.find()) {
@@ -490,6 +634,7 @@ class Template  {
 				if (!preamble.isEmpty() || !postamble.isEmpty()) {
 					semanticBlock.append(":pattern=\"").append(preamble).append("%s").append(postamble).append("\"");
 				}
+				
 				semanticBlock.append("}}");
 			}
 			
@@ -500,13 +645,7 @@ class Template  {
 			semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
 			             .append(commentDelimiter.end().orElse(""));
 		}
-		
-		// Now replace every thing in the in block that is a valid field using the value map
-		String textValue =  fieldMatcher.replaceAll(mr -> fieldSubstitution(mr, valueMap));
-		
-		
-		return semanticBlock + "\n" + textValue;
-		
+		return semanticBlock;
 	}
 	
 	/* Takes string of the form 
