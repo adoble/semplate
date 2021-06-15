@@ -310,9 +310,11 @@ class Template  {
 	
 	
 	
-	/**
-	 * See formal grammer  TODO
-	 *
+	/** Updates all fields in a chunk of markdown with the values in the value map
+	 * 
+	 * @param chunk  A chunk of markdown separated with two newlines. May contain fields with the form {{<i>fieldname</i>}}
+	 * @param valueMap A value map containing the field values. 
+	 * @returns The updated chunk. 
 	 */
 	private String updateBlock(String chunk, ValueMap valueMap) {
 		ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
@@ -413,7 +415,7 @@ class Template  {
 	 * @param markdownFilePath The path of the markdown file
 	 * @throws ReadException 
 	 */
-	private Path copyToTempFile(Path markdownFilePath) throws UpdateException {  //TODO is a ReadException the correct way to do this? 
+	private Path copyToTempFile(Path markdownFilePath) throws UpdateException {  
 		Optional<Path> tempPath = Optional.empty();
 		try  {
 			tempPath = Optional.of(Files.createTempFile(markdownFilePath.getParent(), "semplate", ".tmp"));
@@ -524,7 +526,6 @@ class Template  {
 				String firstPartFieldName = Splitter.on('*').trimResults(CharMatcher.is('.')).splitToList(fieldName).get(0);  //Included the periods, but that's ok. 
 
 				// Add the list directive  
-				//TODO add list directive to BNF
 				String listDirective = commentDelimiter.start().orElse("") 
 						+ "{@list-template=\"" + block.replace("\n", "") 
 						+ "\"}}"
