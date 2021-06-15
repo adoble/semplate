@@ -81,15 +81,7 @@ class Template  {
 				                .collect(Delimiters::new, Delimiters::add, Delimiters::add);
 		}
 		
-		// TODO remove this unused code
-		// Extract the fields that are iterated (identified with a "*" in the field name)
-//		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
-//			iteratedFields = stream
-//					.filter(iteratedFieldPattern.asPredicate())    // TODO is this strict enough?
-//					.flatMap(line -> extractIteratedFieldNames(line))   
-//					.collect(Collectors.toList());
-//		}
-	
+		
 	}
 	
 	/**
@@ -543,23 +535,6 @@ class Template  {
 					String regex = "\\{\\{" + firstPartFieldName + "\\.\\*";
 					String replacement = "{{" + firstPartFieldName + "." + fieldNameEntry;
 					newBlock = block.replaceAll(regex, replacement);
-					// TODO ===> need to add the semantic block here
-//					StringBuilder semanticBlock = new StringBuilder();
-//					semanticBlock.append("{{")
-//							.append(fieldNameEntry) 
-//							.append(":iterated:")
-//							.append("pattern=\"") 
-//							.append("woobeewoobee")
-//							.append("}}");
-//
-//					
-//					// Now surround the semantic block in comments
-//					if (semanticBlock.length() > 0) {
-//						semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
-//						             .append(commentDelimiter.end().orElse(""));
-//					}
-//							
-//					newBlock = semanticBlock.toString() + "\n" +newBlock;		               
 					
 					streamBuilder.add(newBlock);   
 				}                       
