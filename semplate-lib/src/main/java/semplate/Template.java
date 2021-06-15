@@ -243,8 +243,8 @@ class Template  {
 		try (Stream<String> lines = Files.lines(inputFile, Charset.defaultCharset())) {
 			blocks = Stream.concat(lines, Stream.of("\n"))    // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated
 					.map(chunk())  
-					.map(o -> removeListElement(o))  // Remove any blocks that have list elements in them
 					.map(o -> o.orElse(""))  // Remove any empty blocks
+					.flatMap(b -> removeListElement(b))  // Remove any blocks that have list elements in them
 					.flatMap(chunk -> updateList(chunk, updatedValueMap))  
 					.map(chunk -> updateBlock(chunk, updatedValueMap))
 					.collect(Collectors.toList());
@@ -263,10 +263,9 @@ class Template  {
 		
 		
 	}
-    
-	// TODO don't use optional use a stream builder and flatmap()
-	private Optional<String> removeListElement(Optional<String> optBlock) {
-		String block = optBlock.orElse("");
+	
+	private Stream<String> removeListElement(String block) {
+		Stream.Builder<String> streamBuilder = Stream.builder();
 		
 		// Regular expression to find field names that are part of a iteration. i.e field names of the form 
 		//  a.D.b  
@@ -284,12 +283,14 @@ class Template  {
 		
 		Matcher iteratedFieldNameMatcher = Pattern.compile(regex).matcher(block);
 		
-		if (iteratedFieldNameMatcher.find()) {
-			return Optional.empty();
+		if (!iteratedFieldNameMatcher.find()) {
+			streamBuilder.add(block);
 		}
-		return optBlock;
+		return streamBuilder.build();
 		
 	}
+    
+	
 
 	private Delimiter extractCommentDelimiter(String line) {
         checkArgument(line.contains(templateCommentField), "The line \"%s\" does not contain a template comment field", line);
