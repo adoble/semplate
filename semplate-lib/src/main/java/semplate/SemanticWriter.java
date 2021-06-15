@@ -70,7 +70,7 @@ public class SemanticWriter {
 	 * 
 	 * @param templateFile The file containing the template for the generated markdown file
 	 * @return A SemanticTemplateWriter object
-	 * @throws ReadException if the template file could not be read for some cause
+	 * @throws ReadException if the template file could not be read for some reason
 	 */
 	public SemanticTemplateWriter usingTemplate(Path templateFile) throws ReadException {
 		Template template = new Template();
@@ -85,6 +85,21 @@ public class SemanticWriter {
 		SemanticTemplateWriter writer = new SemanticTemplateWriter(dataObject, template);
 		
 		return writer;
+	}
+	
+	/** Specifies the name of the template file  used to generate the semantically annotated markdown file.
+	 * 
+	 * @see SemanticWriter
+	 * @see #with(Object)
+	 * @see SemanticTemplateWriter
+	 * @see SemanticTemplateWriter#write(Path)
+	 * 
+	 * @param templateFileName The name of the file containing the template for the generated markdown file
+	 * @return A SemanticTemplateWriter object
+	 * @throws ReadException if the template file could not be read for some reason
+	 */
+	public SemanticTemplateWriter usingTemplate(String templateFileName) throws ReadException {
+		return usingTemplate(Path.of(templateFileName));
 	}
 
 	

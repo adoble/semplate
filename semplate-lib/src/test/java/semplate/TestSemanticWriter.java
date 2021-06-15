@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -59,6 +60,27 @@ class TestSemanticWriter {
 		SemanticWriter semanticWriter = SemanticWriter.with(workDataObject);
 				
 		SemanticTemplateWriter semanticTemplateWriter = semanticWriter.usingTemplate(templateFile);
+		
+		assertNotNull(semanticTemplateWriter);
+		
+	}
+	
+	// Using @TempDir as the file name as SemanticWriter using the default file system 
+	// to resolve names. 
+	@Test 
+	void testUsingTemplateName(@TempDir Path tempDir) throws Exception {
+		String templateFileName = "simple_template.md";
+		Path templateFile = tempDir.resolve(templateFileName);
+		TestUtilities.copyFromResource(templateFileName, templateFile);
+		
+		Work workDataObject = new Work();
+		
+
+		SemanticWriter semanticWriter = SemanticWriter.with(workDataObject);
+		
+		String fullTemplateFileName = templateFile.toString();
+				
+		SemanticTemplateWriter semanticTemplateWriter = semanticWriter.usingTemplate(fullTemplateFileName);
 		
 		assertNotNull(semanticTemplateWriter);
 		
