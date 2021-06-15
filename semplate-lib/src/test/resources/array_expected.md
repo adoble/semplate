@@ -6,8 +6,7 @@
 
 A test of generating lists using an array as the source object
 
-<!--{@list:template="* [{{references.*.title}}]({{references.*.link}})"}}-->
-
+<!--{@list-template="* [{{references.*.title}}]({{references.*.link}})"}}-->
 <!--{{references.0.title:pattern="[%s]"}}{{references.0.link:pattern="(%s)"}}-->
 * [Figuring the Phallogocentric Argument with Respect to the Classical Greek Philosophical Tradition](http://kenstange.com/nebula/feat013/feat013.html)
 

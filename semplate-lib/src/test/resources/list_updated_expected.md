@@ -8,7 +8,7 @@
 <!--{{author:pattern="Undisputed works of %s"}}-->
 Undisputed works of Stan Lee
 
-<!--{@list:template="* [{{references.*.title}}]({{references.*.link}})"}}-->
+<!--{@list-template="* [{{references.*.title}}]({{references.*.link}})"}}-->
 
 <!--{{references.0.title:pattern="[%s]"}}{{references.0.link:pattern="(%s)"}}-->
 * [The Amazing Spider-Man](https://en.wikipedia.org/wiki/The_Amazing_Spider-Man)

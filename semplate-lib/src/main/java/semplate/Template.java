@@ -369,7 +369,7 @@ class Template  {
 	private Stream<String> updateList(String chunk, ValueMap valueMap) {
 		Stream.Builder<String> streamBuilder = Stream.builder();
 
-		Pattern listDirectivePattern  = Pattern.compile("\\{@list.*:template=\\\"(?<template>.*?)\\\"\\}\\}"); 
+		Pattern listDirectivePattern  = Pattern.compile("\\{@list-template=\\\"(?<template>.*?)\\\"\\}\\}"); 
 		Matcher listDirectiveMatcher = listDirectivePattern.matcher(chunk);
 
 		if (listDirectiveMatcher.find()) {
@@ -530,7 +530,7 @@ class Template  {
 				// Add the list directive  
 				//TODO add list directive to BNF
 				String listDirective = commentDelimiter.start().orElse("") 
-						+ "{@list:template=\"" + block.replace("\n", "") 
+						+ "{@list-template=\"" + block.replace("\n", "") 
 						+ "\"}}"
 						+ commentDelimiter.end().orElse("")
 				        + "\n";

@@ -8,7 +8,7 @@
 <!--{{author:pattern="Undisputed works of %s"}}-->
 Undisputed works of Plato
 
-<!--{@list:template="* [{{references.*.title}}]({{references.*.link}})"}}-->
+<!--{@list-template="* [{{references.*.title}}]({{references.*.link}})"}}-->
 
 <!--{{references.0.title:pattern="[%s]"}}{{references.0.link:pattern="(%s)"}}-->
 * [Apology](https://en.wikisource.org/wiki/Apology_%28Plato%29)
