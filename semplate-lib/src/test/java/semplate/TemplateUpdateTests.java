@@ -58,33 +58,6 @@ public class TemplateUpdateTests {
 	  fileSystem.close();
 	}
 
-	@Test
-	@Deprecated
-	public void testCreationOfTempFile(@TempDir Path tempDir) throws Exception {
-		String expectedContents = "Thou gazest on the stars, my star!\n"
-		                   		+ "Ah! would that I might be\n"
-		                   		+ "Myself those skies with myriad eyes,\n"
-		                   		+ "That I might gaze on thee.";
-
-		// Create a file in the temp dir
-		Path sourceFile = Files.createFile(tempDir.resolve("test-source-file.txt"));
-		// Fill it with some text
-		Files.writeString(sourceFile, expectedContents);
-
-		Template template = new Template();
-		// Invoke the private method copyToTempFile  --> Have to use reflection
-		Method method = Template.class.getDeclaredMethod("copyToTempFile", Path.class);
-		method.setAccessible(true);
-		Path tempPath = (Path) method.invoke(template, sourceFile);
-
-		assertTrue(tempPath.toFile().exists());
-
-		// Compare the contents
-		String actualContents = Files.lines(tempPath).collect(Collectors.joining("\n"));
-
-		assertEquals(expectedContents, actualContents);
-
-	}
 
 	// Test update with no lists
 	@Test
@@ -203,7 +176,6 @@ public class TemplateUpdateTests {
 		works.addReference(new Reference("The Symposium", new URL("https://en.wikisource.org/wiki/Symposium_%28Plato%29")));
 		works.addReference(new Reference("The Gorgias", new URL("https://en.wikisource.org/wiki/Gorgias")));
 
-		System.out.println(works);
 		// Now update
 		t.update(works, sourceFile, outputFile);
 

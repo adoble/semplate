@@ -120,7 +120,7 @@ class Template  {
 				
 		    } else {
 		    	// This is reserved for special delimiters  such  as URL or DATE
-		    	assert(false);
+		    	assert(false);  //TODO 
 		    }
 		    
 		}
@@ -130,25 +130,7 @@ class Template  {
 	}
 	
 
-
-	private Stream<String> extractIteratedFieldNames(String line) {
-		 boolean  lineContainsIteratedField = false;
-		
-		 Stream.Builder<String> streamBuilder = Stream.builder();
-		 
-		 Matcher matcher = iteratedFieldPattern.matcher(line);  
-		 while (matcher.find()) {
-			 streamBuilder.add(matcher.group("fieldname"));
-			
-			 lineContainsIteratedField = true;
-		 }
-		 
-		 checkState(lineContainsIteratedField, "The line passed does not contain an iterated field name.", line);
-		 
-		 return streamBuilder.build();
-		 
-	}
-
+	
 	/**
 	 * Generates a markdown file as specified by the template file using the information
 	 * in the data object.
@@ -409,26 +391,6 @@ class Template  {
 
 		return streamBuilder.build();
 	}
-
-	/** Copies a markdown file into a temp file in the same directory as the markdown file
-	 * 
-	 * @param markdownFilePath The path of the markdown file
-	 * @throws ReadException 
-	 */
-	private Path copyToTempFile(Path markdownFilePath) throws UpdateException {  
-		Optional<Path> tempPath = Optional.empty();
-		try  {
-			tempPath = Optional.of(Files.createTempFile(markdownFilePath.getParent(), "semplate", ".tmp"));
-			Files.copy(markdownFilePath, tempPath.orElseThrow(), StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			throw new UpdateException("Unable to create temporary files whilst updating " +  markdownFilePath.getFileName(), e);
-		} finally {
-			tempPath.ifPresent(p -> p.toFile().deleteOnExit());
-        }
-		
-		return tempPath.orElseThrow(() -> new UpdateException("Unable to create temporary file for  " + markdownFilePath.getFileName()));
-	}
-
 
 	private ValueMap readValueMap(Path markupFilePath) throws ReadException {
 		ValueMap valueMap;

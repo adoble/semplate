@@ -86,6 +86,15 @@ class TestSemanticWriter {
 		
 	}
 	
+	@Test
+	void testErrorUsingTemplateName() throws Exception {
+
+		SemanticWriter semanticWriter = SemanticWriter.with(new Work());
+		assertThrows(ReadException.class, () -> {
+			semanticWriter.usingTemplate("rubbish name");
+		});
+	}
+	
 	@Test 
 	void testGenerateChainWithBasicTemplate() throws Exception {
 		Path templateFile = rootPath.resolve("simple_template.md");
