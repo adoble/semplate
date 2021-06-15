@@ -44,7 +44,7 @@ import java.net.URL;
  */
 class Template  {
 	// Special fields are preceded with template
-	final private String templateCommentField = "{@template.comment}}"; //TODO make static
+	final private static String templateCommentField = "{@template.comment}}"; 
 	
     final private static Pattern delimiterDirectivePattern = Pattern.compile("\\{@template.delimiter.(?<type>.*?):(?<delim>.*?)\\}\\}");;
 	
@@ -179,8 +179,11 @@ class Template  {
 	}
 	
 	
-    /** TODO Document!
-     *  Using Optional as return type so that do not need to create empty strings in the lambda function as this is forbidden. */		
+    /** Converts lines of markdown into blocks of markdown that are separated by two new lines. 
+     *  
+     *  Using Optional as return type so that do not need to create empty strings in the lambda 
+     *  function as this is forbidden. 
+     */		
 	static Function <String, Optional<String>> chunk(){
 		StringBuffer sb = new StringBuffer(80);  // This contains the state and is available for every element in the stream
 		return s -> { if (s.isBlank()) { Optional<String> r = Optional.of(sb.toString()); sb.setLength(0); return r;}
