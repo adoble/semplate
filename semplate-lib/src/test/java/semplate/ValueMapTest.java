@@ -688,6 +688,8 @@ class ValueMapTest {
 		assertFalse(vmChild2.isEmpty());
 		assertTrue(vmChild2.containsField("field3"));
 		assertEquals("value", vmChild2.getValue("field3").orElse(""));
+		
+		assertFalse(valueMap.containsField("field1.field2.anotherField"));
 				
 	}
 	
