@@ -25,7 +25,7 @@ import com.google.common.jimfs.Jimfs;
 
 import semplate.Template;
 
-public class TemplateUpdateTests {
+public class UpdateTests {
 	final static String templateFileName = "simple_template.md";
 
 	private static FileSystem fileSystem;
@@ -141,7 +141,9 @@ public class TemplateUpdateTests {
 		Path outputFile = rootPath.resolve("list_output_file.md");
 
 		Template t = new Template();
-		Works works = (Works) t.read(Works.class, sourceFile);
+		//Works works = (Works) t.read(Works.class, sourceFile);
+		
+		Works works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 
 		// Now update the works by removing an entry in the middle
 		works.removeReference(1);
@@ -170,7 +172,9 @@ public class TemplateUpdateTests {
 		Path outputFile = rootPath.resolve("list_output_file.md");
 
 		Template t = new Template();
-		Works works = (Works) t.read(Works.class, sourceFile);
+//		Works works = (Works) t.read(Works.class, sourceFile);
+		
+		Works works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 
 		// Now update the works by adding two entries
 		works.addReference(new Reference("The Symposium", new URL("https://en.wikisource.org/wiki/Symposium_%28Plato%29")));
@@ -200,7 +204,9 @@ public class TemplateUpdateTests {
 		Path outputFile = rootPath.resolve("list_output_file.md");
 
 		Template t = new Template();
-		Works works = (Works) t.read(Works.class, sourceFile);
+		//Works works = (Works) t.read(Works.class, sourceFile);
+		
+		Works works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 
 		// Now delete all the entries
 		while (works.numberReferences() > 0 ) {

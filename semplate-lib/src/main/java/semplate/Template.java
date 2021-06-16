@@ -180,11 +180,13 @@ class Template  {
 	/**
 	 * Reads the specified markdown file and creates a new  object of class objectClass that contains the
 	 * data semantically represented in the markdown file.
-	 *
+	 * 
+	 * @deprecated Moved to SemanticReader
 	 * @param objectClass  The class of the data object to be generated.
 	 * @param markupFilePath The path of the markdown file.
 	 * @return  The object created from the data in the markdown file.
 	 */
+	@Deprecated
 	 Object read(Class<?> objectClass, Path markupFilePath) throws ReadException {
 		Object dataObject = null;
 	
@@ -397,6 +399,14 @@ class Template  {
 		return streamBuilder.build();
 	}
 
+	/**
+	 * @deprecated Moved to SemanticReader
+	 * @param markupFilePath
+	 * @return
+	 * @throws ReadException
+	 * 
+	 */
+	@Deprecated
 	private ValueMap readValueMap(Path markupFilePath) throws ReadException {
 		ValueMap valueMap;
 		try (Stream<String> lines = Files.lines(markupFilePath, Charset.defaultCharset())) {

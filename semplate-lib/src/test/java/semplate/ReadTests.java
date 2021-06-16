@@ -33,7 +33,7 @@ import com.google.common.jimfs.Jimfs;
 import semplate.Template;
 import semplate.valuemap.ValueMap;
 
-public class TemplateReadTest {
+public class ReadTests {
 	final static String templateFileName = "list_template.md";
 	
 	private static FileSystem fileSystem;
@@ -69,16 +69,18 @@ public class TemplateReadTest {
 	@Test
 	void testReadSimple() throws Exception{
 			
-		Template template = new Template();
-		assumeTrue(template != null);
+		//Template template = new Template();
+		//assumeTrue(template != null);
 		
-		template.config(templateFile);
+		//template.config(templateFile);
 		
 		Path sourceFile = templatesPath.resolve("simple_expected.md");
 		
 		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
 		
-		Work workExpected = (Work) template.read(Work.class, sourceFile);
+		//Work workExpected = (Work) template.read(Work.class, sourceFile);
+		
+		Work workExpected = (Work) SemanticReader.with(Work.class).usingFile(sourceFile).read();
 		
 		assertNotNull(workExpected);
 		
@@ -101,16 +103,18 @@ public class TemplateReadTest {
 		
 		Works works = null;
 		
-		Template template = new Template();
-		assumeTrue(template != null);
+		//Template template = new Template();
+		//assumeTrue(template != null);
 		
-		template.config(templateFile);
+		//template.config(templateFile);
 		
 		Path sourceFile = templatesPath.resolve("list_expected.md");
 		
 		TestUtilities.copyFromResource("list_expected.md", sourceFile);
 		
-	    works = (Works) template.read(Works.class, sourceFile);
+	    //works = (Works) template.read(Works.class, sourceFile);
+	    
+	    works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 	    
 	    assertNotNull(works);
 	    
@@ -149,7 +153,8 @@ public class TemplateReadTest {
         Path sourceFile = templatesPath.resolve("non-existent.md");
         
         assertThrows(ReadException.class, () -> {
-        	template.read(Work.class, sourceFile);
+        	//template.read(Work.class, sourceFile);
+        	SemanticReader.with(Work.class).usingFile(sourceFile).read();
         });
 		
 	}
@@ -166,7 +171,8 @@ public class TemplateReadTest {
 		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
         
         assertThrows(ReadException.class, () -> {
-        	template.read(NonValidClass.class, sourceFile);
+        	//template.read(NonValidClass.class, sourceFile);
+        	SemanticReader.with(NonValidClass.class).usingFile(sourceFile).read();
         });
 	}
 	

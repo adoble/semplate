@@ -3,7 +3,14 @@
  */
 package semplate;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
+
+import semplate.valuemap.ConversionException;
+import semplate.valuemap.ValueMap;
 
 /** Reads semantically annotated markdown files and constructs data objects from them.
  * <p>
@@ -30,6 +37,7 @@ public class SemanticReader {
 	 */
 	private SemanticReader() {}
 
+	/** ----------------------  PUBLIC API -------------------------------------------- */
 	
 	/** Specifies the class of the data object that is created when the semantically annotated markdown file is read. 
 	 * 
@@ -71,13 +79,42 @@ public class SemanticReader {
 	 * @throws ReadException when the markdown file cannot be read
 	 */
 	public Object read() throws ReadException {
-       Template t = new Template();
+       //Template t = new Template();
        
-       Object o = t.read(dataObjectClass, inputFile);
+       //Object o = t.read(dataObjectClass, inputFile);
        
-       return o;
+		ValueMap valueMap = readValueMap(inputFile);
+		
+		Object dataObject = null;
+		try {
+			dataObject = valueMap.toObject(dataObjectClass);
+		} catch (ConversionException e) {
+			throw new ReadException(e.getMessage(), e);
+		}
+	
+		return dataObject;
 	}
+	
+	
+	/** ----------------------  SUPPORT FUNCTIONS -------------------------------------------- */
+	
+
+	private ValueMap readValueMap(Path markupFilePath) throws ReadException {
+		ValueMap valueMap;
+		try (Stream<String> lines = Files.lines(markupFilePath, Charset.defaultCharset())) {
+
+			valueMap = Stream.concat(lines, Stream.of("\n"))  // --> <String> : Add a blank lines to the stream of lines so that all blocks are correctly terminated 
+							  .map(Block.block())              // --> <block> : Create block = [semantic-block] text-value | text-block | empty.
+							  .filter(b -> !b.isEmpty())       // --> <block> : Filter out any empty blocks
+							  .map(b -> b.toValueMap())        // --> <valueMap> : Read the values and create a value map 
+							  .collect(ValueMap::new, ValueMap::merge, ValueMap::merge);  
+
+		} catch (IOException e) {
+			throw new ReadException(e);
+		}
 
 
+		return valueMap;
+	}
 
 }

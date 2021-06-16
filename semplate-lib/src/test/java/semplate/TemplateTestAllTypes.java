@@ -117,8 +117,9 @@ final static String templateFileName = "all_types_template.md";
 		template.generate(allTypes, outputPath);
 		
 		// Now read in the file and see if the object has the same values
-		AllTypes allTypesRead = (AllTypes) template.read(AllTypes.class, outputPath);
+		//AllTypes allTypesRead = (AllTypes) template.read(AllTypes.class, outputPath);
 		
+		AllTypes allTypesRead = (AllTypes) SemanticReader.with(AllTypes.class).usingFile(outputPath).read(); 
 		assertNotNull(allTypesRead);
 		
 		assertEquals(allTypesRead.getStr(), "test string");

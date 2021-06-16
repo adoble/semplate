@@ -23,7 +23,7 @@ import com.google.common.jimfs.Jimfs;
 
 import semplate.Template;
 
-class TemplateListTest {
+class ListTests {
 	
 	final static String listTemplateFileName = "list_template.md";
 
@@ -84,7 +84,8 @@ class TemplateListTest {
 		
 		
 		// Now read in the file and reconstruct the object 
-		Works rWorks = (Works) template.read(Works.class,  outputPath);
+		//Works rWorks = (Works) template.read(Works.class,  outputPath);
+		Works rWorks = (Works) SemanticReader.with(Works.class).usingFile(outputPath).read();
 		
 		assertEquals("Plato", rWorks.getAuthor());
 		assertEquals("The Works of Plato", rWorks.getTitle());
