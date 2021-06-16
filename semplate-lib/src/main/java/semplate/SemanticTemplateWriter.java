@@ -3,6 +3,8 @@ package semplate;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import semplate.valuemap.ConversionException;
+
 /** Writes a semantically annotated markdown file using a data object containing the data and a template file.
  * <p>
  * This class is never directly instantiated by clients. Instead the factory methods in {@link SemanticWriter} are used:
@@ -43,7 +45,7 @@ public class SemanticTemplateWriter {
 		
 		try {
 			template.generate(dataObject, outputFile);
-		} catch (IOException | CloneNotSupportedException e) {
+		} catch (IOException | CloneNotSupportedException | ConversionException e) {
 			String msg = "Unable to generate " + outputFile.getFileName() + " from data object of type " + dataObject.getClass();
 			throw new WriteException(msg, e); 
 		}

@@ -586,7 +586,7 @@ public class ValueMap {
      * @return The created value map
      */
     @SuppressWarnings("unchecked")
-	public static ValueMap from(Object dataObject) {
+	public static ValueMap from(Object dataObject) throws ConversionException {
 		Object fieldValue;
 		
 		Iterable<Object> fieldIterable;
@@ -643,7 +643,8 @@ public class ValueMap {
 							}
 						}
 					} catch (IllegalArgumentException | IllegalAccessException e) {
-						fieldValue = null; //"ERROR"
+						String msg = "Unable to convert object to value map.";
+						throw new ConversionException(msg, e);
 					}
 				}
 			}
@@ -671,9 +672,10 @@ public class ValueMap {
      * </pre>
      *  
      * @param iterator An interator over objects
+     * @throws ConversionException If the iterator cannot be converted to a value map
      * @return This value map
      */
-    public static ValueMap from(Iterator<?> iterator) {
+    public static ValueMap from(Iterator<?> iterator) throws ConversionException {
     	ValueMap fieldValueMap = new ValueMap();   
     	int index = 0;
     	while (iterator.hasNext()) {

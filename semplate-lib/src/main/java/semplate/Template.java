@@ -138,7 +138,7 @@ class Template  {
 	 * @param dataObject An object annotated with template field information
 	 * @param outputFilePath Path specifying the markdown file to be generated
 	 */
-	 void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException {
+	 void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException, ConversionException {
 
 		ValueMap valueMap = ValueMap.from(dataObject);
 
@@ -207,7 +207,7 @@ class Template  {
 	 * @param dataObject The object containing the new data
 	 * @param inputFile A path to the markdown file to be updated. 
 	 * @param outputFile A path to the markdown file to be updated
-	 * @throws UpdateException 
+	 * @throws UpdateException If the output file cannot be updated for some reason
 	 */
 	void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
 		
@@ -218,7 +218,12 @@ class Template  {
 			throw new UpdateException("Unable to read the file to be updated", e);
 		}
 		
-		ValueMap updatedValueMap = ValueMap.from(dataObject); 
+		ValueMap updatedValueMap;
+		try {
+			updatedValueMap = ValueMap.from(dataObject);
+		} catch (ConversionException e) {
+			throw new UpdateException("Cannot read the supplied data object", e);
+		} 
 
 		// Update the contents with the data in the value map 
 		List<String> blocks;
@@ -231,7 +236,7 @@ class Template  {
 					.map(chunk -> updateBlock(chunk, updatedValueMap))
 					.collect(Collectors.toList());
 			
-		} catch (IOException e)  {
+		} catch (IOException  e)  {
 			throw new UpdateException("Unable to update the file", e);
 		}
 		

@@ -759,7 +759,7 @@ class ValueMapTest {
 	
 		
 	@Test
-	void testCreationWithSimpleObjectIterator() {
+	void testCreationWithSimpleObjectIterator() throws Exception {
 		List<String> list = Arrays.asList(new String[]{"Asimov", "Clark", "Pohl"});
 		
 		ValueMap valueMap = ValueMap.from(list.iterator());
@@ -771,7 +771,7 @@ class ValueMapTest {
 	}
 	
 	@Test 
-	void testCreationWithComplexObjectIterator() {
+	void testCreationWithComplexObjectIterator() throws Exception {
 		Work work0 = new Work(); 
 	    work0.setTitle("I Robot");
 	    Work work1 = new Work(); 
