@@ -1,22 +1,12 @@
 package semplate;
 
-//import static org.junit.Assume.*;
-import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.*;
@@ -24,8 +14,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-
-import semplate.Template;
 
 class TemplateGenerateTest {
 	final static String templateFileName = "simple_template.md";
@@ -82,41 +70,30 @@ class TemplateGenerateTest {
 	
 	@Test 
 	void testGenerateSimple() throws Exception{
-		
-		Template template = new Template();
-		assumeTrue(template != null);
-		
-		
-		template.config(templateFile);
-				
+
 		Path outputPath = templatesPath.resolve("the_republic.md");
-		
-		template.generate(work, outputPath);
-		
+
+		SemanticWriter.with(work).usingTemplate(templateFile).write(outputPath);
+
 		assertTrue(Files.exists(outputPath));
-		
+
 		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
-		
+
 		String resourceFileName = "simple_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
-		
-		
+
+
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);
-		
-		 String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
-		
+
+		String expectedContents = Files.lines(expectedFile).collect(Collectors.joining());
+
 		assertEquals(expectedContents, actualContents);
 	}
 	
 	@Test
 	void testDelimiterDefinition(@TempDir Path tempDir) throws Exception {
-		Template t = new Template();
-		assumeTrue(t != null);
-
-		Path templateFileName = tempDir.resolve("delimiter_directives.md");
-		TestUtilities.copyFromResource("delimiter_directives.md", templateFileName);
-
-		t.config(templateFileName);		
+		Path templateFile = tempDir.resolve("delimiter_directives.md");
+		TestUtilities.copyFromResource("delimiter_directives.md", templateFile);
 
 		Work work = new Work();
 		work.setAuthor("Dan Brown");
@@ -124,7 +101,7 @@ class TemplateGenerateTest {
 
 		Path outputPath = templatesPath.resolve("delimiter_directives_actual.md");
 
-		t.generate(work, outputPath);		
+		SemanticWriter.with(work).usingTemplate(templateFile).write(outputPath);
 		assertTrue(Files.exists(outputPath));
 
 
@@ -146,12 +123,6 @@ class TemplateGenerateTest {
 		TestUtilities.copyFromResource(listTemplateFileName, templateFile);  
 		
 		assertTrue(Files.exists(templateFile));
-		Template template = new Template();
-		assumeTrue(template != null);
-		
-		
-		template.config(templateFile);
-		
 		
 		Works works = new Works();
 		works.setTitle("The Works of Plato");
@@ -163,8 +134,7 @@ class TemplateGenerateTest {
 
 		Path outputPath = fileSystem.getPath("list_actual.md");
 		
-		template.generate(works, outputPath);
-
+		SemanticWriter.with(works).usingTemplate(templateFile).write(outputPath);
 		assertTrue(Files.exists(outputPath));
 		
 	
@@ -191,10 +161,6 @@ class TemplateGenerateTest {
 		TestUtilities.copyFromResource(arrayTemplateFileName, arrayTemplateFile);  
 		
 		assertTrue(Files.exists(arrayTemplateFile));
-		Template template = new Template();
-		assumeTrue(template != null);
-				
-		template.config(arrayTemplateFile);
 				
 		// Set up a templatable object that uses an array. 		
 		References references = new References(3);
@@ -209,7 +175,7 @@ class TemplateGenerateTest {
 			
 		Path outputPath = fileSystem.getPath("array_actual.md");
 				
-		template.generate(references, outputPath);
+		SemanticWriter.with(references).usingTemplate(arrayTemplateFile).write(outputPath);
 		
 		assertTrue(Files.exists(outputPath));
 		
@@ -242,11 +208,7 @@ class TemplateGenerateTest {
 		TestUtilities.copyFromResource(simpleListTemplateFileName, simpleListTemplateFile);  
 		
 		assertTrue(Files.exists(simpleListTemplateFile));
-		Template template = new Template();
-		assumeTrue(template != null);
-				
-		template.config(simpleListTemplateFile);
-				
+
 		// Set up a list 
 		ArrayList<String> simpleList = new ArrayList<String>();
 		simpleList.add("Number One");
@@ -256,7 +218,7 @@ class TemplateGenerateTest {
 			
 		Path outputPath = fileSystem.getPath("top_level_list_actual.md");
 				
-		template.generate(simpleList, outputPath);
+		SemanticWriter.with(simpleList).usingTemplate(simpleListTemplateFile).write(outputPath);
 		
 		assertTrue(Files.exists(outputPath));
 		
@@ -286,11 +248,6 @@ class TemplateGenerateTest {
 		TestUtilities.copyFromResource(linkTemplateFileName, linkTemplateFile);  
 		assertTrue(Files.exists(linkTemplateFile));
 
-		Template template = new Template();
-		assumeTrue(template != null);
-
-		template.config(linkTemplateFile);
-
 		// Set up the data objects
 		Link link = new Link();
 		link.setId(4711);
@@ -301,15 +258,15 @@ class TemplateGenerateTest {
 		
 		
 		Path outputPath = fileSystem.getPath("link_actual.md");
-		template.generate(link, linkTemplateFile);
+
+		SemanticWriter.with(link).usingTemplate(linkTemplateFile).write(outputPath);
 		assertTrue(Files.exists(linkTemplateFile));
 		
-		
-		String actualContents = Files.lines(linkTemplateFile).collect(Collectors.joining());
+		String actualContents = Files.lines(outputPath).collect(Collectors.joining());
 		
 		String expectedContents = "";
 		String resourceFileName = "link_expected.md";
-		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file as the same name as the resource 
+		Path expectedFile = fileSystem.getPath(resourceFileName);  // Expected file has the same name as the resource 
 		
 		
 		TestUtilities.copyFromResource(resourceFileName, expectedFile);

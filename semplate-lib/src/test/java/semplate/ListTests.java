@@ -3,25 +3,17 @@ package semplate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
+
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-
-import semplate.Template;
 
 class ListTests {
 	
@@ -63,12 +55,7 @@ class ListTests {
 		TestUtilities.copyFromResource(listTemplateFileName, templateFile);  
 		
 		assertTrue(Files.exists(templateFile));
-		Template template = new Template();
-		assumeTrue(template != null);
-		
-		template.config(templateFile);
-		
-		
+
 		Works works = new Works();
 		works.setTitle("The Works of Plato");
 		works.setAuthor("Plato");
@@ -78,7 +65,7 @@ class ListTests {
 			
 		Path outputPath = fileSystem.getPath("list_actual.md");
 		
-		template.generate(works, outputPath);
+		SemanticWriter.with(works).usingTemplate(templateFile).write(outputPath);
 		
 		assumeTrue(Files.exists(outputPath));
 		

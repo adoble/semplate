@@ -3,12 +3,10 @@ package semplate;
 import static com.google.common.base.Preconditions.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import semplate.*;
 import semplate.valuemap.*;
 
 class Block {    StringBuffer text = new StringBuffer();

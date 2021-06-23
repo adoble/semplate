@@ -3,9 +3,6 @@ package semplate;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Optional;
 import java.util.regex.MatchResult;
@@ -16,16 +13,11 @@ import java.util.stream.*;
 import com.google.common.base.*;
 
 import static com.google.common.base.Preconditions.*;
-import static com.google.common.primitives.Primitives.*;
 
-import semplate.annotations.Templatable;
-import semplate.annotations.TemplateField;
+
+
 import semplate.valuemap.ConversionException;
 import semplate.valuemap.ValueMap;
-
-import java.lang.reflect.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 
 /** Provides facilities to be able to generate, read and update markdown files using data in POJOs.
@@ -42,6 +34,7 @@ import java.net.URL;
  * @author Andrew Doble
  *
  */
+@Deprecated
 class Template  {
 	// Special fields are preceded with template
 	final private static String templateCommentField = "{@template.comment}}"; 
@@ -50,7 +43,7 @@ class Template  {
 	
 	final private static Pattern fieldPattern = Pattern.compile("\\{{2}(?<fieldname>[^\\}]*)\\}{2}");  
 	
-	final private static Pattern iteratedFieldPattern = Pattern.compile("\\{\\{(?<fieldname>.*?\\*.*?)\\}\\}");
+	//final private static Pattern iteratedFieldPattern = Pattern.compile("\\{\\{(?<fieldname>.*?\\*.*?)\\}\\}");
 	
 	private Path templatePath;
 
@@ -60,9 +53,10 @@ class Template  {
 	
 	/**
 	 * Specifies the template to be used in generating the markdown files.
-	 *
+	 * @deprecated Moved to {@link SemanticWriter} as readDelimiters
 	 * @param templatePath A path to the template file.
 	 */
+	@Deprecated
 	void config(Path templatePath) throws IOException, ReadException {
 		this.templatePath = templatePath;
 
@@ -86,6 +80,7 @@ class Template  {
 	
 	/**
 	 * Specifies the name of a template file used for generating the markdown files.
+     * @deprecated Moved to {@link SemanticWriter}as readDelimiters
      * @param templateFileName The name of the template file
 	 */
 	void config(String templateFileName) throws IOException, ReadException {
@@ -94,10 +89,11 @@ class Template  {
 	}
 	
 	/** Parse a string containing delimiter specification and extract the delimiters. 
-	 * 
+	 * @deprecated Moved to SemanticWriter
 	 * @param line The string contains  the specification
 	 * @return A Delimiter object containing the delimiters 
 	 */
+	@Deprecated
 	private Delimiter extractDelimiters(String line) {
 		Matcher matcher = delimiterDirectivePattern.matcher(line);
 		
@@ -134,10 +130,11 @@ class Template  {
 	/**
 	 * Generates a markdown file as specified by the template file using the information
 	 * in the data object.
-
+     * @deprecated Moveds to SematicTemplateWriter
 	 * @param dataObject An object annotated with template field information
 	 * @param outputFilePath Path specifying the markdown file to be generated
 	 */
+	@Deprecated
 	 void generate(Object dataObject, Path outputFilePath) throws IOException, CloneNotSupportedException, ConversionException {
 
 		ValueMap valueMap = ValueMap.from(dataObject);
@@ -165,7 +162,10 @@ class Template  {
      *  
      *  Using Optional as return type so that do not need to create empty strings in the lambda 
      *  function as this is forbidden. 
-     */		
+     *  
+     *  @deprecated Moved to SemanticWriter
+     */	
+	@Deprecated
 	static Function <String, Optional<String>> chunk(){
 		StringBuffer sb = new StringBuffer(80);  // This contains the state and is available for every element in the stream
 		return s -> { if (s.isBlank()) { Optional<String> r = Optional.of(sb.toString()); sb.setLength(0); return r;}
@@ -205,12 +205,14 @@ class Template  {
 	/**
 	 * Read a markdown file, updates it with the information in annotated {@code dataObject} and then outputs the 
 	 * results to a the specified output markdown file. 
+	 * @deprecated MOved to SemanticWriter
 	 *
 	 * @param dataObject The object containing the new data
 	 * @param inputFile A path to the markdown file to be updated. 
 	 * @param outputFile A path to the markdown file to be updated
 	 * @throws UpdateException If the output file cannot be updated for some reason
 	 */
+	@Deprecated
 	void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
 		
 		// Determine delimiters in the markdown file to be updated. 
@@ -253,6 +255,12 @@ class Template  {
 		
 	}
 	
+	/**
+	 * @deprecated Moved to SemanticWriter
+	 * @param block
+	 * @return
+	 */
+	@Deprecated
 	private Stream<String> removeListElement(String block) {
 		Stream.Builder<String> streamBuilder = Stream.builder();
 		
@@ -280,7 +288,12 @@ class Template  {
 	}
     
 	
-
+    /**
+     * @deprecated Moved to SemanticWriter
+     * @param line
+     * @return
+     */
+	@Deprecated
 	private Delimiter extractCommentDelimiter(String line) {
         checkArgument(line.contains(templateCommentField), "The line \"%s\" does not contain a template comment field", line);
         
@@ -300,11 +313,12 @@ class Template  {
 	
 	
 	/** Updates all fields in a chunk of markdown with the values in the value map
-	 * 
+	 * @deprected Moved to SemanticWriter
 	 * @param chunk  A chunk of markdown separated with two newlines. May contain fields with the form {{<i>fieldname</i>}}
 	 * @param valueMap A value map containing the field values. 
 	 * @returns The updated chunk. 
 	 */
+	@Deprecated
 	private String updateBlock(String chunk, ValueMap valueMap) {
 		ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
 		
@@ -348,11 +362,12 @@ class Template  {
 	}
 	
 	/** If the chunk is a list directive then expends this into a list and stream each list entry
-	 * 
+	 * @deprecated Moved to SemanticWriter
 	 * @param chunk  Contains some text 
 	 * @param valueMap The updated value map
 	 * @return A stream of either text blocks or added list entries
 	 */
+	@Deprecated
 	private Stream<String> updateList(String chunk, ValueMap valueMap) {
 		Stream.Builder<String> streamBuilder = Stream.builder();
 
@@ -400,7 +415,7 @@ class Template  {
 	}
 
 	/**
-	 * @deprecated Moved to SemanticReader
+	 * @deprecated Moved to {@link SemanticReader}
 	 * @param markupFilePath
 	 * @return
 	 * @throws ReadException
@@ -430,10 +445,11 @@ class Template  {
 	 * 
 	 * @return The path to the markdown file operated on. 
 	 */
-	Path getTemplatePath() {
-
-		return templatePath;
-	}
+//	@Deprecated
+//	Path getTemplatePath() {
+//
+//		return templatePath;
+//	}
 
 
 	/** Returns the string used for starting comments in the markdown.
@@ -443,10 +459,11 @@ class Template  {
 	 * 
 	 * @return An <code>Optional</code> to the string used for starting comments in the markdown. 
 	 */
-	Optional<String> getCommentStartDelimiter() {
-		//return delimiters.commentStartDelimiter();
-		return commentDelimiter.start();
-	}
+//	@Deprecated
+//	Optional<String> getCommentStartDelimiter() {
+//		//return delimiters.commentStartDelimiter();
+//		return commentDelimiter.start();
+//	}
 
 
 	/** Returns the string used for ending comments in the markdown.
@@ -456,9 +473,10 @@ class Template  {
 	 * 
 	 * @return An <code>Optional</code> to the string used for ending comments in the markdown. 
 	 */
-	Optional<String> getCommentEndDelimiter() {
-		return commentDelimiter.end();
-	}
+//	@Deprecated
+//	Optional<String> getCommentEndDelimiter() {
+//		return commentDelimiter.end();
+//	}
 
 	
 	/* Expands any markdown block that contains field names that refer to a list (i.e. have a '*' as part of their (compound) name
@@ -483,10 +501,13 @@ class Template  {
 	 * 
 	 * ---Precondition is that the blocks do not contains directives.
 	 * 
+	 * @deprecated Moved to SemanticTemplateWriter
+	 * 
 	 * @param block A blank line delimited block of markdown text.
 	 * @param valueMap The value map  
 	 * @throws IllegalArgumentException if the block contains a directive
 	 */
+	@Deprecated
 	private Stream<String> templateExpand(String block, ValueMap valueMap)  throws IllegalArgumentException {
 
         Stream.Builder<String> streamBuilder = Stream.builder();
@@ -535,6 +556,14 @@ class Template  {
 	}
 	
 
+	/**
+	 * @deprecated Moved to SemanticTemplateWriter
+	 * @param inBlock
+	 * @param valueMap
+	 * @param delimiters
+	 * @return
+	 */
+	@Deprecated
 	private String templateReplace(String inBlock, ValueMap valueMap, Delimiters delimiters) {
 	   if (inBlock.contains("{@") && inBlock.contains("}}")) {
 		   // Directives are passed through without any further processing
@@ -559,6 +588,12 @@ class Template  {
 		
 	}
 
+	/**
+	 * @deprecated MOved to {@link SemanticWriter}
+	 * @param inBlock
+	 * @return
+	 */
+	@Deprecated
 	private StringBuilder assembleSemanticBlock(String inBlock) {
 		StringBuilder semanticBlock = new StringBuilder();
 						
@@ -611,10 +646,13 @@ class Template  {
 	 * them to an inline field spec of the form:
 	 * {{<f>:pattern="<s>%s<e>"}}
 	 * 
+	 * @deprecated Moved to SemanticWriter
+	 * 
 	 * @param s The string to be mapped
 	 * @return The inline field spec
 	 * 
 	 */
+	@Deprecated
 	private StringBuffer mapInlineFieldSpec(String s) {
 		StringBuffer sb = new StringBuffer();
 		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").splitToList(s);
@@ -627,7 +665,13 @@ class Template  {
 		
 	}
 
-
+    /**
+     * @deprecated Moved to {@link SemanticTemplateWriter}
+     * @param mr
+     * @param valueMap
+     * @return
+     */
+	@Deprecated
 	private String fieldSubstitution(MatchResult mr, ValueMap valueMap) {
 
 		String fieldName = mr.group().replaceAll("\\{|\\}", "");  // Removed the field delimiters
@@ -650,6 +694,13 @@ class Template  {
 	}
 
 	
+	/**
+	 * @deprecated Moved {@link SemanticTemplateWriter}
+	 * @param fieldName
+	 * @param fieldValueMap
+	 * @return
+	 */
+	@Deprecated
 	private String getFieldValueAsString(String fieldName, ValueMap fieldValueMap) {
 		String valueString;
 		Optional<Object> valueObject;

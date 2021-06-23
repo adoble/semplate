@@ -1,7 +1,6 @@
 package semplate;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +35,6 @@ class TestSemanticReader {
 
 	@Test
 	void testReadChainSimple() throws Exception {
-		Template template = new Template();
-		assumeTrue(template != null);
-		
 		Path sourceFile = rootPath.resolve("simple_expected.md");
 		
 		TestUtilities.copyFromResource("simple_expected.md", sourceFile);

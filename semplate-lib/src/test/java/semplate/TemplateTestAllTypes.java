@@ -1,7 +1,6 @@
 package semplate;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.net.URL;
 import java.nio.file.FileSystem;
@@ -14,7 +13,6 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.jimfs.Configuration;
@@ -104,17 +102,11 @@ final static String templateFileName = "all_types_template.md";
 	@Test
 	void testAllTypes() throws Exception {
 
-        Template template = new Template();
-		assumeTrue(template != null);
-		template.config(templateFile);
-		
-		//Path sourceFile = templatesPath.resolve("all_types_template.md");
-		
-		
 		// Generate a file from the using the data in the allTypes object
 		//Path outputPath = templatesPath.resolve("all_types_test.md");
 		Path outputPath = rootPath.resolve("all_types_test.md");
-		template.generate(allTypes, outputPath);
+
+		SemanticWriter.with(allTypes).usingTemplate(templateFile).write(outputPath);
 		
 		// Now read in the file and see if the object has the same values
 		//AllTypes allTypesRead = (AllTypes) template.read(AllTypes.class, outputPath);

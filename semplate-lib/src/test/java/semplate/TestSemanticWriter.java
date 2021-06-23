@@ -3,6 +3,7 @@ package semplate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -93,6 +94,19 @@ class TestSemanticWriter {
 		assertThrows(ReadException.class, () -> {
 			semanticWriter.usingTemplate("rubbish name");
 		});
+	}
+	
+	
+	@Test
+	void testTemplateHasNoCommentDirective(@TempDir Path tempDir) throws IOException, ReadException{
+		Path sourceFile = tempDir.resolve("no_comment_directive.md");
+
+		TestUtilities.copyFromResource("no_comment_directive.md", sourceFile);
+
+		assertThrows(ReadException.class, 
+				() -> SemanticWriter.with(new Work()).usingTemplate(sourceFile));		
+
+
 	}
 	
 	@Test 

@@ -3,27 +3,17 @@ package semplate;
 
 import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-
-import semplate.Template;
 
 public class UpdateTests {
 	final static String templateFileName = "simple_template.md";
@@ -79,7 +69,7 @@ public class UpdateTests {
         updatedWork.setSourceLink(new URL("https://en.wikipedia.org/wiki/Academic_dishonesty"));
         updatedWork.setId(4713);
 
-		new Template().update(updatedWork, sourceFile, outputFile);
+		SemanticWriter.with(updatedWork).usingFile(sourceFile).write(outputFile);
 
 		String expectedContents = "";
 		String resourceFileName = "simple_updated_expected.md";
@@ -118,7 +108,7 @@ public class UpdateTests {
                 new URL("https://en.wikipedia.org/wiki/Ravage_2099" )));
 
 
-        new Template().update(updatedWorks, sourceFile, outputFile);
+        SemanticWriter.with(updatedWorks).usingFile(sourceFile).write(outputFile);
 
         String resourceFileName = "list_updated_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);
@@ -140,16 +130,13 @@ public class UpdateTests {
 
 		Path outputFile = rootPath.resolve("list_output_file.md");
 
-		Template t = new Template();
-		//Works works = (Works) t.read(Works.class, sourceFile);
-		
 		Works works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 
 		// Now update the works by removing an entry in the middle
 		works.removeReference(1);
 
         // Now update
-        t.update(works, sourceFile, outputFile);
+        SemanticWriter.with(works).usingFile(sourceFile).write(outputFile);
 
         String resourceFileName = "list_removal_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);
@@ -171,9 +158,6 @@ public class UpdateTests {
 
 		Path outputFile = rootPath.resolve("list_output_file.md");
 
-		Template t = new Template();
-//		Works works = (Works) t.read(Works.class, sourceFile);
-		
 		Works works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 
 		// Now update the works by adding two entries
@@ -181,8 +165,8 @@ public class UpdateTests {
 		works.addReference(new Reference("The Gorgias", new URL("https://en.wikisource.org/wiki/Gorgias")));
 
 		// Now update
-		t.update(works, sourceFile, outputFile);
-
+		SemanticWriter.with(works).usingFile(sourceFile).write(outputFile);
+		
 		String resourceFileName = "list_addition_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);
 
@@ -203,9 +187,6 @@ public class UpdateTests {
 
 		Path outputFile = rootPath.resolve("list_output_file.md");
 
-		Template t = new Template();
-		//Works works = (Works) t.read(Works.class, sourceFile);
-		
 		Works works = (Works) SemanticReader.with(Works.class).usingFile(sourceFile).read();
 
 		// Now delete all the entries
@@ -214,7 +195,7 @@ public class UpdateTests {
 		}
 
 		// Now update
-        t.update(works, sourceFile, outputFile);
+        SemanticWriter.with(works).usingFile(sourceFile).write(outputFile);
 
 		String resourceFileName = "list_complete_removal_expected.md";
 		Path expectedFile = fileSystem.getPath(resourceFileName);

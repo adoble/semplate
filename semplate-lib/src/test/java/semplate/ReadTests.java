@@ -1,37 +1,19 @@
 package semplate;
 
 
-import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
+
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import static java.util.stream.Collectors.*;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-
-import semplate.Template;
-import semplate.valuemap.ValueMap;
 
 public class ReadTests {
 	final static String templateFileName = "list_template.md";
@@ -144,16 +126,9 @@ public class ReadTests {
 	 */
 	@Test
 	void testReadMarkupError() throws IOException, ReadException {
-		
-		Template template = new Template();
-		assumeTrue(template != null);
-		
-		template.config(templateFile);
-		
-        Path sourceFile = templatesPath.resolve("non-existent.md");
+		Path sourceFile = templatesPath.resolve("non-existent.md");
         
         assertThrows(ReadException.class, () -> {
-        	//template.read(Work.class, sourceFile);
         	SemanticReader.with(Work.class).usingFile(sourceFile).read();
         });
 		
@@ -161,22 +136,15 @@ public class ReadTests {
 	
 	@Test
 	void testUsingInvalidClass () throws IOException, ReadException {
-		Template template = new Template();
-		assumeTrue(template != null);
-		
-		template.config(templateFile);
-		
-        Path sourceFile = templatesPath.resolve("simple_expected.md");
-		
+		Path sourceFile = templatesPath.resolve("simple_expected.md");
+
 		TestUtilities.copyFromResource("simple_expected.md", sourceFile);
-        
-        assertThrows(ReadException.class, () -> {
-        	//template.read(NonValidClass.class, sourceFile);
-        	SemanticReader.with(NonValidClass.class).usingFile(sourceFile).read();
-        });
+
+		assertThrows(ReadException.class, () -> {
+			SemanticReader.with(NonValidClass.class).usingFile(sourceFile).read();
+		});
 	}
 	
-
 		
 }
 

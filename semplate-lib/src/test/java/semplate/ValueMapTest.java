@@ -5,14 +5,12 @@ import java.net.URL;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
@@ -329,7 +327,7 @@ class ValueMapTest {
 		}
 
 		assertTrue(valueMap.containsField("emperors"));
-		ValueMap emperorsVM = valueMap.getValueMap("emperors").orElse(valueMap.empty());
+		ValueMap emperorsVM = valueMap.getValueMap("emperors").orElse(ValueMap.empty());
 		assertTrue(emperorsVM.containsField("0"));
 		assertTrue(emperorsVM.containsField("1"));
 		assertTrue(emperorsVM.containsField("2"));
