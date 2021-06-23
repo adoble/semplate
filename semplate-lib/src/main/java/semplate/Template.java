@@ -83,6 +83,7 @@ class Template  {
      * @deprecated Moved to {@link SemanticWriter}as readDelimiters
      * @param templateFileName The name of the template file
 	 */
+	@Deprecated
 	void config(String templateFileName) throws IOException, ReadException {
 		this.config(Path.of(templateFileName));
 

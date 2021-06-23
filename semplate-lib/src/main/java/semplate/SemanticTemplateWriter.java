@@ -183,12 +183,13 @@ public class SemanticTemplateWriter {
     /**
      * @deprecated This functionality is very similar to the updateBlock 
      * functionality in {@link SemanticWriter}.
-     * TODO try and fund a less redundant solution
+     * TODO try and find a less redundant solution
      * @param inBlock
      * @param valueMap
      * @param delimiters
      * @return
      */
+	@Deprecated
 	private String templateReplace(String inBlock, ValueMap valueMap, Delimiters delimiters) {
 	   if (inBlock.contains("{@") && inBlock.contains("}}")) {
 		   // Directives are passed through without any further processing
