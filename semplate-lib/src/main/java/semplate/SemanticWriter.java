@@ -366,7 +366,7 @@ public class SemanticWriter extends SemanticTemplateWriter {
 		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
  			commentDelimiter = stream.filter(Patterns.COMMENT_DIRECTIVE_PATTERN.asPredicate())
-						 			 .map(line -> extractCommentDelimiter(line))
+						 			 .map(line -> Delimiter.createCommentDelimiter(line))
  									 .findFirst()
  									 .orElseThrow(() -> new ReadException("No template.comment directive found in template."));
 		}
@@ -381,21 +381,7 @@ public class SemanticWriter extends SemanticTemplateWriter {
 		
 	}
 	
-	//TODO move to Delimiter
-	private Delimiter extractCommentDelimiter(String line) {
-		checkArgument(Patterns.COMMENT_DIRECTIVE_PATTERN.asPredicate().test(line), "The line \"%s\" does not contain a template comment field", line);
-        
-        Delimiter delimiter = new Delimiter();
-		
-        List<String> preamble = Splitter.on("{@").trimResults().splitToList(line);
-		delimiter.start(preamble.get(0));
 
-		List<String> postamble = Splitter.on("}}").splitToList(line);
-		delimiter.end(postamble.get(1));
-
-		return delimiter;
-		
-	}
 	
 	//TODO Move to Delimiter
 	/** Parse a string containing delimiter specification and extract the delimiters. 

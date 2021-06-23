@@ -2,8 +2,11 @@ package semplate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import com.google.common.base.Splitter;
 
 /** Handles, in uniform way, field delimiters in semantically annotated markkdown files.
  * 
@@ -13,6 +16,30 @@ import java.util.regex.Pattern;
 class Delimiter {
     private Optional<String> start = Optional.empty();
 	private Optional<String> end = Optional.empty();
+	
+	
+	/**
+	 * Factory method to parse a line of text and create a comment delimiter based on the comment directive there. 
+	 * 
+	 * Precondition: The line needs to contain a comment directive 
+	 * 
+	 * @param line A string containing a comment directive
+	 * @return A delimiter object with the comment delimiter(s)
+	 */
+	static Delimiter createCommentDelimiter(String line) {
+		checkArgument(Patterns.COMMENT_DIRECTIVE_PATTERN.asPredicate().test(line), "The line \"%s\" does not contain a template comment field", line);
+        
+        Delimiter delimiter = new Delimiter();
+		
+        List<String> preamble = Splitter.on("{@").trimResults().splitToList(line);
+		delimiter.start(preamble.get(0));
+
+		List<String> postamble = Splitter.on("}}").splitToList(line);
+		delimiter.end(postamble.get(1));
+
+		return delimiter;
+		
+	}
 
 	Delimiter start(String startDelimiter) {
 		this.start = filter(startDelimiter);
