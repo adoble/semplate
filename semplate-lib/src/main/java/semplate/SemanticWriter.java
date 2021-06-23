@@ -423,18 +423,17 @@ public class SemanticWriter {
 	void readDelimiters(Path templatePath) throws IOException, ReadException {
 		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
- 			commentDelimiter = stream.filter(line -> line.contains(Patterns.TEMPLATE_COMMENT_FIELD))
- 									 .map(line -> extractCommentDelimiter(line))
+ 			commentDelimiter = stream.filter(Patterns.COMMENT_DIRECTIVE_PATTERN.asPredicate())
+						 			 .map(line -> extractCommentDelimiter(line))
  									 .findFirst()
  									 .orElseThrow(() -> new ReadException("No template.comment directive found in template."));
 		}
 
 		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
-			delimiters  = stream.filter(line -> line.contains("{@template.delimiter"))    // TODO is this strict enough?
-					            .map(line -> extractDelimiters(line))
-					            //.flatMap(delimiterList -> delimiterList.stream())    // Converts the list of delimiters to a stream of single delimiters
-				                .collect(Delimiters::new, Delimiters::add, Delimiters::add);
+			delimiters  = stream.filter(Patterns.DELIMITER_DIRECTIVE_PATTERN.asPredicate())
+							    .map(line -> extractDelimiters(line))
+					            .collect(Delimiters::new, Delimiters::add, Delimiters::add);
 		}
 		
 		
@@ -442,7 +441,7 @@ public class SemanticWriter {
 	
 	//TODO move to Delimiter
 	private Delimiter extractCommentDelimiter(String line) {
-        checkArgument(line.contains(Patterns.TEMPLATE_COMMENT_FIELD), "The line \"%s\" does not contain a template comment field", line);
+		checkArgument(Patterns.COMMENT_DIRECTIVE_PATTERN.asPredicate().test(line), "The line \"%s\" does not contain a template comment field", line);
         
         Delimiter delimiter = new Delimiter();
 		
