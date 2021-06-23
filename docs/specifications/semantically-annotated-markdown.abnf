@@ -5,7 +5,7 @@ comment-directive = markdown-comment-start "{@template.comment}}" [markdown-comm
 
 directive = markdown-comment-start "{@" directive-name [("=" directive-value)] "}}" [markdown-comment-end] newline
 
-block = (semantic-block newline text-value) / (text-block)
+block = ((semantic-block text-value-block) / (text-block))  
 
 semantic-block =  markdown-comment-start 1*field-spec markdown-comment-end newline
 
@@ -19,7 +19,7 @@ url-pattern-spec = "URL"
 
 date-pattern-spec = "date=" date-pattern
 
-text-value = 1*([character-sequence] embedded-value [character-sequence]) newline newline
+text-value-block = 1*([character-sequence] embedded-value [character-sequence]) newline newline
 
 text-block = character-sequence newline newline
 
