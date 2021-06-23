@@ -50,13 +50,16 @@ import semplate.valuemap.ValueMap;
  * @author Andrew Doble
  *
  */
-public class SemanticWriter {
-	private Object dataObject;
+public class SemanticWriter extends SemanticTemplateWriter {
+	// Existing semantic markdown file to be updated
 	private Path inputFile;
 	
-	private Delimiter commentDelimiter;
-
-	private  Delimiters delimiters = new Delimiters();
+	/* ------------------- CONSTRUCTORS ---------------- */
+	private SemanticWriter(Object dataObject) {
+		super(dataObject);
+		this.dataObject = dataObject;
+	}
+	
 	
 	/* ------------------- PUBLIC API ------------------ */
 
@@ -71,19 +74,12 @@ public class SemanticWriter {
 	 * @return A SemanticWriter object setup with the data object
 	 */
 	public static SemanticWriter with(Object dataObject) {
-		SemanticWriter semanticWriter = new SemanticWriter();
-		semanticWriter.dataObject = dataObject;
+		SemanticWriter semanticWriter = new SemanticWriter(dataObject);
+		//semanticWriter.dataObject = dataObject;
 		return semanticWriter;
 	}
-
 	
-	/** Get the data object setup with the method {@link #with(Object)}
-	 * 
-	 * @return The data object 
-	 */
-	Object getDataObject() {
-		return dataObject ;
-	}
+	
 
 	
 	/** Specifies the template file used to generate the semantically annotated markdown file.
@@ -143,9 +139,10 @@ public class SemanticWriter {
 	
 	/** Writes a semantically annotated markdown file.
 	 * @param outputFile Path where the semantically annotated markdown file is written
-	 * @throws UpdateException If the file could not be updated. 
+	 * @throws WriteException If the file could not be updated. 
 	 */
-	public void write(Path outputFile) throws UpdateException {
+	@Override
+	public void write(Path outputFile) throws WriteException {
 		//Template t = new Template();
 		
 		update(dataObject, inputFile, outputFile);
@@ -160,22 +157,22 @@ public class SemanticWriter {
 	 * @param dataObject The object containing the new data
 	 * @param inputFile A path to the markdown file to be updated. 
 	 * @param outputFile A path to the markdown file to be updated
-	 * @throws UpdateException If the output file cannot be updated for some reason
+	 * @throws WriteException If the output file cannot be updated for some reason
 	 */
-	void update(Object dataObject, Path inputFile, Path outputFile) throws UpdateException {
+	void update(Object dataObject, Path inputFile, Path outputFile) throws WriteException {
 		
 		// Determine delimiters in the markdown file to be updated. 
 		try {
 			readDelimiters(inputFile);
 		} catch (IOException | ReadException e) {
-			throw new UpdateException("Unable to read the file to be updated", e);
+			throw new WriteException("Unable to initally read the file to be updated", e);
 		}
 		
 		ValueMap updatedValueMap;
 		try {
 			updatedValueMap = ValueMap.from(dataObject);
 		} catch (ConversionException e) {
-			throw new UpdateException("Cannot read the supplied data object", e);
+			throw new WriteException("Cannot read the supplied data object", e);
 		} 
 
 		// Update the contents with the data in the value map 
@@ -190,7 +187,7 @@ public class SemanticWriter {
 					.collect(Collectors.toList());
 			
 		} catch (IOException  e)  {
-			throw new UpdateException("Unable to update the file", e);
+			throw new WriteException("Unable to update the file", e);
 		}
 		
 		// Create the output file with the new contents.  
@@ -198,7 +195,7 @@ public class SemanticWriter {
 			Files.write(outputFile, blocks);
 		} catch (IOException e) {
 			String msg = "Cannot update the markdown file";
-			throw new UpdateException(msg, e);
+			throw new WriteException(msg, e);
 		}
 		
 		
@@ -220,6 +217,17 @@ public class SemanticWriter {
 	}
 	
 	
+	/** Get the data object setup with the method {@link #with(Object)}
+	 * 
+	 * @return The data object 
+	 */
+	Object getDataObject() {
+		return dataObject ;
+	}
+
+
+
+
 	private Stream<String> removeListElement(String block) {
 		Stream.Builder<String> streamBuilder = Stream.builder();
 		
@@ -346,73 +354,7 @@ public class SemanticWriter {
 	}
 	
 	
-	private StringBuilder assembleSemanticBlock(String inBlock) {
-		StringBuilder semanticBlock = new StringBuilder();
-						
-		// Assemble the semantic block 
-		// First assemble any inline field-specs and add them to the semantic block 
-		Pattern delimiterPattern = delimiters.pattern();
-		Matcher delimiterMatcher  = delimiterPattern.matcher(inBlock);
-		semanticBlock = delimiterMatcher.results()
-				                        .map(mr -> mr.group())   // Map to the string  s{{f}}e
-						                .map(s -> mapInlineFieldSpec(s))
-						                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
-		
-		
-		boolean noInlineFieldsFound = (semanticBlock.length() == 0);
-		
-		Matcher fieldMatcher = Patterns.FIELD_PATTERN.matcher(inBlock);
-	    
-		if (noInlineFieldsFound) {
-			// A text block has the form
-			//   a{{f}}b  where a, b are strings with 0 or more characters, f is the field name
-			// Need to map this to the outline field spec:
-			//   {{f:pattern="a%s%b"}}
-			if (fieldMatcher.find()) {
-				List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults(CharMatcher.is('\n')).splitToList(inBlock);
-				
-				semanticBlock.append("{{").append(parts.get(1));
-				String preamble = parts.get(0);
-				String postamble = parts.get(2);
-				
-				if (!preamble.isEmpty() || !postamble.isEmpty()) {
-					semanticBlock.append(":pattern=\"").append(preamble).append("%s").append(postamble).append("\"");
-				}
-				
-				semanticBlock.append("}}");
-			}
-			
-		}
-		
-		// Now surround the semantic block in comments
-		if (semanticBlock.length() > 0) {
-			semanticBlock.insert(0,  commentDelimiter.start().orElse(""))
-			             .append(commentDelimiter.end().orElse(""));
-		}
-		return semanticBlock;
-	}
-	
-	/* Takes string of the form 
-	 *      <s>{{<f>}}<e>
-	 * where <s> is the start delimiter, <f> is the field name and <e> is the end delimiter, and maps
-	 * them to an inline field spec of the form:
-	 * {{<f>:pattern="<s>%s<e>"}}
-	 * 
-	 * @param s The string to be mapped
-	 * @return The inline field spec
-	 * 
-	 */
-	private StringBuffer mapInlineFieldSpec(String s) {
-		StringBuffer sb = new StringBuffer();
-		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").splitToList(s);
-		
-		checkArgument(parts.size() == 3, "The string \"%s\" is malformed", s); 
-		
-		sb.append("{{").append(parts.get(1)).append(":pattern=\"").append(parts.get(0)).append("%s").append(parts.get(2)).append("\"}}");
-		
-		return sb;
-		
-	}
+
 	
 	/**
 	 * Reads the delimiters specified in the template file. 

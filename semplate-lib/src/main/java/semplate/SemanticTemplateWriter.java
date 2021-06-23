@@ -33,12 +33,15 @@ import semplate.valuemap.ValueMap;
  *
  */
 public class SemanticTemplateWriter {
-	private Path templatePath;
-	private Object dataObject;
-	private Delimiters delimiters;
-	private Delimiter commentDelimiter;
+	protected Path templatePath;
+	protected Object dataObject;
+	protected Delimiters delimiters;
+	protected Delimiter commentDelimiter;
 
-	/** Construct a SemanticTemplateWriter object using the data object containing the data and the path to the template file. 
+	/* -------------------  CONSTRUCTORS----------------- */
+	
+	/** Construct a SemanticTemplateWriter object using the data object containing the data and the path to the template file.
+	 * Also specified are the any found delimiters 
 	 * <p>
 	 * This constructor has package scope as it is never directly called by clients. Instead it is constructed using the 
 	 * factory method {@link SemanticWriter#with(Object)}.
@@ -47,8 +50,6 @@ public class SemanticTemplateWriter {
 	 * @param templatePath Path to a template file
 	 * @param delimiters List of the delimiters used in the template
 	 * @param commentDelimiter The delimiter used for comments in the template
-	 * 
-	 *
 	 */
 	SemanticTemplateWriter(Object dataObject, Path templatePath, Delimiters delimiters, Delimiter commentDelimiter) {
 		this.dataObject = dataObject;
@@ -56,6 +57,18 @@ public class SemanticTemplateWriter {
 		this.delimiters = delimiters;
 		this.commentDelimiter = commentDelimiter;
 	}
+	
+	/** Construct a SemanticTemplateWriter object using the data object containing the data. 
+	 * <p>
+	 * This constructor has package scope as it is never directly called by clients. Instead it is 
+	 * used when for constructing  objects using inherited classes.
+	 * 
+	 * @param dataObject An object annotated with template field information
+	 * 
+	 */
+    SemanticTemplateWriter(Object dataObject) {
+    	this.dataObject = dataObject;
+    }
 	
 	/* -------------------  PUBLIC API ----------------- */
 
@@ -181,15 +194,13 @@ public class SemanticTemplateWriter {
 	}
 
     /**
-     * @deprecated This functionality is very similar to the updateBlock 
-     * functionality in {@link SemanticWriter}.
+     * 
      * TODO try and find a less redundant solution
      * @param inBlock
      * @param valueMap
      * @param delimiters
      * @return
      */
-	@Deprecated
 	private String templateReplace(String inBlock, ValueMap valueMap, Delimiters delimiters) {
 	   if (inBlock.contains("{@") && inBlock.contains("}}")) {
 		   // Directives are passed through without any further processing
@@ -213,14 +224,14 @@ public class SemanticTemplateWriter {
 		return semanticBlock + "\n" + textValue;
 		
 	}
-
+	
+	
 	/**
-	 * @deprecated This method is duplicated in {@link SemanticWriter}. 
+	 * 
 	 * @param inBlock
 	 * @return
 	 */
-	@Deprecated
-	private StringBuilder assembleSemanticBlock(String inBlock) {
+	protected StringBuilder assembleSemanticBlock(String inBlock) {
 		StringBuilder semanticBlock = new StringBuilder();
 						
 		// Assemble the semantic block 
@@ -272,14 +283,12 @@ public class SemanticTemplateWriter {
 	 * them to an inline field spec of the form:
 	 * {{<f>:pattern="<s>%s<e>"}}
 	 * 
-	 * @deprecated This methid is duplicated in {@link SemanticWriter}
-	 * 
+	  
 	 * @param s The string to be mapped
 	 * @return The inline field spec
 	 * 
 	 */
-	@Deprecated
-	private StringBuffer mapInlineFieldSpec(String s) {
+	protected StringBuffer mapInlineFieldSpec(String s) {
 		StringBuffer sb = new StringBuffer();
 		List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").splitToList(s);
 		
