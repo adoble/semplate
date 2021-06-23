@@ -246,7 +246,7 @@ public class SemanticWriter {
 		
 	}
 	
-	/** If the chunk is a list directive then expends this into a list and stream each list entry
+	/** If the chunk is a list directive then expends this into a list and streams each list entry
 	 * @param chunk  Contains some text 
 	 * @param valueMap The updated value map
 	 * @return A stream of either text blocks or added list entries
@@ -297,20 +297,20 @@ public class SemanticWriter {
 		return streamBuilder.build();
 	}
 	
-	/** Updates all fields in a chunk of markdown with the values in the value map
+	/** Updates all fields in a block of markdown with the values in the value map
 	 * 
-	 * @param chunk  A chunk of markdown separated with two newlines. May contain fields with the form {{<i>fieldname</i>}}
+	 * @param block  A block of markdown separated with two newlines. May contain fields with the form {{<i>fieldname</i>}}
 	 * @param valueMap A value map containing the field values. 
 	 * @returns The updated chunk. 
 	 */
-	private String updateBlock(String chunk, ValueMap valueMap) {
+	private String updateBlock(String block, ValueMap valueMap) {
 		ArrayList<FieldSpec> fieldSpecs = new ArrayList<>();
 		
 		// Extract the field specs 
         fieldSpecs.clear();
 		
 		Pattern fieldPattern = FieldSpec.pattern();
-		Matcher fieldMatcher = fieldPattern.matcher(chunk);  
+		Matcher fieldMatcher = fieldPattern.matcher(block);  
 
 		while (fieldMatcher.find()) {
 			FieldSpec field = FieldSpec.of(fieldMatcher.group());
@@ -321,8 +321,8 @@ public class SemanticWriter {
 		// the rest containing the text.
 		String semanticBlock = "";
 		StringBuffer text  = new StringBuffer();
-		if (!chunk.isEmpty()) {
-		  List<String> parts = Splitter.on('\n').splitToList(chunk);
+		if (!block.isEmpty()) {
+		  List<String> parts = Splitter.on('\n').splitToList(block);
 		  semanticBlock = parts.get(0);
 		  parts.subList(1, parts.size() - 1).forEach(s -> text.append(s));;
 		}
