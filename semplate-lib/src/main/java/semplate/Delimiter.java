@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Splitter;
@@ -37,6 +38,43 @@ class Delimiter {
 		List<String> postamble = Splitter.on("}}").splitToList(line);
 		delimiter.end(postamble.get(1));
 
+		return delimiter;
+		
+	}
+	
+	/** Factory method to parse a string containing a delimiter specification and 
+	 * create a delimiter object. 
+	 * 
+	 * @param line The string containing the delimiter directive
+	 * @return A Delimiter object 
+	 */
+	static Delimiter createDelimiter(String line) {
+		Matcher matcher = Patterns.DELIMITER_DIRECTIVE_PATTERN.matcher(line);
+		
+		Delimiter delimiter = new Delimiter();  
+		while(matcher.find()) {
+			
+		    // What type of delimiter directive is this?
+		    String delimiterType = matcher.group("type");
+		    String delimiterValue = matcher.group("delim");
+		    if (delimiterValue.startsWith("\"")  && delimiterValue.endsWith("\"")) {
+		      // Remove the quotes
+		       delimiterValue = delimiterValue.substring(1, delimiterValue.length() - 1);
+		       if (delimiterType.equals("start")) {
+					delimiter.start(delimiterValue);
+				} else if (delimiterType.equals("end")) {
+					delimiter.end(delimiterValue);
+				} else if (delimiterType.equals("pair")) {
+					delimiter.pair(delimiterValue);
+				}
+				
+		    } else {
+		    	// This is reserved for special delimiters  such  as URL or DATE
+		    	assert(false);  //TODO 
+		    }
+		    
+		}
+		
 		return delimiter;
 		
 	}

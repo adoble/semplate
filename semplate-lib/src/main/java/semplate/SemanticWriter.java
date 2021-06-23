@@ -354,7 +354,6 @@ public class SemanticWriter extends SemanticTemplateWriter {
 	}
 	
 	
-
 	
 	/**
 	 * Reads the delimiters specified in the template file. 
@@ -374,7 +373,7 @@ public class SemanticWriter extends SemanticTemplateWriter {
 		
 		try (Stream<String> stream = Files.lines(templatePath, Charset.defaultCharset())) {
 			delimiters  = stream.filter(Patterns.DELIMITER_DIRECTIVE_PATTERN.asPredicate())
-							    .map(line -> extractDelimiters(line))
+							    .map(line -> Delimiter.createDelimiter(line))
 					            .collect(Delimiters::new, Delimiters::add, Delimiters::add);
 		}
 		
@@ -383,41 +382,6 @@ public class SemanticWriter extends SemanticTemplateWriter {
 	
 
 	
-	//TODO Move to Delimiter
-	/** Parse a string containing delimiter specification and extract the delimiters. 
-	 * 
-	 * @param line The string contains  the specification
-	 * @return A Delimiter object containing the delimiters 
-	 */
-	private Delimiter extractDelimiters(String line) {
-		Matcher matcher = Patterns.DELIMITER_DIRECTIVE_PATTERN.matcher(line);
-		
-		Delimiter delimiter = new Delimiter();  
-		while(matcher.find()) {
-			
-		    // What type of delimiter directive is this?
-		    String delimiterType = matcher.group("type");
-		    String delimiterValue = matcher.group("delim");
-		    if (delimiterValue.startsWith("\"")  && delimiterValue.endsWith("\"")) {
-		      // Remove the quotes
-		       delimiterValue = delimiterValue.substring(1, delimiterValue.length() - 1);
-		       if (delimiterType.equals("start")) {
-					delimiter.start(delimiterValue);
-				} else if (delimiterType.equals("end")) {
-					delimiter.end(delimiterValue);
-				} else if (delimiterType.equals("pair")) {
-					delimiter.pair(delimiterValue);
-				}
-				
-		    } else {
-		    	// This is reserved for special delimiters  such  as URL or DATE
-		    	assert(false);  //TODO 
-		    }
-		    
-		}
-		
-		return delimiter;
-		
-	}
+
 
 }
