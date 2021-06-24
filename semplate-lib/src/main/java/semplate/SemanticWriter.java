@@ -3,8 +3,6 @@
  */
 package semplate;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
