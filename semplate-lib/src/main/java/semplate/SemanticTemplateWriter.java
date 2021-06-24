@@ -33,9 +33,16 @@ import semplate.valuemap.ValueMap;
  *
  */
 public class SemanticTemplateWriter {
+	/** The template file */
 	protected Path templatePath;
+	
+	/** The object containing the data for the output file */
 	protected Object dataObject;
+	
+	/** Any delimiters used around data in the output file */
 	protected Delimiters delimiters;
+	
+	/** The delimiters used for comments in the mark down file */
 	protected Delimiter commentDelimiter;
 
 	/* -------------------  CONSTRUCTORS----------------- */
@@ -226,18 +233,19 @@ public class SemanticTemplateWriter {
 	}
 	
 	
-	/**
-	 * 
-	 * @param inBlock
-	 * @return
+	/** 
+	 *  Reads in a text containing field specifications and creates a semantic block for it 
+	 *
+	 * @param textValueBlock String containing field specifications
+	 * @return The constructed semantic block
 	 */
-	protected StringBuilder assembleSemanticBlock(String inBlock) {
+	protected StringBuilder assembleSemanticBlock(String textValueBlock) {
 		StringBuilder semanticBlock = new StringBuilder();
 						
 		// Assemble the semantic block 
 		// First assemble any inline field-specs and add them to the semantic block 
 		Pattern delimiterPattern = delimiters.pattern();
-		Matcher delimiterMatcher  = delimiterPattern.matcher(inBlock);
+		Matcher delimiterMatcher  = delimiterPattern.matcher(textValueBlock);
 		semanticBlock = delimiterMatcher.results()
 				                        .map(mr -> mr.group())   // Map to the string  s{{f}}e
 						                .map(s -> mapInlineFieldSpec(s))
@@ -246,7 +254,7 @@ public class SemanticTemplateWriter {
 		
 		boolean noInlineFieldsFound = (semanticBlock.length() == 0);
 		
-		Matcher fieldMatcher = Patterns.FIELD_PATTERN.matcher(inBlock);
+		Matcher fieldMatcher = Patterns.FIELD_PATTERN.matcher(textValueBlock);
 	    
 		if (noInlineFieldsFound) {
 			// A text block has the form
@@ -254,7 +262,7 @@ public class SemanticTemplateWriter {
 			// Need to map this to the outline field spec:
 			//   {{f:pattern="a%s%b"}}
 			if (fieldMatcher.find()) {
-				List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults(CharMatcher.is('\n')).splitToList(inBlock);
+				List<String> parts = Splitter.onPattern("\\{\\{|\\}\\}").trimResults(CharMatcher.is('\n')).splitToList(textValueBlock);
 				
 				semanticBlock.append("{{").append(parts.get(1));
 				String preamble = parts.get(0);
@@ -277,11 +285,21 @@ public class SemanticTemplateWriter {
 		return semanticBlock;
 	}
 	
-	/** Takes string of the form 
-	 *      <s>{{<f>}}<e>
-	 * where <s> is the start delimiter, <f> is the field name and <e> is the end delimiter, and maps
+	/** 
+	 * Takes string of the form 
+	 * 
+	 * <pre>
+	 * 
+	 *      S{{F}}E 
+	 * 
+	 * </pre>
+	 * 
+	 * where S  is the start delimiter, F is the field name and E is the end delimiter, and maps
 	 * them to an inline field spec of the form:
-	 * {{<f>:pattern="<s>%s<e>"}}
+	 * 
+	 * <pre> 
+	 * {{F:pattern="S%sE"}} 
+	 * </pre>
 	 * 
 	  
 	 * @param s The string to be mapped

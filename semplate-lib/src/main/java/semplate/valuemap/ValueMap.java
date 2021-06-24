@@ -1,5 +1,7 @@
 package semplate.valuemap;
 
+import java.lang.reflect.*;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -583,6 +585,7 @@ public class ValueMap {
     /** Creates a value map from the specified data object.
      * 
      * @param dataObject An object whose fields are annotated with @{@link TemplateField}
+     * @throws ConversionException if the data object cannot be converted to a value map.
      * @return The created value map
      */
     @SuppressWarnings("unchecked")
