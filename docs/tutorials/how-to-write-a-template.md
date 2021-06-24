@@ -48,7 +48,7 @@ the above example, but in Asciidoc:
 
 ## Compound Fields
 
-Maybe you have data object whose fields are themselves objects, for instance:
+Maybe you have a data object whose fields are themselves objects, for instance:
 
 <!-- {% raw %} -->
 ```java
@@ -129,7 +129,7 @@ If the data object itself implements an `Iterable` interface, then the first par
 
 ## Delimiters
 
-As fields can be embedded in text, some means of identifying where it is in the text is required. A template can specify a set of delimiters that are either intrinsic to the markdown or defined by the user. This definition is done using delimiter directives after the `template.comment` directive. For instance;
+As fields can be embedded in text, some means of identifying where in the text it is required. A template can specify a set of delimiters that are either intrinsic to the markdown or defined by the user. This definition is done using delimiter directives after the `template.comment` directive. For instance;
 
 <!-- {% raw %} -->
 ```markdown

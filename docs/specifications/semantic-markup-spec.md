@@ -76,7 +76,7 @@ The formal syntax of a template file is defined as [Augmented Backus Naur format
  ![template.abnf](template-abnf.svg)
 
 
- ### Semantically Annotated Markdown Files
+### Semantically Annotated Markdown Files
 
 Although these are generated from the **semplate** libary and not directly written by the user, the formal ABNF syntax of a semantically annotated markdown file can be found [here](template.abnf), but a rail road diagram is shown below.
 

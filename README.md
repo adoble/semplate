@@ -10,9 +10,9 @@
 It works with both [Markdown](https://www.markdownguide.org/getting-started/) and [Asciidoc](http://asciidoc.org/)
 and may work with other markdown flavors.
 
-# Usage
+More comprehensive documentation can be found in the [GitHub Pages](https://adoble.github.io/semplate/)
 
-:warning: This is still under development and the API is liable to change.
+# Quick overview on how to use the Semplate library
 
 :grey_exclamation: Exception handling in not shown in the following examples.
 
@@ -90,6 +90,6 @@ and may work with other markdown flavors.
    updatedADR.setStatus("Agreed");
 
    SemanticWriter.with(updatedADR)                 
-                .usingFile(Path input_semantic_file)
-                .write(Path updated_semantic_file);       
+                .usingFile(path_to_input_semantic_file)
+                .write(path_to_updated_semantic_file);       
   ```

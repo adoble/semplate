@@ -1,5 +1,3 @@
-**Currently Under Construction**
-
 # Contents
 
 - [How to write a template](./tutorials/how-to-write-a-template.md)
