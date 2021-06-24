@@ -358,7 +358,8 @@ public class ValueMap {
 	 * @param startingOrdinal The ordinal number to start from if no mappings exist
 	 * @return This value map
 	 */
-	public ValueMap add(String fieldName, ValueMap map, int startingOrdinal) {
+	@Deprecated
+	 public ValueMap add(String fieldName, ValueMap map, int startingOrdinal) {
 		ValueMap ordinalValueMap;
 		
 	
@@ -379,6 +380,7 @@ public class ValueMap {
 	 * @param map The value map to be added 
 	 * @return This value map
 	 */
+	@Deprecated
 	public ValueMap add(String fieldName, ValueMap map) {
 		this.add(fieldName, map, 0); // Start a zero
 		
@@ -636,11 +638,10 @@ public class ValueMap {
 							}
 							
 							ValueMap fieldIterationMap;
+							int i = 0;
 							for (Object listEntry: fieldIterable) {
 								fieldIterationMap = ValueMap.from(listEntry);
-								//listValues.add(fieldIterationMap);
-								fieldValueMap.add(field.getName(), fieldIterationMap);
-
+								fieldValueMap.put(field.getName() + "." + i++, fieldIterationMap);
 							}
 						}
 					} catch (IllegalArgumentException | IllegalAccessException e) {
