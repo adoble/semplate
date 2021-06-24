@@ -335,58 +335,9 @@ public class ValueMap {
 		return this;
 	}
 
-	/** Add a value map to a field by automatically giving an ordinal number as field name.
-	 * <p>
-	 * For instance:
-	 * <pre>
-	 * 
-	 *   ValueMap vm = new ValueMap();
-	 *   vm.add("emperors", emperorValueMap[0]);
-	 *   vm.add("emperors", emperorValueMap[1]);
-	 * </pre>  
-	 * will:
-	 * <ol>
-	 * <li>will create a new value map and map it to the field name "emperors"
-	 * <li>in the new value map will create a field "0" and map the value map emperorValueMap[0] to it. 
-	 * <li>in the new value map will create a field "1" and map the value map emperorValueMap[1] to it. 
-	 * </ol>
-	 * Subsequent calls to <code>add("emperors", ...)</code> will create new mappings with the field name acting as 
-	 * an incrementing ordinal number.<p>
-	 * 
-	 * @param fieldName The name of field to contain the ordinal mappings to the value maps
-	 * @param map The value map to be added 
-	 * @param startingOrdinal The ordinal number to start from if no mappings exist
-	 * @return This value map
-	 */
-	@Deprecated
-	 public ValueMap add(String fieldName, ValueMap map, int startingOrdinal) {
-		ValueMap ordinalValueMap;
-		
+
 	
-		// Generate an ordinal number as key for the new value map, by first finding the key that 
-		// represents the highest ordinal number and then creating a new key that represents a digit
-		// one higher. 
-		ordinalValueMap = getValueMap(fieldName).orElse(ValueMap.empty());
-		Integer maxKey = ordinalValueMap.fieldNames().stream().mapToInt(Integer::parseInt).max().orElse(startingOrdinal - 1);
-		this.add(fieldName, Integer.valueOf(maxKey + 1).toString(), map);
-				
-		return this;
-	}
 	
-	/** Add a value map to the specified filed name at the ordinal index 0.
-	 * 
-	 * @see #add(String, ValueMap, int)
-	 * @param fieldName The name of field to contain the ordinal mappings to the value maps
-	 * @param map The value map to be added 
-	 * @return This value map
-	 */
-	@Deprecated
-	public ValueMap add(String fieldName, ValueMap map) {
-		this.add(fieldName, map, 0); // Start a zero
-		
-		return this;
-		
-	}
 	
 	/** Merges a value map with this one.
 	 *  
