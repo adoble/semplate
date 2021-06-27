@@ -5,3 +5,5 @@
 - [Specifications](./specifications/semantic-markup-spec.md)
 
 - [Architectural Decision Records](./adr/toc.md)
+
+- [API documentation](./javadoc/index.html)
