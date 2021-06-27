@@ -2,12 +2,12 @@
 # generated files to the docs/javadoc directory. They are then subsequntly
 # appears in the github pages.
 
-name: docs
+name: Javadoc generation
 
 on:
   push:
-    branches: [ master, dev ]
-    paths: [ '**.java' ]
+    branches: [ main, dev ]
+    # paths: [ '**.java' ]
 
 jobs:
   api-website:
