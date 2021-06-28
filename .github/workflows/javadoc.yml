@@ -33,11 +33,11 @@ jobs:
         cp -rfv semplate-lib/build/docs/javadoc docs/javadoc
         touch docs/javadoc/.nojekyll  # Creating .nojekyll to have Github pages deploy html as is"
 
-    - name: Tidy up the javadocs
-      id: tidy
-      uses: cicirello/javadoc-cleanup@v1
-      with:
-        path-to-root: docs
+#    - name: Tidy up the javadocs
+#      id: tidy
+#      uses: cicirello/javadoc-cleanup@v1
+#      with:
+#        path-to-root: docs
 
     - name: Log javadoc-cleanup output
       run: |
