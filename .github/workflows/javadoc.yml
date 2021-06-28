@@ -30,7 +30,7 @@ jobs:
     - name: Copy to Documentation Website Location
       run: |
         rm -rf docs/javadoc
-        cp -rf semplate-lib/build/docs/javadoc docs/javadoc
+        cp -rfv semplate-lib/build/docs/javadoc docs/javadoc
         touch docs/javadoc/.nojekyll  # Creating .nojekyll to have Github pages deploy html as is"
 
     - name: Tidy up the javadocs
