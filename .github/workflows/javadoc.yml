@@ -31,7 +31,7 @@ jobs:
       run: |
         rm -rf docs/javadoc
         cp -rf semplate-lib/build/docs/javadoc docs/javadoc
-        touch .nojekyll  # Creating .nojekyll to have Github pages deploy html as is"
+        touch docs/javadoc/.nojekyll  # Creating .nojekyll to have Github pages deploy html as is"
 
     - name: Tidy up the javadocs
       id: tidy
@@ -49,5 +49,6 @@ jobs:
           git config --global user.name 'adoble'
           git config --global user.email 'adoble@users.noreply.github.com'
           git add -A
+          git status
           git commit -m "Automated Javadoc website updates."
         fi
