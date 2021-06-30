@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"semplate"},{"l":"semplate.annotations"},{"l":"semplate.valuemap"}]
