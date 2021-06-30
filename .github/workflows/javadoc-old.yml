@@ -1,0 +1,53 @@
+# This worksflow musing gradel to gernaret javadoc and then moves the
+# generated files to the docs/javadoc directory. They are then subsequntly
+# appears in the github pages.
+
+name: Javadoc generation
+
+on:
+  push:
+  #  branches: [ main, dev ]
+    branches: [ some-nonsense ]
+      # paths: [ '**.java' ]
+
+jobs:
+  api-website:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v2
+
+    - name: Set up the Java JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build javadocs with Gradle
+      run: ./gradlew javadoc
+
+    - name: Copy to Documentation Website Location
+      run: |
+        rm -rf docs/javadoc
+        cp -rfv semplate-lib/build/docs/javadoc docs/javadoc
+        touch docs/javadoc/.nojekyll  # Creating .nojekyll to have Github pages deploy html as is"
+#    - name: Tidy up the javadocs
+#      id: tidy
+#      uses: cicirello/javadoc-cleanup@v1
+#      with:
+#        path-to-root: docs
+
+    - name: Log javadoc-cleanup output
+      run: |
+        echo "modified-count = ${{ steps.tidy.outputs.modified-count }}"
+    - name: Commit documentation changes
+      run: |
+        if [[ `git status --porcelain` ]]; then
+          git config --global user.name 'adoble'
+          git config --global user.email 'adoble@users.noreply.github.com'
+          git add -A
+          git status
+          git commit -m "Automated Javadoc website updates."
+        fi
